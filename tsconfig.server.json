@@ -1,0 +1,14 @@
+{
+    "extends":"./tsconfig.json",
+    "compilerOptions": {
+        "target": "esnext",
+        "outDir": "out/",
+        "module": "esnext",
+        "noEmit":false,
+        "moduleResolution": "node",
+        "allowSyntheticDefaultImports": true
+    },
+    "include": [
+        "server/**/*.ts",
+    ]
+}

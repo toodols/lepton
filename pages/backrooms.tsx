@@ -11,10 +11,8 @@ import { Posts } from "../components/main/posts";
 const Home: NextPage = () => {
 	return (
 		<>
-				<Posts/>
-				<CreatePostModal />
-				<Settings />
-				<Signin />
+			<h1>you{"'"}ve reached the Backrooms</h1>
+			<a href="https://static.wikia.nocookie.net/backrooms/images/0/05/Thebackrooms.jpg/revision/latest/scale-to-width-down/640?cb=20190608093553">I don{"'"}t know how copyright works so click here for a link to an image of backrooms</a>			
 		</>
 	);
 };

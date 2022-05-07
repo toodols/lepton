@@ -1,0 +1,4 @@
+export function GhostPost(){
+	return <>
+	</>
+}
