@@ -1,5 +1,5 @@
 import {Request, Response} from "express";
-import type { UserData, PostData, CommentData } from "lepton-client";
+import { CommentData, UserData } from "lepton-client";
 import { comments, posts, users } from "../../database";
 import { io } from "../../server-entry";
 import { Converter, hash } from "../../util";

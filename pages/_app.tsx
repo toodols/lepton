@@ -10,12 +10,13 @@ import { Sidebar } from "../components/sidebar";
 import { Topbar } from "../components/topbar";
 
 function MyApp({ Component, pageProps }: AppProps) {
+	//@ts-ignore
+	const getLayout: (page)=>JSX.Element = Component.getLayout || ((page) => page)
+
 	return (
 		<I18nextProvider i18n={i18n}>
 			<Provider store={store}>
-				<Topbar />
-				<Component {...pageProps} />
-				<Sidebar />
+				{getLayout(<Component {...pageProps} />)}
 			</Provider>
 		</I18nextProvider>
 	);

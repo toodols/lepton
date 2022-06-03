@@ -1,5 +1,2 @@
 dist
 node_modules
-.VSCodeCounter
-.DS_Store
-.env*.local

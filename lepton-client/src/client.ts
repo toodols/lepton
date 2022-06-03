@@ -110,6 +110,13 @@ export class Client extends EventEmitter {
 		}
 	}
 
+	@signedIn(true)
+	signOut(){
+		this.clientUser = undefined;
+		this.token = undefined;
+		this.emit("clientUserChanged");
+	}
+
 	@signedIn(false)
 	async signIn(username: string, password: string) {
 		const result = await fetch(SIGN_IN_URL, {

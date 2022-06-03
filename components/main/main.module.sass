@@ -13,7 +13,13 @@
 	@include border
 	height: calc(100vh - $topbar-height)
 	top: $topbar-height
-	
+
+.post[data-expanded=true]
+	.content
+		max-height: unset
+	.show_more
+		display: block
+
 .post
 	padding: 7px
 	@include border
@@ -23,6 +29,30 @@
 	max-width: 700px
 	border-radius: 5px
 	word-wrap: break-word
+	white-space: pre-wrap
+	background-color: var(--color-post-background)
+	.content
+		max-height: 100px
+		overflow: hidden
+		position: relative
+		.overflow_gradient
+			display: none
+			position: absolute
+			bottom: 0
+			left: 0
+			width: 100%
+			height: 50px
+			background: linear-gradient(to bottom, rgb(0, 0, 0, 0) 0%, var(--color-post-background) 100%)
+		
+	.show_more
+		display: none
+		
+	.content[data-truncated=true]
+		~ .show_more
+			display: block
+		.overflow_gradient
+			display: block
+
 	button
 		padding: 5px
 		border: none

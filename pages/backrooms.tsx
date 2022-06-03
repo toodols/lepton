@@ -7,8 +7,10 @@ import { Sidebar } from "../components/sidebar";
 import { Topbar } from "../components/topbar";
 import { CreatePostModal } from "../components/create-post-modal";
 import { Posts } from "../components/main/posts";
+import { WithTopbar } from "components/util/withTopbar";
+import { ReactNode } from "react";
 
-const Home: NextPage = () => {
+export default function Backrooms() {
 	return (
 		<>
 			<h1>you{"'"}ve reached the Backrooms</h1>
@@ -16,5 +18,4 @@ const Home: NextPage = () => {
 		</>
 	);
 };
-
-export default Home;
+Backrooms.getLayout = (page: ReactNode)=>(<WithTopbar>{page}</WithTopbar>);

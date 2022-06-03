@@ -6,7 +6,7 @@ export const clientSlice = createSlice({
 	name: "Client",
 	initialState: {
 		username: "",
-		isLoggedIn: false,
+		isSignedIn: false,
 		userId: "",
 		avatar: "",
 	},
@@ -14,12 +14,12 @@ export const clientSlice = createSlice({
 		onClientUserChanged(state, action: PayloadAction){
 			if (client.clientUser) {
 				state.username = client.clientUser.username;
-				state.isLoggedIn = true;
+				state.isSignedIn = true;
 				state.userId = client.clientUser.id.toString();
 				state.avatar = client.clientUser.avatar;
 			} else {
 				// state.username = ""; not necessary
-				state.isLoggedIn = false;
+				state.isSignedIn = false;
 				state.userId = ""
 			}
 		}

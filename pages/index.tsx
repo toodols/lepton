@@ -7,16 +7,15 @@ import { Sidebar } from "../components/sidebar";
 import { Topbar } from "../components/topbar";
 import { CreatePostModal } from "../components/create-post-modal";
 import { Posts } from "../components/main/posts";
+import { WithTopbar } from "components/util/withTopbar";
+import { ReactNode } from "react";
 
-const Home: NextPage = () => {
+export default function Home() {
 	return (
 		<>
-				<Posts/>
-				<CreatePostModal />
-				<Settings />
-				<Signin />
+			<Posts/>
+			<CreatePostModal />
 		</>
 	);
 };
-
-export default Home;
+Home.getLayout = (page: ReactNode)=>(<WithTopbar>{page}</WithTopbar>);

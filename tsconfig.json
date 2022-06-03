@@ -15,9 +15,7 @@
     "jsx": "preserve",
     "incremental": true,
     "experimentalDecorators": true,
-    "paths": {
-      "lepton-client": ["./node_modules/lepton-client/src"]
-    }
+	"baseUrl": "."
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "next.config.js"],
   "exclude": ["node_modules"]

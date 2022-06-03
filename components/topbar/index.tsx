@@ -14,7 +14,7 @@ import Styles from "./topbar.module.sass";
 
 export function Topbar() {
 	const dispatch = useDispatch();
-	const { username, isLoggedIn } = useSelector(
+	const { username, isSignedIn } = useSelector(
 		(state: RootState) => state.client
 	);
 	const router = useRouter();
@@ -32,7 +32,7 @@ export function Topbar() {
 				{router.pathname === "/" ? "Home" : router.pathname}
 			</h2>
 			<div className={Styles.right}>
-				{isLoggedIn ? (
+				{isSignedIn ? (
 					<>
 						{router.pathname === "/" ? (
 							<button
