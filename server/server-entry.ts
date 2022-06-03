@@ -1,7 +1,5 @@
 // entry point for server
 // it's a mess but who cares
-
-
 import express, { Request, Response } from "express";
 import next from "next";
 import { apiRouter } from "./api";
@@ -9,10 +7,9 @@ import bodyparser from "body-parser";
 import * as socketio from "socket.io";
 import http from "http";
 const dev = process.env.NODE_ENV !== "production";
-const nextApp = next({ dev, conf: await import("../next.config") });
+const nextApp = next({ dev });
 const handle = nextApp.getRequestHandler();
 const port = process.env.PORT || 3000;
-
 
 await nextApp.prepare()
 const app = express();
@@ -30,7 +27,6 @@ io.on('connection', (socket: socketio.Socket) => {
 		console.log('client disconnected');
 	})
 });
-
 app.all('*', (req: any, res: any) => handle(req, res));
 
 server.listen(port, () => {

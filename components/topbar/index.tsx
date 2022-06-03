@@ -45,7 +45,6 @@ export function Topbar() {
 						) : (
 							<></>
 						)}
-						<label>{username}</label>
 						<AccountSelection />
 					</>
 				) : (

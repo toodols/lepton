@@ -1,10 +1,12 @@
 /** @type {import('next').NextConfig} */
-export const nextConfig = {
+const config = {
   reactStrictMode: true,
+  images: {
+	domains: ["cdn.discordapp.com"]
+  },
   webpack: (config) => {
     config.experiments = { topLevelAwait: true, layers: true };
     return config;
   }
 }
-
-
+export default config;

@@ -12,10 +12,8 @@ export function CreatePostModal() {
 	return <Modal className={Styles.create_post_modal} isOpen={isOpen} closeTimeoutMS={300} onRequestClose={()=>{
 		dispatch(setCreatePostModalOpen(false));
 	}}>
-		<div>Create Post</div>
-		<textarea ref={ref}>
-			Post
-		</textarea>
+		<h1>Create Post</h1>
+		<textarea defaultValue="I think I am very sad right now" ref={ref}></textarea>
 		<button onClick={()=>{
 			client.createPost({
 				content: ref.current!.value

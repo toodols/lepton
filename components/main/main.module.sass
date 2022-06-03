@@ -15,7 +15,7 @@
 	top: $topbar-height
 	
 .post
-	padding: 10px
+	padding: 7px
 	@include border
 	margin-bottom: 10px
 	width: 100%
@@ -23,6 +23,22 @@
 	max-width: 700px
 	border-radius: 5px
 	word-wrap: break-word
+	button
+		padding: 5px
+		border: none
+		background-color: var(--color-topbar-button)
+		margin: 0 5px
+		svg 
+			color: orange
+	.post_topbar
+		display: flex
+		align-items: center
+		height: 30px
+		font-size: 20px
+		.action_bar
+			width: 100%
+			display: flex
+			justify-content: right
 
 .post[data-deleting=true]
 	opacity: 0.5

@@ -23,7 +23,7 @@ export default async function handler(req: Request, res: Response<Error | Data>)
 		hashed_password,
 		salt: password_salt,
 		token: generatedToken,
-		avatar: "",
+		avatar: "/avatar.png",
 	})
 
 	res.status(200).json({token: generatedToken});

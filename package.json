@@ -5,7 +5,7 @@
   "type": "module",
   "repository": "https://github.com/toodols/lepton.git",
   "scripts": {
-    "dev": "tsc --project ./tsconfig.server.json && node --inspect --experimental-specifier-resolution=node ./out/server/server-entry.js",
+    "dev": "tsc --project ./tsconfig.server.json && node --inspect --experimental-specifier-resolution=node ./out/server-entry.js",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"

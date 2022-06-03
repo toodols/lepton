@@ -1,13 +1,22 @@
 import { useSelector } from "react-redux";
 import { RootState } from "../../../lib/store";
 import Styles from "./account-selection.module.sass";
-import Image from "next/image";
+import { Avatar } from "../../util/avatar";
+import { useState } from "react";
 
 export function AccountSelection() {
-	const avatar = useSelector((state: RootState) => state.client.avatar);
+	const client = useSelector((state: RootState) => state.client);
+	const [isVisible, setIsVisible] = useState(false);
+
 	return <div className={Styles.account_selection}>
-		<button className={Styles.inner}>
-			<Image width={100} height={100} alt="Avatar" src={"/"+avatar}/>
+		<button className={Styles.button} onClick={()=>{
+			setIsVisible(!isVisible);
+		}}>
+			<Avatar src={client.avatar} size={30}/>
+			<div>{client.username}</div>
 		</button>
+		<div className={Styles.inner} data-visible={isVisible}>
+			<button>Add Account</button>
+		</div>
 	</div>
 }

@@ -1,10 +1,32 @@
 .account_selection
 	position: relative
 	margin: 0px
-	.inner
-		border-radius: 50%
-		width: 40px
+	display: flex
+	.button
+		padding: 5px
+		div
+			margin: 5px
+		align-items: center
+		font-size: 20px
+		display: flex
+		border-radius: 5px
 		height: 40px
-		padding: 7px
 		margin: 0px
-		border: solid .2px
+	.inner
+		background: var(--color-account-selection-interface)
+		position: absolute
+		top: 50px
+		right: 0px
+		width: 200px
+		border-radius: 5px
+		transition: opacity .3s
+		button
+			margin: 5px
+			padding: 5px
+			width: calc(100% - 10px)
+	.inner[data-visible=true]
+		opacity: 1
+		pointer-events: all
+	.inner[data-visible=false]
+		opacity: 0
+		pointer-events: none
