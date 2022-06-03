@@ -9,7 +9,7 @@ import signInHandler from "./signin"
 import signUpHandler from "./signup"
 import usersMeHandler from "./users/@me";
 import userLookupHandler from "./users/userid";
-import createPostHandler from "./createpost";
+import createPostHandler from "./posts/create";
 import getPostsHandler from "./posts/get";
 import deletePostHandler from "./posts/delete";
 

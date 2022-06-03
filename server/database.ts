@@ -29,16 +29,18 @@ export interface Post extends Document {
 export interface Response {
 	users: Collection<User>;
 	posts: Collection<Post>;
+	comments: Collection<Comment>;
 }
 
 export const {
-	users, posts,
+	users, posts, comments
 } = await new Promise<Response>((resolve, reject) => {
 	const client = new MongoClient(MongoDB_URI);
 	client.connect(err => {
 		const database = client.db("database");
 		
 		resolve({
+			comments: database.collection("comments"),
 			users: database.collection("users"),
 			posts: database.collection("posts"),
 		})
