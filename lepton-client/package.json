@@ -1,6 +1,7 @@
 {
   "name": "lepton-client",
   "version": "1.0.0",
+  "repository":"https://github.com/toodols/lepton-client.git",
   "description": "Lepton's client api as a package",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

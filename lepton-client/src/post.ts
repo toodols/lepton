@@ -10,6 +10,8 @@ export interface PostData {
 	author: string;
 	content: string;
 	group?: string;
+	createdAt: number;
+	updatedAt: number;
 }
 
 // keeping track of a post's comments is too expensive
@@ -38,6 +40,7 @@ export class Post extends EventEmitter {
 	lastComment?: Comment;
 	author: User;
 	group?: Group;
+	createdAt: number;
 
 	private commentsLoader?: CommentsLoader;
 
@@ -79,5 +82,6 @@ export class Post extends EventEmitter {
 		this.group = from.group ? this.client.groupsCache.get(from.group) : undefined;
 		this.content = from.content;
 		this.client.postsCache.set(this.id, this);
+		this.createdAt = from.createdAt;
 	}
 }

@@ -7,6 +7,10 @@ import { Client } from "./client";
 export interface UserData {
 	id: string;
 	username: string;
+	createdAt: number;
+
+	/** Avatar URL */
+	avatar: string;
 }
 
 
@@ -22,11 +26,12 @@ export class User {
 
 	id: string;
 	username: string;
-	// avatar: string;
+	avatar: string;
 
 	constructor(public client: Client, from: UserData) {
 		this.id = from.id;
 		this.username = from.username;		
+		this.avatar = from.avatar;
 		this.client.usersCache.set(this.id, this);
 	}
 }

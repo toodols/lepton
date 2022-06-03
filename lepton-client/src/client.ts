@@ -4,7 +4,7 @@ import { Comment } from "./comment";
 import { Group } from "./group";
 import { ClientUser } from "./clientuser";
 import { EventEmitter } from "events";
-import {fetch} from "cross-fetch";
+import { fetch } from "cross-fetch";
 import { io } from "socket.io-client";
 import { CREATE_POST_URL, GET_POSTS_URL, GET_SELF_URL, SIGN_IN_URL, SIGN_UP_URL } from "./constants";
 
@@ -13,7 +13,7 @@ const URL = process.env.NODE_ENV === "development" ? "/api/socket" : "wss://idk 
 export function signedIn(isSignedIn = true) {
 	return (target: any, propertyKey: string, descriptor: PropertyDescriptor) => {
 		const originalMethod = descriptor.value;
-		descriptor.value = function (this: Client | {client: Client}, ...args: any[]): any {
+		descriptor.value = function (this: Client | { client: Client }, ...args: any[]): any {
 			let client: Client;
 			if ("client" in this) {
 				client = this.client;
@@ -43,8 +43,13 @@ export class Client extends EventEmitter {
 	token?: string;
 	clientUser?: ClientUser;
 
-	async getPosts() {
-		const {posts, users}: {posts:PostData[], users: UserData[]} = await fetch(GET_POSTS_URL).then(e=>e.json());
+	async getPosts(props: { before: number }): Promise<Post[]>;
+	async getPosts(): Promise<Post[]>;
+
+	async getPosts(props?: { before: number }) {
+		const { posts, users }: { posts: PostData[]; users: UserData[] } = await fetch(
+			GET_POSTS_URL + (props?.before ? `?before=${props.before}` : "")
+		).then((e) => e.json());
 
 		for (const userid in users) {
 			User.from(this, users[userid]);
@@ -55,7 +60,7 @@ export class Client extends EventEmitter {
 			createdPosts.push(Post.from(this, post));
 		}
 		// after we do comments we do here
-		
+
 		return createdPosts;
 	}
 
@@ -127,21 +132,21 @@ export class Client extends EventEmitter {
 	constructor() {
 		super();
 		const socketio = io();
-		socketio.on("post", ({post, author}: {post: PostData, author: UserData}) => {
-			console.log(post,author)
+		socketio.on("post", ({ post, author }: { post: PostData; author: UserData }) => {
+			console.log(post, author);
 			User.from(this, author);
 
 			// there is no need to call afterinit on post because there are no comments
 			Post.from(this, post);
 			console.log(post);
 			this.emit("postAdded", post.id);
-		})
-		socketio.on("postDeleted", (id)=>{
-			if (this.postsCache.has(id)){
+		});
+		socketio.on("postDeleted", (id) => {
+			if (this.postsCache.has(id)) {
 				this.emit("postDeleted", id);
 				this.postsCache.get(id)!.emit("deleted");
 				this.postsCache.delete(id);
 			}
-		})
+		});
 	}
 }

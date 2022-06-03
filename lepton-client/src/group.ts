@@ -3,6 +3,7 @@ import { Client } from "./client";
 export interface GroupData {
 	id: string;
 	name: string;
+	createdAt: number;
 }
 
 export class Group {

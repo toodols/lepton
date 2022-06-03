@@ -8,6 +8,8 @@ export interface CommentData {
 	content: string;
 	author: string;
 	post: string;
+	createdAt: number;
+	updatedAt: number;
 }
 
 export class Comment extends EventEmitter {
