@@ -9,6 +9,7 @@ import {
 	setSidebarOpen,
 	setCreatePostModalOpen,
 } from "../../lib/store";
+import { AccountSelection } from "./account-selection";
 import Styles from "./topbar.module.sass";
 
 export function Topbar() {
@@ -27,30 +28,36 @@ export function Topbar() {
 			>
 				<FontAwesomeIcon icon={faBars} />
 			</button>
-			{isLoggedIn ? (
-				<>
-					<label>{username}</label>
-					{router.pathname === "/" ? (
-						<button
-							onClick={() => {
-								dispatch(setCreatePostModalOpen(true));
-							}}
-						>
-							Create Post
-						</button>
-					) : (
-						<></>
-					)}
-				</>
-			) : (
-				<button
-					onClick={() => {
-						dispatch(setSignInModalOpen(true));
-					}}
-				>
-					Sign In
-				</button>
-			)}
+			<h2 className={Styles.title}>
+				{router.pathname === "/" ? "Home" : router.pathname}
+			</h2>
+			<div className={Styles.right}>
+				{isLoggedIn ? (
+					<>
+						{router.pathname === "/" ? (
+							<button
+								onClick={() => {
+									dispatch(setCreatePostModalOpen(true));
+								}}
+							>
+								Create Post
+							</button>
+						) : (
+							<></>
+						)}
+						<label>{username}</label>
+						<AccountSelection />
+					</>
+				) : (
+					<button
+						onClick={() => {
+							dispatch(setSignInModalOpen(true));
+						}}
+					>
+						Sign In
+					</button>
+				)}
+			</div>
 		</header>
 	);
 }

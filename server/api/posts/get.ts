@@ -11,7 +11,11 @@ interface Data {
 };
 
 export default async function handler(req: Request, res: Response<Data | Error>) {
-	const result = await posts.find({}).sort({_id:-1}).limit(10).toArray();
+	const query: {createdAt?: any} = {}
+	if (req.query.before) {
+		query.createdAt = {$lt: req.query.before};
+	};
+	const result = await posts.find(query).sort({_id:-1}).limit(10).toArray();
 
 	const usersRecognized: Record<string, boolean> = {};
 	const arr: Promise<UserData>[] = [];

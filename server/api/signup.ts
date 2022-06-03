@@ -18,10 +18,12 @@ export default async function handler(req: Request, res: Response<Error | Data>)
 	
 	const generatedToken = token();
 	users.insertOne({
+		createdAt: Date.now(),
 		username,
 		hashed_password,
 		salt: password_salt,
 		token: generatedToken,
+		avatar: "",
 	})
 
 	res.status(200).json({token: generatedToken});

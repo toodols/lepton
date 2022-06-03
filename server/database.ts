@@ -1,4 +1,4 @@
-import { MongoClient, Collection, Document, ObjectId } from 'mongodb';
+import { MongoClient, Collection, Document, ObjectId, Timestamp } from 'mongodb';
 import { MongoDB_URI } from "./env";
 
 export interface User extends Document {
@@ -6,18 +6,23 @@ export interface User extends Document {
 	hashed_password: string;
 	salt: string;
 	token: string;
+	avatar: string;
 }
 
 export interface Comment extends Document {
 	content: string;
 	author: ObjectId;
 	post: ObjectId;
+	updatedAt: Timestamp;
+	createdAt: Timestamp;
 }
 
 export interface Post extends Document {
 	author: ObjectId;
 	content: string;
 	lastComment?: ObjectId;
+	updatedAt: Timestamp;
+	createdAt: Timestamp;
 	group?: ObjectId;
 }
 

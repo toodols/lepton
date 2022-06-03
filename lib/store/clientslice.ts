@@ -1,8 +1,6 @@
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { createSlice, CreateSliceOptions, PayloadAction, SliceCaseReducers } from "@reduxjs/toolkit";
 import {Client, ClientUser} from "lepton-client";
 import { client } from "../client";
-
-
 
 export const clientSlice = createSlice({
 	name: "Client",
@@ -10,6 +8,7 @@ export const clientSlice = createSlice({
 		username: "",
 		isLoggedIn: false,
 		userId: "",
+		avatar: "",
 	},
 	reducers: {
 		onClientUserChanged(state, action: PayloadAction){
@@ -17,6 +16,7 @@ export const clientSlice = createSlice({
 				state.username = client.clientUser.username;
 				state.isLoggedIn = true;
 				state.userId = client.clientUser.id.toString();
+				state.avatar = client.clientUser.avatar;
 			} else {
 				// state.username = ""; not necessary
 				state.isLoggedIn = false;
