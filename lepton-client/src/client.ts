@@ -45,7 +45,6 @@ export class Client extends EventEmitter {
 
 	async getPosts(props: { before: number }): Promise<Post[]>;
 	async getPosts(): Promise<Post[]>;
-
 	async getPosts(props?: { before: number }) {
 		const { posts, users }: { posts: PostData[]; users: UserData[] } = await fetch(
 			GET_POSTS_URL + (props?.before ? `?before=${props.before}` : "")
@@ -94,22 +93,30 @@ export class Client extends EventEmitter {
 		});
 	}
 
-	async useToken(token: string) {
+	async getSelfInfo(token: string){
 		const result = await fetch(GET_SELF_URL, {
 			headers: {
 				Authorization: token,
 			},
 		}).then((e) => e.json());
-		this.clientUser = new ClientUser(this, result);
+		if (result.error) {
+			throw new Error(result.error);
+		}
+		return result;
+	}
+
+	async useToken(token: string) {
+		const info = await this.getSelfInfo(token);
+		this.clientUser = new ClientUser(this, info);
 		this.token = token;
 		this.emit("clientUserChanged");
 	}
 
 	/**
 	 * Sign in with username and password
+	 * Different then sign in because it is more uncommon so after calling this you need to use client.useToken(token)
 	 */
-	@signedIn(false)
-	async signUp(username: string, password: string) {
+	async signUp(username: string, password: string): Promise<string> {
 		const result = await fetch(SIGN_UP_URL, {
 			method: "POST",
 			headers: {
@@ -122,9 +129,8 @@ export class Client extends EventEmitter {
 		}).then((e) => e.json());
 		if (result.error) {
 			throw new Error(result.error);
-		} else {
-			this.useToken(result.token);
 		}
+		return result.token;
 	}
 
 	@signedIn(true)
@@ -134,8 +140,7 @@ export class Client extends EventEmitter {
 		this.emit("clientUserChanged");
 	}
 
-	@signedIn(false)
-	async signIn(username: string, password: string) {
+	async getToken(username: string, password: string){
 		const result = await fetch(SIGN_IN_URL, {
 			method: "POST",
 			headers: {
@@ -148,24 +153,35 @@ export class Client extends EventEmitter {
 		}).then((e) => e.json());
 		if (result.error) {
 			throw new Error(result.error);
-		} else {
-			this.useToken(result.token);
 		}
 		return result.token;
+	}
+
+	@signedIn(false)
+	async signIn(username: string, password: string) {
+		const token = await this.getToken(username, password);
+		this.useToken(token);
 	}
 
 	constructor() {
 		super();
 		const socketio = io();
 		socketio.on("post", ({ post, author }: { post: PostData; author: UserData }) => {
-			console.log(post, author);
 			User.from(this, author);
 
 			// there is no need to call afterinit on post because there are no comments
 			Post.from(this, post);
-			console.log(post);
 			this.emit("postAdded", post.id);
 		});
+		socketio.on("comment", ({comment, author}: { author: UserData, comment: CommentData})=>{
+			User.from(this, author);
+			const post = this.postsCache.get(comment.post)
+			if (post) {
+				Comment.from(this, comment);
+				post.onNewComment(comment.id);
+				this.emit("commentAdded", comment.id);
+			}
+		})
 		socketio.on("postDeleted", (id) => {
 			if (this.postsCache.has(id)) {
 				this.emit("postDeleted", id);

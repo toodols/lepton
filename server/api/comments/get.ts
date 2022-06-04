@@ -19,7 +19,7 @@ export default async function handler(req: Request, res: Response<Data | Error>)
 	if (req.query.before) {
 		query.createdAt = {$lt: req.query.before};
 	};
-	const result = await comments.find(query).sort({_id:-1}).limit(10).toArray();
+	const result = await comments.find(query).limit(10).toArray();
 
 	const usersRecognized: Record<string, boolean> = {};
 	const arr: Promise<UserData>[] = [];

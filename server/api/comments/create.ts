@@ -27,7 +27,7 @@ export default async function handler(
 			updatedAt: Timestamp.fromNumber(Date.now()),
 		});
 		if (comment.acknowledged) {
-			const data = await comments.findOne({ _id: post.insertedId });
+			const data = await comments.findOne({ _id: comment.insertedId });
 			io.emit("comment", {
 				post: post._id.toString,
 				comment: Converter.toCommentData(data!),

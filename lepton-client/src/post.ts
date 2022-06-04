@@ -21,7 +21,7 @@ export interface PostData {
 export class CommentsLoader extends EventEmitter {
 	client: Client;
 	isLoading = false;
-	loaded: Comment[] = [];
+	loaded: string[] = [];
 	loadUp(){
 		
 	}
@@ -30,7 +30,7 @@ export class CommentsLoader extends EventEmitter {
 		this.isLoading = true;
 		this.client.getComments({post: this.post.id}).then(comments => {
 			this.isLoading = false;
-			this.loaded = comments;
+			this.loaded = comments.map(e=>e.id);
 			this.emit("update");
 		});
 	}
@@ -67,6 +67,14 @@ export class Post extends EventEmitter {
 			});
 		}
 		return this._commentsLoader;
+	}
+
+	onNewComment(id: string){
+		const comment = this.client.commentsCache.get(id)!;
+		this._commentsLoader?.loaded.push(id);
+		this._commentsLoader?.emit("update");
+		this.lastComment = comment;
+		this.emit("update");
 	}
 
 	@signedIn()

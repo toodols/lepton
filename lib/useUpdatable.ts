@@ -20,6 +20,6 @@ export function useUpdatable<T extends EventEmitter>(value: T){
 		return ()=>{
 			value.removeListener("update", handler)
 		}
-	})
+	}, [value])
 	return value;
 }

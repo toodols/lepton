@@ -26,7 +26,7 @@ export function Posts() {
 	}, []);
 	const [autoCurrentId, setAutoCurrentId] = useState<string | null>(null);
 	const [forceCurrentId, setForceCurrentId] = useState<string | null>(null);
-	const currentId = (forceCurrentId &&
+	const currentPost = (forceCurrentId &&
 		client.postsCache.get(
 			forceCurrentId
 		)) ||
@@ -98,11 +98,8 @@ export function Posts() {
 											/>
 										))}
 									</InfiniteScroll>
-									<Comments
-										post={
-											currentId
-										}
-									/>
+									{currentPost?<Comments key={currentPost.id} post={currentPost}/>:<>
+									</>}
 								</>
 							);
 						}}

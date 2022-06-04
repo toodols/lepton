@@ -9,6 +9,8 @@ import Styles from "./sign-in-modal.module.sass";
 
 export function Signin() {
 	const {isOpen, menuType} = useSelector((state: RootState) => ({isOpen: state.main.signInMenuOpen, menuType: state.main.signInMenuType}));
+	const isSignedIn = useSelector((state: RootState) => state.client.isSignedIn);
+
 	const dispatch = useDispatch();
 	const [isLoading, setIsLoading] = useState(false);
 	
@@ -35,10 +37,11 @@ export function Signin() {
 			<Input disabled={isLoading} name="Password" type="password" ref={signInPasswordRef}/>
 			<button disabled={isLoading} onClick={()=>{
 				setIsLoading(true);
-				
-				client.signIn(signInUsernameRef.current!.value, signInPasswordRef.current!.value).then((tok)=>{
+				client.getToken(signInUsernameRef.current!.value, signInPasswordRef.current!.value).then((tok)=>{
+					client.useToken(tok);
 					dispatch(addAccount(tok))
 					dispatch(setSignInModalOpen(false));
+					
 				}).catch((err)=>{
 					setError(err.message);
 				}).finally(()=>{
@@ -63,8 +66,10 @@ export function Signin() {
 					// passwords do not match
 				} else {
 					setIsLoading(true);
-					client.signUp(signUpUsernameRef.current!.value, signUpPasswordRef.current!.value).then(()=>{
-
+					client.signUp(signUpUsernameRef.current!.value, signUpPasswordRef.current!.value).then((token)=>{
+						dispatch(addAccount(token));
+						dispatch(setSignInModalOpen(false));
+						client.useToken(token)
 					}).catch((err)=>{
 						setError(err.message);
 					}).finally(()=>{

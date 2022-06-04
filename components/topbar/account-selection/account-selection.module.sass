@@ -1,7 +1,10 @@
+@import "../../util/util.module"
+
 .account_selection
 	position: relative
 	margin: 0px
 	display: flex
+	
 	.button
 		padding: 5px
 		div
@@ -21,10 +24,28 @@
 		border-radius: 5px
 		transition: opacity .3s
 		padding-top: 5px
-		button
+		.account_selection_item
+			display: flex
+			align-items: center
+			button:not(.remove)
+				align-items: center
+				display: flex
+				width: 100%
+			.remove
+				position: absolute
+				right: 15px
+				width: 18px
+				height: 18px
+			.img_container
+				margin-right: 10px
+				width: 30px
+				height: 30px
+		> button, .account_selection_item
+			text-align: left
 			margin: 0px 5px 5px 5px
-			padding: 5px
 			width: calc(100% - 10px)
+		> button
+			padding: 5px
 	.inner[data-visible=true]
 		opacity: 1
 		pointer-events: all
