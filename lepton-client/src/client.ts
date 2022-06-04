@@ -7,6 +7,7 @@ import { EventEmitter } from "events";
 import { fetch } from "cross-fetch";
 import { io } from "socket.io-client";
 import { CREATE_POST_URL, GET_COMMENTS_URL, GET_POSTS_URL, GET_SELF_URL, SIGN_IN_URL, SIGN_UP_URL } from "./constants";
+import { Settings } from "./types";
 
 const URL = process.env.NODE_ENV === "development" ? "/api/socket" : "wss://idk lmao";
 
@@ -140,6 +141,16 @@ export class Client extends EventEmitter {
 		this.emit("clientUserChanged");
 	}
 
+	@signedIn(true)
+	async saveSettings(settings: Settings){
+		// TODO
+	}
+
+	@signedIn(true)
+	async getSettings(){
+
+	}
+
 	async getToken(username: string, password: string){
 		const result = await fetch(SIGN_IN_URL, {
 			method: "POST",
@@ -189,5 +200,16 @@ export class Client extends EventEmitter {
 				this.postsCache.delete(id);
 			}
 		});
+		socketio.on("commentDeleted", (id) => {
+			if (this.commentsCache.has(id)) {
+				this.emit("commentDeleted", id);
+				const comment = this.commentsCache.get(id)!;
+				comment.emit("deleted");
+				const loader = comment.post.commentsLoader;
+				loader.loaded = loader.loaded.filter((e) => e !== id);
+				loader.emit("update");
+				this.commentsCache.delete(id);
+			}
+		})
 	}
 }

@@ -20,9 +20,9 @@ export default async function handler(req: Request, res: Response<Data | Error>)
 	const comment = await comments.findOne({_id: new ObjectId(req.body.id)})
 	if (comment) {
 		if (comment.author.equals(user._id)) {
-			const deleteRes = await posts.deleteOne({_id: comment._id});
+			const deleteRes = await comments.deleteOne({_id: comment._id});
 			if (deleteRes.acknowledged) {
-				io.emit("postDeleted", comment._id) // its automatically casted to a string just so i dont get confused
+				io.emit("commentDeleted", comment._id) // its automatically casted to a string just so i dont get confused
 				res.status(200).json({})
 			} else {
 				res.status(500).json({error: "Failed to delete comment"});

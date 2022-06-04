@@ -1,25 +1,28 @@
 .ReactModal__Content
-    position: absolute
-    // inset: 40px
-    left: 50%
-    top: 50%
-    transform: translate(-50%, -50%)
-    border: 1px solid rgb(204, 204, 204)
-    background: rgb(255, 255, 255)
-    overflow: auto
-    border-radius: 5px
-    outline: none
-    padding: 20px
+	position: absolute
+	// inset: 40px
+	left: 50%
+	top: 50%
+	transform: translate(-50%, -50%)
+	border: 1px solid rgb(204, 204, 204)
+	background: rgb(255, 255, 255)
+	overflow: auto
+	border-radius: 5px
+	outline: none
+	padding: 20px
 
 .ReactModal__Overlay
-    opacity: 0
-    transition: opacity .5s
-    z-index: 2
+	opacity: 0
+	transition: opacity .5s
+	z-index: 2
+	background-color: rgb(0, 0, 0, 0.2) !important
+	position: fixed
+	inset: 0px
 
 .ReactModal__Overlay--after-open 
-    opacity: 1
+	opacity: 1
 
 
 .ReactModal__Overlay--before-close
-    opacity: 0
+	opacity: 0
 

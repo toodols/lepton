@@ -9,7 +9,7 @@ export function CreatePostModal() {
 	const [isLoading, setIsLoading] = useState(false);
 	const isOpen = useSelector((state: RootState) => state.main.createPostModalOpen);
 	const ref = useRef<HTMLTextAreaElement>(null);
-	return <Modal className={Styles.create_post_modal} isOpen={isOpen} closeTimeoutMS={300} onRequestClose={()=>{
+	return <Modal ariaHideApp={false} className={Styles.create_post_modal} isOpen={isOpen} closeTimeoutMS={300} onRequestClose={()=>{
 		dispatch(setCreatePostModalOpen(false));
 	}}>
 		<h1>Create Post</h1>

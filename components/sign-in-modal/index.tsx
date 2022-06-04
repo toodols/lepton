@@ -24,7 +24,7 @@ export function Signin() {
 
 	const [error, setError] = useState<string | null>(null);
 
-	return <Modal data={{
+	return <Modal ariaHideApp={false} data={{
 		error: !!error,
 		menutype: menuType,
 	}} className={Styles.signin_modal} isOpen={isOpen} closeTimeoutMS={300} onRequestClose={()=>{

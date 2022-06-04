@@ -1,3 +1,4 @@
+import { openSettings } from "lib/store/settingsmodal";
 import Link from "next/link";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState, setSidebarOpen } from "../../lib/store";
@@ -38,6 +39,12 @@ export function Sidebar() {
 							Backrooms
 						</button>
 					</Link>
+					<button onClick={()=>{
+						dispatch(setSidebarOpen(false));
+						dispatch(openSettings())
+					}}>
+						Settings
+					</button>
 				</aside>
 			</div>
 		</>

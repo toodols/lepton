@@ -1,5 +1,5 @@
 import { EventEmitter } from "events";
-import type { Client } from "./client";
+import { Client, signedIn } from "./client";
 import type { Post } from "./post";
 import type { User } from "./user";
 
@@ -24,6 +24,24 @@ export class Comment extends EventEmitter {
 		}
 		return new Comment(client, data);
 	}
+
+	@signedIn()
+	async delete(){
+		const result = await fetch(`/api/comments/delete`, {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+				"Authorization": this.client.token!,
+			},
+			body: JSON.stringify({
+				id: this.id,
+			})
+		}).then(e=>e.json());
+		if (result.error) { 
+			throw new Error(result.error);
+		}
+	}
+
 	constructor(public client: Client, data: CommentData){
 		super();
 		this.id = data.id;

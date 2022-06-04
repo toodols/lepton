@@ -19,18 +19,30 @@
 	.comments_container
 		width: 100%
 		height: 100%
-		padding: 5px
-		.author
-			display: flex
-			height: 25px
-			font-size: 20px
-			div
-				margin-left: 5px
-			@include avatar()
+		.box
+			padding: 0px 5px
+			background: var(--color-comment)
+			position: relative
+			.actions
 				position: absolute
+				top: 0px
+				right: 0px
+				display: none
+			&:hover
+				background: var(--color-comment-hover)
+				.actions
+					display: block
+			.author
+				display: flex
+				height: 25px
+				font-size: 20px
+				div
+					margin-left: 5px
+				@include avatar()
+					position: absolute
 			
 		.content
-			margin-left: 30px
+			margin-left: 35px
 
 .post[data-expanded=true]
 	.content

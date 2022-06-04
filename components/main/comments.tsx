@@ -1,3 +1,5 @@
+import { faComment, faTrash } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Avatar } from "components/util/avatar";
 import { Comment, CommentsLoader, Post } from "lepton-client";
 import { client } from "lib/client";
@@ -9,17 +11,24 @@ import Styles from "./main.module.sass";
 export function Comments({ post }: { post: Post }) {
 	const loader = post.commentsLoader;
 	useUpdatable(loader)
-
+	
 	let last: Comment | undefined;
 	const elements = loader.loaded.map((commentid)=>{
 		const comment = client.commentsCache.get(commentid)!;
 
-		const res = <div key={comment.id}>
+		const res = <div className={Styles.box} key={comment.id}>
 				{comment.author!==last?.author?<div className={Styles.author}>
 					<Avatar size={30} src={comment.author.avatar}/>
 					<div>{comment.author.username}</div>
 				</div>:<></>}
 				<div className={Styles.content}>{comment.content}</div>
+				<div className={Styles.actions}>
+					<button onClick={()=>{
+							comment.delete();
+						}}>
+							<FontAwesomeIcon icon={faTrash}/>
+						</button>
+				</div>
 			</div>;
 		last = comment;
 		return res;
@@ -27,8 +36,8 @@ export function Comments({ post }: { post: Post }) {
 	const inputRef = useRef<HTMLInputElement>(null);
 	if (post && loader) {
 		return <div className={Styles.comments}>
-			<div>{post.author.username}</div>
-			<div>{post.id}</div>
+			<h2>{post.author.username}</h2>
+			
 			<div className={Styles.comments_container}>
 				{elements}
 			</div>
