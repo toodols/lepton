@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { Timestamp } from "mongodb";
+import { ObjectId, Timestamp } from "mongodb";
 import { comments, posts, users } from "../../database";
 import { io } from "../../server-entry";
 import { Converter, hash } from "../../util";
@@ -16,8 +16,8 @@ export default async function handler(
 
 	const user = await users.findOne({ token: req.headers.authorization });
 	if (!user) return res.status(400).json({ error: "User not found" });
+	const post = await posts.findOne({ _id: new ObjectId(req.body.post) });
 
-	const post = await posts.findOne({ _id: req.body.post });
 	if (post) {
 		const comment = await comments.insertOne({
 			content: req.body.content,

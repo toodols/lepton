@@ -18,7 +18,7 @@ export class Comment extends EventEmitter {
 	author: User;
 	post: Post;
 	
-	from(client: Client, data: CommentData){
+	static from(client: Client, data: CommentData){
 		if (client.commentsCache.has(data.id)){
 			return client.commentsCache.get(data.id)!;
 		}

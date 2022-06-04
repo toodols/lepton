@@ -9,8 +9,13 @@ export const clientSlice = createSlice({
 		isSignedIn: false,
 		userId: "",
 		avatar: "",
+		accounts: (typeof localStorage!=="undefined"&&localStorage.getItem("accounts")) ? JSON.parse(localStorage.getItem("accounts")!) : [],
 	},
 	reducers: {
+		addAccount(state, action: PayloadAction<string>) {
+			state.accounts = [...state.accounts, action.payload].filter((e, i, a) => a.indexOf(e) === i);
+			localStorage.setItem("accounts", JSON.stringify(state.accounts));
+		},
 		onClientUserChanged(state, action: PayloadAction){
 			if (client.clientUser) {
 				state.username = client.clientUser.username;
@@ -26,4 +31,4 @@ export const clientSlice = createSlice({
 	}
 });
 
-export const { onClientUserChanged } = clientSlice.actions;
+export const { onClientUserChanged, addAccount } = clientSlice.actions;

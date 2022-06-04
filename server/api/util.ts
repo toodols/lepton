@@ -24,3 +24,14 @@ export function assertBody(props: Record<string, "string">, req: Request, res: R
 	}
 	return false;
 }
+
+export function assertQuery(props: Record<string, "string">, req: Request, res: Response) {
+	for (const prop in props) {
+		if (typeof req.query[prop] !== props[prop]) {
+			res.status(400);
+			res.send({error: `Prop "${prop}" is either missing or not of type "${props[prop]}"`});
+			return true;
+		}
+	}
+	return false;
+}

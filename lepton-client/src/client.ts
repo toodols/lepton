@@ -1,12 +1,12 @@
 import { Post, PostData } from "./post";
 import { User, UserData } from "./user";
-import { Comment } from "./comment";
+import { Comment, CommentData } from "./comment";
 import { Group } from "./group";
 import { ClientUser } from "./clientuser";
 import { EventEmitter } from "events";
 import { fetch } from "cross-fetch";
 import { io } from "socket.io-client";
-import { CREATE_POST_URL, GET_POSTS_URL, GET_SELF_URL, SIGN_IN_URL, SIGN_UP_URL } from "./constants";
+import { CREATE_POST_URL, GET_COMMENTS_URL, GET_POSTS_URL, GET_SELF_URL, SIGN_IN_URL, SIGN_UP_URL } from "./constants";
 
 const URL = process.env.NODE_ENV === "development" ? "/api/socket" : "wss://idk lmao";
 
@@ -62,6 +62,23 @@ export class Client extends EventEmitter {
 		// after we do comments we do here
 
 		return createdPosts;
+	}
+
+	async getComments(props: {post: string, before?: number}) {
+		const {comments, users}: {comments: CommentData[], users: UserData[]} = await fetch(
+			GET_COMMENTS_URL + `?post=${props.post}` + (props.before ? `&before=${props.before}` : "")
+		).then((e) => e.json());
+
+		for (const userid in users) {
+			User.from(this, users[userid]);
+		}
+
+		let createdComments = [];
+		for (const comment of comments) {
+			createdComments.push(Comment.from(this, comment));
+		}
+
+		return createdComments;
 	}
 
 	// @TODO add groupid
@@ -134,6 +151,7 @@ export class Client extends EventEmitter {
 		} else {
 			this.useToken(result.token);
 		}
+		return result.token;
 	}
 
 	constructor() {

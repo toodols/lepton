@@ -1,6 +1,7 @@
 import { EventEmitter } from "events";
 import { Client, signedIn } from "./client";
 import { Comment } from "./comment";
+import { CREATE_COMMENT_URL } from "./constants";
 import { Group } from "./group";
 import { User } from "./user";
 
@@ -17,11 +18,26 @@ export interface PostData {
 // keeping track of a post's comments is too expensive
 // so there's an optional class that can be used to fetch and listen to new comments
 // when it is no longer needed it can be removed
-export class CommentsLoader {
-	destroy(){
-		//
+export class CommentsLoader extends EventEmitter {
+	client: Client;
+	isLoading = false;
+	loaded: Comment[] = [];
+	loadUp(){
+		
 	}
-	constructor(public post: Post){
+	load(){
+		if(this.isLoading) return;
+		this.isLoading = true;
+		this.client.getComments({post: this.post.id}).then(comments => {
+			this.isLoading = false;
+			this.loaded = comments;
+			this.emit("update");
+		});
+	}
+	constructor(public post: Post, public destroy: ()=>void){
+		super();
+		this.client = post.client;
+		this.load();
 		//
 	}
 }
@@ -42,12 +58,34 @@ export class Post extends EventEmitter {
 	group?: Group;
 	createdAt: number;
 
-	private commentsLoader?: CommentsLoader;
+	private _commentsLoader?: CommentsLoader;
 
-	getCommentsLoader(){
-		if (!this.commentsLoader){
-			this.commentsLoader = new CommentsLoader(this);
+	get commentsLoader(){
+		if (!this._commentsLoader){
+			this._commentsLoader = new CommentsLoader(this, ()=>{
+				this._commentsLoader = undefined;
+			});
 		}
+		return this._commentsLoader;
+	}
+
+	@signedIn()
+	async comment(content: string){
+		const result = await fetch(CREATE_COMMENT_URL, {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+				"Authorization": this.client.token!,
+			},
+			body: JSON.stringify({
+				post: this.id,
+				content: content,
+			}),
+		}).then(e=>e.json());
+		if (result.error) {
+			throw new Error(result.error);
+		}
+		return Comment.from(this.client, result);
 	}
 
 	@signedIn()

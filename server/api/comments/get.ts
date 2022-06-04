@@ -1,9 +1,10 @@
 import {Request, Response} from "express";
 import { CommentData, UserData } from "lepton-client";
+import { ObjectId } from "mongodb";
 import { comments, posts, users } from "../../database";
 import { io } from "../../server-entry";
 import { Converter, hash } from "../../util";
-import {assertAuthorization, assertBody, Error} from "../util";
+import {assertAuthorization, assertBody, assertQuery, Error} from "../util";
 
 interface Data {
 	users: Record<string, UserData>;
@@ -11,7 +12,10 @@ interface Data {
 };
 
 export default async function handler(req: Request, res: Response<Data | Error>) {
-	const query: {createdAt?: any} = {}
+	assertQuery({post: "string"}, req, res);
+	const query: {createdAt?: any, post: ObjectId} = {
+		post: new ObjectId(req.query.post as string),
+	}
 	if (req.query.before) {
 		query.createdAt = {$lt: req.query.before};
 	};

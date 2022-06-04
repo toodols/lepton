@@ -1,3 +1,4 @@
+import { addAccount } from "lib/store/clientslice";
 import { createRef, useRef, useState } from "react";
 import Modal from "react-modal";
 import { useDispatch, useSelector } from "react-redux";
@@ -34,7 +35,9 @@ export function Signin() {
 			<Input disabled={isLoading} name="Password" type="password" ref={signInPasswordRef}/>
 			<button disabled={isLoading} onClick={()=>{
 				setIsLoading(true);
-				client.signIn(signInUsernameRef.current!.value, signInPasswordRef.current!.value).then(()=>{
+				
+				client.signIn(signInUsernameRef.current!.value, signInPasswordRef.current!.value).then((tok)=>{
+					dispatch(addAccount(tok))
 					dispatch(setSignInModalOpen(false));
 				}).catch((err)=>{
 					setError(err.message);

@@ -7,8 +7,8 @@ import { Sidebar } from "../components/sidebar";
 import { Topbar } from "../components/topbar";
 import { CreatePostModal } from "../components/create-post-modal";
 import { Posts } from "../components/main/posts";
-import { WithTopbar } from "components/util/withTopbar";
 import { ReactNode } from "react";
+import { Layout } from "components/layout";
 
 export default function Backrooms() {
 	return (
@@ -18,4 +18,4 @@ export default function Backrooms() {
 		</>
 	);
 };
-Backrooms.getLayout = (page: ReactNode)=>(<WithTopbar>{page}</WithTopbar>);
+Backrooms.getLayout = (page: ReactNode)=>(<Layout>{page}</Layout>);
