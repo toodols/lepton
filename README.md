@@ -1,2 +1,2 @@
 # Lepton
-Oh baby a triple!
+Very cool open source social platform written in typescript.

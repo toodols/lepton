@@ -1,4 +1,6 @@
-import { closeSettings, discardSettings, editSettings, saveSettings } from "lib/store/settingsmodal";
+import { discardSettings, editSettings, saveSettings } from "../../lib/store/settings";
+import { setSettingsModalOpen } from "../../lib/store";
+
 import Modal from "react-modal";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../lib/store";
@@ -21,7 +23,7 @@ export function Settings() {
 	const dispatch = useDispatch();
 	return <Modal ariaHideApp={false} className={Styles.settings_modal} closeTimeoutMS={300} onRequestClose={()=>{
 		dispatch(discardSettings());
-		dispatch(closeSettings());
+		dispatch(setSettingsModalOpen(false));
 	}} isOpen={isOpen}>
 		<h1>Settings</h1>
 		<button onClick={()=>{

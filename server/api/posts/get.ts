@@ -1,13 +1,14 @@
 import {Request, Response} from "express";
-import type { UserData, PostData } from "lepton-client";
-import { posts, users } from "../../database";
+import type { UserDataPartial, PostData, CommentData } from "lepton-client";
+import { comments, posts, users } from "../../database";
 import { io } from "../../server-entry";
 import { Converter, hash } from "../../util";
 import {assertAuthorization, assertBody, Error} from "../util";
 
 interface Data {
-	users: Record<string, UserData>;
-	posts: PostData[]
+	users: Record<string, UserDataPartial>;
+	posts: PostData[];
+	comments: (CommentData | undefined)[];
 };
 
 export default async function handler(req: Request, res: Response<Data | Error>) {
@@ -16,19 +17,21 @@ export default async function handler(req: Request, res: Response<Data | Error>)
 		query.createdAt = {$lt: req.query.before};
 	};
 	const result = await posts.find(query).sort({_id:-1}).limit(10).toArray();
-
+	const commentDatas = await Promise.all(result.map(post=>{
+		return comments.findOne({post: post._id}).then(comment=>comment?Converter.toCommentData(comment):undefined)
+	}))
 	const usersRecognized: Record<string, boolean> = {};
-	const arr: Promise<UserData>[] = [];
+	const arr: Promise<UserDataPartial>[] = [];
 	for (const post of result) {
 		if (!usersRecognized[post.author.id.toString()]) {			
 			usersRecognized[post.author.id.toString()] = true;
 			arr.push(users.findOne(post.author).then(value=>{
-				return Converter.toUserData(value!);
+				return Converter.toUserDataPartial(value!);
 			}));
 		}
 	}
 
-	const dataMap: Record<string, UserData> = {}
+	const dataMap: Record<string, UserDataPartial> = {}
 	for (const data of await Promise.all(arr)) {
 		dataMap[data.id] = data;
 	};
@@ -37,5 +40,6 @@ export default async function handler(req: Request, res: Response<Data | Error>)
 	res.json({
 		users: dataMap,
 		posts: result.map(Converter.toPostData),
+		comments: commentDatas,
 	}).status(200);
 }

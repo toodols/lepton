@@ -1,7 +1,6 @@
-import { openSettings } from "lib/store/settingsmodal";
 import Link from "next/link";
 import { useDispatch, useSelector } from "react-redux";
-import { RootState, setSidebarOpen } from "../../lib/store";
+import { RootState, setSettingsModalOpen, setSidebarOpen } from "../../lib/store";
 import Styles from "./sidebar.module.sass";
 
 export function Sidebar() {
@@ -20,7 +19,7 @@ export function Sidebar() {
 					className={Styles.sidebar_backdrop}
 				></div>
 				<aside className={Styles.sidebar}>
-					<h1>Something Stupid Here</h1>
+					<h1>Lepton</h1>
 					<Link href="/" passHref>
 						<button
 							onClick={() => {
@@ -41,7 +40,7 @@ export function Sidebar() {
 					</Link>
 					<button onClick={()=>{
 						dispatch(setSidebarOpen(false));
-						dispatch(openSettings())
+						dispatch(setSettingsModalOpen(true))
 					}}>
 						Settings
 					</button>

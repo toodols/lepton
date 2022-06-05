@@ -1,3 +1,5 @@
 export interface Settings {
-	theme: string;	
+	avatar: string;
+	description: string;
+	theme: string;
 }

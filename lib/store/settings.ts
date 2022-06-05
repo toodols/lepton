@@ -58,7 +58,7 @@ if (typeof localStorage !== "undefined") {
 }
 initialState.originalSettings = {...initialState.settings};
 
-export const settingsModalSlice = createSlice({
+export const settingsSlice = createSlice({
 	name: "SettingsModal",
 	initialState: initialState,
 	reducers: {
@@ -83,13 +83,7 @@ export const settingsModalSlice = createSlice({
 			state.settings = {...state.settings, ...action.payload};
 			state.isEditing = true;
 		},
-		openSettings: (state) => {
-			state.isOpen = true;
-		},
-		closeSettings: (state) => {
-			state.isOpen = false;
-		},
 	},
 });
 
-export const { openSettings, closeSettings, discardSettings, editSettings, saveSettings } = settingsModalSlice.actions;
+export const { discardSettings, editSettings, saveSettings } = settingsSlice.actions;

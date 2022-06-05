@@ -1,5 +1,5 @@
 import { EventEmitter } from "events";
-import { Client, signedIn } from "./client";
+import { Client, Options, signedIn } from "./client";
 import type { Post } from "./post";
 import type { User } from "./user";
 
@@ -12,13 +12,13 @@ export interface CommentData {
 	updatedAt: number;
 }
 
-export class Comment extends EventEmitter {
+export class Comment<Opts extends Options> extends EventEmitter {
 	id: string;
 	content: string;
-	author: User;
-	post: Post;
+	author: User<Opts>;
+	post: Post<Opts>;
 	
-	static from(client: Client, data: CommentData){
+	static from<Opts extends Options>(client: Client<Opts>, data: CommentData): Comment<Opts> {
 		if (client.commentsCache.has(data.id)){
 			return client.commentsCache.get(data.id)!;
 		}
@@ -42,7 +42,7 @@ export class Comment extends EventEmitter {
 		}
 	}
 
-	constructor(public client: Client, data: CommentData){
+	constructor(public client: Client<Opts>, data: CommentData){
 		super();
 		this.id = data.id;
 		this.content = data.content;

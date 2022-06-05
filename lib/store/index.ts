@@ -1,14 +1,17 @@
 import { combineReducers, configureStore, createSlice, createStore, PayloadAction } from "@reduxjs/toolkit";
 import { Post } from "lepton-client";
+import { client, init } from "lib/client";
 import { clientSlice } from "./clientslice";
 import { dataSlice } from "./dataslice";
-import { settingsModalSlice } from "./settingsmodal";
+import { settingsSlice } from "./settings";
 
 interface MainState {
 	sidebarOpen: boolean;
 	signInMenuOpen: boolean,
 	signInMenuType: "signin" | "signup" | "forgot" | "reset",
+	settingsModalOpen: boolean,
 	createPostModalOpen: boolean,
+	title: string,
 }
 
 const mainSlice = createSlice({
@@ -16,8 +19,10 @@ const mainSlice = createSlice({
 	initialState: {
 		sidebarOpen: false,
 		signInMenuOpen: false,
+		settingsModalOpen: false,
 		signInMenuType: "signin",
 		createPostModalOpen: false,
+		title: "...",
 	} as MainState,
 	reducers: {
 		setSidebarOpen: (state, action: PayloadAction<boolean>) => {
@@ -31,6 +36,12 @@ const mainSlice = createSlice({
 		},
 		setCreatePostModalOpen(state, action: PayloadAction<boolean>) {
 			state.createPostModalOpen = action.payload;
+		},
+		setSettingsModalOpen(state, action: PayloadAction<boolean>) {
+			state.settingsModalOpen = action.payload;
+		},
+		setTitle(state, action: PayloadAction<string>) {
+			state.title = action.payload;
 		}
 	}
 });
@@ -39,14 +50,15 @@ const mainSlice = createSlice({
 export const store = configureStore(
 	{
 		reducer: combineReducers({
-			settingsModal: settingsModalSlice.reducer,
+			settingsModal: settingsSlice.reducer,
 			client: clientSlice.reducer,
 			main: mainSlice.reducer,
 			data: dataSlice.reducer,
 		})
 	}
 )
+init();
 
-export const { setSidebarOpen, setSignInModalOpen, setCreatePostModalOpen, setSigninMenuType } = mainSlice.actions;
+export const { setTitle, setSettingsModalOpen, setSidebarOpen, setSignInModalOpen, setCreatePostModalOpen, setSigninMenuType } = mainSlice.actions;
 
 export type RootState = ReturnType<typeof store.getState>;

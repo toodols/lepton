@@ -1,6 +1,6 @@
 import { faClose } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Avatar } from "components/util/avatar";
+import { Avatar } from "../../util/avatar";
 import { client } from "lib/client";
 import { removeAccount } from "lib/store/clientslice";
 import { useEffect, useState } from "react";

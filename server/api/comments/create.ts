@@ -1,9 +1,9 @@
 import { Request, Response } from "express";
 import { ObjectId, Timestamp } from "mongodb";
-import { comments, posts, users } from "../../database";
+import { auth, comments, posts, users } from "../../database";
 import { io } from "../../server-entry";
 import { Converter, hash } from "../../util";
-import { assertAuthorization, assertBody, Error } from "../util";
+import { assertAuthorization, assertBody, Error, getUserFromAuth } from "../util";
 
 interface Data {}
 
@@ -12,10 +12,10 @@ export default async function handler(
 	res: Response<Data | Error>
 ) {
 	if (assertBody({ content: "string", post: "string" }, req, res)) return;
-	if (assertAuthorization(req, res)) return;
 
-	const user = await users.findOne({ token: req.headers.authorization });
-	if (!user) return res.status(400).json({ error: "User not found" });
+	const user = await getUserFromAuth(req, res);
+	if (!user) return;
+
 	const post = await posts.findOne({ _id: new ObjectId(req.body.post) });
 
 	if (post) {
@@ -31,7 +31,7 @@ export default async function handler(
 			io.emit("comment", {
 				post: post._id.toString,
 				comment: Converter.toCommentData(data!),
-				author: Converter.toUserData(user),
+				author: Converter.toUserDataPartial(user),
 			});
 			res.status(200).json({});
 		} else {

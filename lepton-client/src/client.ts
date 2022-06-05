@@ -1,15 +1,22 @@
 import { Post, PostData } from "./post";
-import { User, UserData } from "./user";
+import { User, UserDataFull } from "./user";
 import { Comment, CommentData } from "./comment";
 import { Group } from "./group";
 import { ClientUser } from "./clientuser";
 import { EventEmitter } from "events";
 import { fetch } from "cross-fetch";
 import { io } from "socket.io-client";
-import { CREATE_POST_URL, GET_COMMENTS_URL, GET_POSTS_URL, GET_SELF_URL, SIGN_IN_URL, SIGN_UP_URL } from "./constants";
+import { CREATE_POST_URL, GET_COMMENTS_URL, GET_POSTS_URL, GET_SELF_URL, GET_USER_URL, SIGN_IN_URL, SIGN_UP_URL } from "./constants";
 import { Settings } from "./types";
 
 const URL = process.env.NODE_ENV === "development" ? "/api/socket" : "wss://idk lmao";
+
+export interface Options {
+	/**
+	 * 
+	 */
+	partial: boolean;
+}
 
 export function signedIn(isSignedIn = true) {
 	return (target: any, propertyKey: string, descriptor: PropertyDescriptor) => {
@@ -35,19 +42,20 @@ export function signedIn(isSignedIn = true) {
 	};
 }
 
-export class Client extends EventEmitter {
-	commentsCache = new Map<string, Comment>();
-	postsCache = new Map<string, Post>();
-	usersCache = new Map<string, User>();
+export class Client<Opts extends Options = {partial: false}> extends EventEmitter {
+	commentsCache = new Map<string, Comment<Opts>>();
+	postsCache = new Map<string, Post<Opts>>();
+	usersCache = new Map<string, User<Opts>>();
 	groupsCache = new Map<string, Group>();
 
 	token?: string;
-	clientUser?: ClientUser;
+	clientUser?: ClientUser<Opts>;
+	options: Opts;
 
-	async getPosts(props: { before: number }): Promise<Post[]>;
-	async getPosts(): Promise<Post[]>;
+	async getPosts(props: { before: number }): Promise<Post<Opts>[]>;
+	async getPosts(): Promise<Post<Opts>[]>;
 	async getPosts(props?: { before: number }) {
-		const { posts, users }: { posts: PostData[]; users: UserData[] } = await fetch(
+		const { posts, users }: { posts: PostData[]; users: UserDataFull[] } = await fetch(
 			GET_POSTS_URL + (props?.before ? `?before=${props.before}` : "")
 		).then((e) => e.json());
 
@@ -64,8 +72,8 @@ export class Client extends EventEmitter {
 		return createdPosts;
 	}
 
-	async getComments(props: {post: string, before?: number}) {
-		const {comments, users}: {comments: CommentData[], users: UserData[]} = await fetch(
+	async getComments(props: {post: string, before?: number}): Promise<Comment<Opts>[]> {
+		const {comments, users}: {comments: CommentData[], users: UserDataFull[]} = await fetch(
 			GET_COMMENTS_URL + `?post=${props.post}` + (props.before ? `&before=${props.before}` : "")
 		).then((e) => e.json());
 
@@ -173,18 +181,34 @@ export class Client extends EventEmitter {
 		const token = await this.getToken(username, password);
 		this.useToken(token);
 	}
+	
+	async findUser(userid: string): Promise<User<Opts>> {
+		const response = await fetch(GET_USER_URL+userid, {
+			method: "GET",
+			headers: {
+				["Content-Type"]: "application/json",
+			},
+		}).then(e=>e.json());
+		if (response.error) {
+			throw new Error(response.error);
+		}
+		return User.from(this, response);
+	}
 
-	constructor() {
+	constructor(options?: Opts) {
 		super();
+		// @ts-ignore
+		this.options = options || {partial: true};
+
 		const socketio = io();
-		socketio.on("post", ({ post, author }: { post: PostData; author: UserData }) => {
+		socketio.on("post", ({ post, author }: { post: PostData; author: UserDataFull }) => {
 			User.from(this, author);
 
 			// there is no need to call afterinit on post because there are no comments
 			Post.from(this, post);
 			this.emit("postAdded", post.id);
 		});
-		socketio.on("comment", ({comment, author}: { author: UserData, comment: CommentData})=>{
+		socketio.on("comment", ({comment, author}: { author: UserDataFull, comment: CommentData})=>{
 			User.from(this, author);
 			const post = this.postsCache.get(comment.post)
 			if (post) {

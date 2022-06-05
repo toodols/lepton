@@ -1,5 +1,5 @@
 import { EventEmitter } from "events";
-import { Client, signedIn } from "./client";
+import { Client, Options, signedIn } from "./client";
 import { Comment } from "./comment";
 import { CREATE_COMMENT_URL } from "./constants";
 import { Group } from "./group";
@@ -18,8 +18,8 @@ export interface PostData {
 // keeping track of a post's comments is too expensive
 // so there's an optional class that can be used to fetch and listen to new comments
 // when it is no longer needed it can be removed
-export class CommentsLoader extends EventEmitter {
-	client: Client;
+export class CommentsLoader<Opts extends Options> extends EventEmitter {
+	client: Client<Opts>;
 	isLoading = false;
 	loaded: string[] = [];
 	loadUp(){
@@ -34,7 +34,7 @@ export class CommentsLoader extends EventEmitter {
 			this.emit("update");
 		});
 	}
-	constructor(public post: Post, public destroy: ()=>void){
+	constructor(public post: Post<Opts>, public destroy: ()=>void){
 		super();
 		this.client = post.client;
 		this.load();
@@ -42,9 +42,9 @@ export class CommentsLoader extends EventEmitter {
 	}
 }
 
-export class Post extends EventEmitter {
+export class Post<Opts extends Options> extends EventEmitter {
 
-	static from(client: Client, post: PostData){
+	static from<Opts extends Options>(client: Client<Opts>, post: PostData){
 		if (client.postsCache.has(post.id)){
 			return client.postsCache.get(post.id)!;
 		}
@@ -53,14 +53,14 @@ export class Post extends EventEmitter {
 
 	id: string;
 	content: string;
-	lastComment?: Comment;
-	author: User;
+	lastComment?: Comment<Opts>;
+	author: User<Opts>;
 	group?: Group;
 	createdAt: number;
 
-	private _commentsLoader?: CommentsLoader;
+	private _commentsLoader?: CommentsLoader<Opts>;
 
-	get commentsLoader(){
+	get commentsLoader(): CommentsLoader<Opts> {
 		if (!this._commentsLoader){
 			this._commentsLoader = new CommentsLoader(this, ()=>{
 				this._commentsLoader = undefined;
@@ -121,7 +121,7 @@ export class Post extends EventEmitter {
 	afterInit(){
 		this.lastComment = this.client.commentsCache.get(this.id)!;
 	}
-	constructor(public client: Client, from: PostData){
+	constructor(public client: Client<Opts>, from: PostData){
 		super();
 		this.id = from.id;
 		this.author = this.client.usersCache.get(from.author)!;

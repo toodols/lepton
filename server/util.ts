@@ -1,10 +1,18 @@
 import { createHash } from "crypto";
-import type { PostData, UserData, CommentData } from "lepton-client";
+import type { PostData, UserDataPartial, CommentData, UserDataFull } from "lepton-client";
 import { ObjectId, WithId } from "mongodb";
 import { Post, Comment, User } from "./database";
 
+function hex(n: number){
+	let s = "";
+	for (let i = 0; i < n; i++) {
+		s+=Math.floor(Math.random()*16).toString(16);
+	}
+	return s;
+}
+
 export function salt(){
-	return Math.floor(Math.random()*9999999999).toString(16)
+	return hex(16);
 }
 
 export function hash(password: string, salt: string) {
@@ -12,7 +20,7 @@ export function hash(password: string, salt: string) {
 }
 
 export function token(){
-	return Math.floor(Math.random()*9999999999).toString(16)
+	return hex(16);
 }
 
 export namespace Converter {
@@ -26,12 +34,21 @@ export namespace Converter {
 			group: post.group?.toString(),
 		}
 	}
-	export function toUserData(user: WithId<User>): UserData {
+	export function toUserDataPartial(user: WithId<User>): UserDataPartial {
 		return {
-			createdAt: user.createdAt,
+			createdAt: user.createdAt.toNumber(),
 			id: user._id.toString(),
 			username: user.username,
-			avatar: user.avatar,
+			avatar: user.settings.avatar,
+		}
+	}
+	export function toUserDataFull(user: WithId<User>): UserDataFull {
+		return {
+			createdAt: user.createdAt.toNumber(),
+			id: user._id.toString(),
+			username: user.username,
+			avatar: user.settings.avatar,
+			description: user.settings.description,
 		}
 	}
 

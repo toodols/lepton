@@ -7,3 +7,4 @@ export const DELETE_COMMENT_URL = "/api/comments/delete";
 export const SIGN_UP_URL = "/api/signup";
 export const SIGN_IN_URL = "/api/signin";
 export const GET_SELF_URL = "/api/users/@me";
+export const GET_USER_URL = "/api/users/";

@@ -1,16 +1,13 @@
 // react dev tools after adding 10 layers of nested elements with react router: 🗿
 
-import type { NextPage } from "next";
-import { Signin } from "../components/sign-in-modal";
-import { Settings } from "../components/settings-modal";
-import { Sidebar } from "../components/sidebar";
-import { Topbar } from "../components/topbar";
-import { CreatePostModal } from "../components/create-post-modal";
-import { Posts } from "../components/main/posts";
+import { setTitle } from "lib/store";
 import { ReactNode } from "react";
-import { Layout } from "components/layout";
+import { useDispatch } from "react-redux";
+import { Layout } from "../components/layout";
 
 export default function Backrooms() {
+	const dispatch = useDispatch();
+	dispatch(setTitle("fjieafjaifjaewoifjawoijfaewiojfa"))
 	return (
 		<>
 			<h1>you{"'"}ve reached the Backrooms</h1>

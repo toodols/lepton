@@ -1,12 +1,26 @@
+import { Settings } from 'lepton-client';
 import { MongoClient, Collection, Document, ObjectId, Timestamp } from 'mongodb';
+import { Permission } from './api/util';
 import { MongoDB_URI } from "./env";
-
-export interface User extends Document {
+export interface PasswordAuth extends Document {
 	username: string;
 	hashed_password: string;
 	salt: string;
 	token: string;
-	avatar: string;
+	user: ObjectId;
+	createdAt: Timestamp;
+	updatedAt: Timestamp;
+	permission: Permission
+}
+
+type Auth = PasswordAuth;
+
+export interface User extends Document {
+	username: string;
+	settings: Settings, //may make own type instead of referencing Settings
+	inventory: ObjectId;
+	createdAt: Timestamp;
+	updatedAt: Timestamp;
 }
 
 export interface Comment extends Document {
@@ -20,20 +34,26 @@ export interface Comment extends Document {
 export interface Post extends Document {
 	author: ObjectId;
 	content: string;
-	lastComment?: ObjectId;
 	updatedAt: Timestamp;
 	createdAt: Timestamp;
 	group?: ObjectId;
+}
+
+export interface Inventory extends Document {
+	updatedAt: Timestamp;
+	createdAt: Timestamp;
 }
 
 export interface Response {
 	users: Collection<User>;
 	posts: Collection<Post>;
 	comments: Collection<Comment>;
+	auth: Collection<Auth>;
+	inventory: Collection<Inventory>;
 }
 
 export const {
-	users, posts, comments
+	users, posts, comments, auth, inventory
 } = await new Promise<Response>((resolve, reject) => {
 	const client = new MongoClient(MongoDB_URI);
 	client.connect(err => {
@@ -43,6 +63,8 @@ export const {
 			comments: database.collection("comments"),
 			users: database.collection("users"),
 			posts: database.collection("posts"),
+			auth: database.collection("auth"),
+			inventory: database.collection("inventory"),
 		})
 	});
 })

@@ -1,8 +1,7 @@
 import { faComment, faTrash } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Avatar } from "components/util/avatar";
-import { Comment, CommentsLoader, Post } from "lepton-client";
-import { client } from "lib/client";
+import { Avatar } from "../util/avatar";
+import { client, Post, Comment } from "lib/client";
 import { useUpdatable } from "lib/useUpdatable";
 import { useEffect, useMemo, useRef, useState } from "react";
 import Styles from "./main.module.sass";

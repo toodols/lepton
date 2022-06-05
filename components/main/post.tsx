@@ -1,17 +1,16 @@
 import { CommentPreview } from "./comment-preview";
-import { Post as PostObject } from "lepton-client";
+import { Post as PostObject } from "../../lib/client";
 import Styles from "./main.module.sass";
 import { useUpdatable } from "../../lib/useUpdatable";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faComment, faTrash } from "@fortawesome/free-solid-svg-icons";
 import { useSelector } from "react-redux";
 import { RootState } from "../../lib/store";
-import Image from "next/image";
 import { useContext, useState } from "react";
 import {PostElementsContext} from "./posts";
-import getConfig from 'next/config'
 import { Avatar } from "../util/avatar";
 import { useTruncate } from "lib/truncate";
+import Link from "next/link";
 
 export function Post({ post, setCurrent, current }: { current: string | null, setCurrent: (id: string)=>void, post: PostObject }) {
 	useUpdatable(post);
@@ -31,7 +30,7 @@ export function Post({ post, setCurrent, current }: { current: string | null, se
 		}} data-deleting={isBeingDeleted} data-expanded={isExpanded} className={Styles.post}>
 			<div className={Styles.post_topbar}>
 				<Avatar src={post.author.avatar}/>
-				{post.author.username}
+				<Link href={`/users/${post.author.id}`}>{post.author.username}</Link>
 				<div className={Styles.action_bar}>
 					<button onClick={()=>{
 							setCurrent(post.id)

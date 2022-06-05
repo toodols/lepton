@@ -1,6 +1,7 @@
 import { faBars } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useRouter } from "next/router";
+import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { client } from "../../lib/client";
 import {
@@ -8,6 +9,7 @@ import {
 	RootState,
 	setSidebarOpen,
 	setCreatePostModalOpen,
+	setTitle,
 } from "../../lib/store";
 import { AccountSelection } from "./account-selection";
 import Styles from "./topbar.module.sass";
@@ -17,8 +19,8 @@ export function Topbar() {
 	const { username, isSignedIn } = useSelector(
 		(state: RootState) => state.client
 	);
+	const title = useSelector((state: RootState) => state.main.title);
 	const router = useRouter();
-
 	return (
 		<header className={Styles.topbar}>
 			<button
@@ -29,7 +31,7 @@ export function Topbar() {
 				<FontAwesomeIcon icon={faBars} />
 			</button>
 			<h2 className={Styles.title}>
-				{router.pathname === "/" ? "Home" : router.pathname}
+				{title}
 			</h2>
 			<div className={Styles.right}>
 				{isSignedIn ? (

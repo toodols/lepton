@@ -1,5 +1,4 @@
 import { createSlice, CreateSliceOptions, PayloadAction, SliceCaseReducers } from "@reduxjs/toolkit";
-import {Client, ClientUser} from "lepton-client";
 import { client } from "../client";
 
 export const clientSlice = createSlice({
