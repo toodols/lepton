@@ -62,7 +62,7 @@ export function Post({ post, setCurrent, current }: { current: string | null, se
 				setIsExpanded(!isExpanded);
 			}}>{isExpanded?"Show Less":"Show More"}</button>
 			{post.lastComment ? (
-				<CommentPreview comment={post.lastComment} />
+				<CommentPreview select={()=>{setCurrent(post.id)}} comment={post.lastComment} />
 			) : (
 				<></>
 			)}

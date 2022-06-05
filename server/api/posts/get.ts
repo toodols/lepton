@@ -23,23 +23,23 @@ export default async function handler(req: Request, res: Response<Data | Error>)
 	};
 	const result = await posts.find(query).sort({_id:-1}).limit(10).toArray();
 	let unfiltered = await Promise.all(result.map(post=>{
-		return comments.findOne({post: post._id})
+		return comments.findOne({post: post._id}, {sort: {_id: -1}});
 	}))
 	const commentResults = unfiltered.filter(comment=>comment) as Exclude<(typeof unfiltered)[number], null>[];
 
 	const usersRecognized: Record<string, boolean> = {};
 	const arr: Promise<UserDataPartial>[] = [];
 	for (const post of result) {
-		if (!usersRecognized[post.author.id.toString()]) {			
-			usersRecognized[post.author.id.toString()] = true;
+		if (!usersRecognized[post.author.toString()]) {			
+			usersRecognized[post.author.toString()] = true;
 			arr.push(users.findOne(post.author).then(value=>{
 				return Converter.toUserDataPartial(value!);
 			}));
 		}
 	}
 	for (const comment of commentResults) {
-		if (!usersRecognized[comment.author.id.toString()]) {
-			usersRecognized[comment.author.id.toString()] = true;
+		if (!usersRecognized[comment.author.toString()]) {
+			usersRecognized[comment.author.toString()] = true;
 			arr.push(users.findOne(comment.author).then(value=>{
 				return Converter.toUserDataPartial(value!);
 			}));

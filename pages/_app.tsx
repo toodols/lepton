@@ -1,13 +1,10 @@
 import "../styles/globals.sass";
-import "../styles/vars.sass";
 import "../styles/react-modal.sass";
 import type { AppProps } from "next/app";
 import { I18nextProvider } from "react-i18next";
 import i18n from "i18next";
 import { Provider } from "react-redux";
 import { store } from "../lib/store";
-import { Sidebar } from "../components/sidebar";
-import { Topbar } from "../components/topbar";
 
 function MyApp({ Component, pageProps }: AppProps) {
 	//@ts-ignore

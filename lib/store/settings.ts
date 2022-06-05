@@ -11,6 +11,8 @@ export const themes = {
 			--color-topbar-button-hover: #e5e5e5;
 			--color-account-selection-interface: #f5f5f5;
 			--color-post-background: #ffffff;
+			--color-post-preview: #ffffff;
+			--color-post-preview-hover: #e5e5e5;
 			--color-comment-hover: #f5f5f5;
 			--color-comment: #ffffff;
 			--color-background: #ffffff;
@@ -28,6 +30,8 @@ export const themes = {
 			--color-topbar-button-hover: #1a1a1a;
 			--color-account-selection-interface: #1a1a1a;
 			--color-post-background: #1a1a1a;
+			--color-post-preview: #1a1a1a;
+			--color-post-preview-hover: #2a2a2a;
 			--color-comment-hover: #1a1a1a;
 			--color-comment: #1a1a1a;
 			--color-background: #1a1a1a;

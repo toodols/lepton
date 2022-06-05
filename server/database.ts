@@ -58,7 +58,6 @@ export const {
 	const client = new MongoClient(MongoDB_URI);
 	client.connect(err => {
 		const database = client.db("database");
-		
 		resolve({
 			comments: database.collection("comments"),
 			users: database.collection("users"),

@@ -61,6 +61,22 @@
 	word-wrap: break-word
 	white-space: pre-wrap
 	background-color: var(--color-post-background)
+	.preview
+		margin: 5px
+		display: flex
+		align-items: center
+		width: calc(100% - 10px)
+		background: var(--color-post-preview)
+		.author
+			font-size: 17px
+			margin-right: 5px
+			&::after
+				content: ":"
+		@include border
+		transition: background 0.5s
+		
+		&:hover
+			background: var(--color-post-preview-hover)
 	.content
 		max-height: 100px
 		overflow: hidden
