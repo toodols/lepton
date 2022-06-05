@@ -55,7 +55,7 @@ export class Client<Opts extends Options = {partial: false}> extends EventEmitte
 	async getPosts(props: { before: number }): Promise<Post<Opts>[]>;
 	async getPosts(): Promise<Post<Opts>[]>;
 	async getPosts(props?: { before: number }) {
-		const { posts, users }: { posts: PostData[]; users: UserDataFull[] } = await fetch(
+		const { posts, users, comments }: { posts: PostData[]; users: UserDataFull[], comments: CommentData[] } = await fetch(
 			GET_POSTS_URL + (props?.before ? `?before=${props.before}` : "")
 		).then((e) => e.json());
 
@@ -63,11 +63,17 @@ export class Client<Opts extends Options = {partial: false}> extends EventEmitte
 			User.from(this, users[userid]);
 		}
 
-		let createdPosts = [];
-		for (const post of posts) {
-			createdPosts.push(Post.from(this, post));
+		let createdPosts: Post<Opts>[] = [];
+
+		for (const postData of posts) {
+			let post = Post.from(this, postData)
+			createdPosts.push(post);
 		}
-		// after we do comments we do here
+
+		for (const comment of comments) {
+			let c = Comment.from(this, comment);
+			c.post.lastComment = c;
+		}
 
 		return createdPosts;
 	}

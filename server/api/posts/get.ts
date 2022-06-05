@@ -8,7 +8,7 @@ import {assertAuthorization, assertBody, Error} from "../util";
 interface Data {
 	users: Record<string, UserDataPartial>;
 	posts: PostData[];
-	comments: (CommentData | undefined)[];
+	comments: CommentData[];
 };
 
 export default async function handler(req: Request, res: Response<Data | Error>) {
@@ -19,7 +19,7 @@ export default async function handler(req: Request, res: Response<Data | Error>)
 	const result = await posts.find(query).sort({_id:-1}).limit(10).toArray();
 	const commentDatas = await Promise.all(result.map(post=>{
 		return comments.findOne({post: post._id}).then(comment=>comment?Converter.toCommentData(comment):undefined)
-	}))
+	})).then(e=>e.filter(e=>e)) as CommentData[];
 	const usersRecognized: Record<string, boolean> = {};
 	const arr: Promise<UserDataPartial>[] = [];
 	for (const post of result) {

@@ -7,7 +7,6 @@ import { User } from "./user";
 
 export interface PostData {
 	id: string;
-	lastComment?: string;
 	author: string;
 	content: string;
 	group?: string;
@@ -118,9 +117,9 @@ export class Post<Opts extends Options> extends EventEmitter {
 		this.emit("update");
 	}
 
-	afterInit(){
-		this.lastComment = this.client.commentsCache.get(this.id)!;
-	}
+	// afterInit(){
+	// 	this.lastComment = this.client.commentsCache.get(this.id)!;
+	// }
 	constructor(public client: Client<Opts>, from: PostData){
 		super();
 		this.id = from.id;

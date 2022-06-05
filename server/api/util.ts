@@ -18,7 +18,7 @@ export function assertAuthorization(req: Request, res: Response) {
 
 export enum Permission {
 	ALL = 1,
-	CHAT = 2,
+	COMMENT = 2,
 	POST = 4,
 }
 
