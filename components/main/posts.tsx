@@ -66,11 +66,13 @@ export function Posts() {
 										}}
 										dataLength={posts.length}
 										next={async () => {
+											console.log(client.postsCache.size)
 											if (
-												Object.keys(client.postsCache)
-													.length === 0
+											
+												client.postsCache.size	=== 0
 											)
 												return;
+												console.log("trying to load next");
 											dispatch(
 												onPostsLoadedOld(
 													(
@@ -90,12 +92,7 @@ export function Posts() {
 										loader={<div>hmmm</div>}
 									>
 										{posts.map(id=>(
-											<Post
-												key={id}
-												post={client.postsCache.get(id)!}
-												setCurrent={setForceCurrentId}
-												current={forceCurrentId}
-											/>
+											<Post key={id} setCurrent={setAutoCurrentId} post={client.postsCache.get(id)!} current={forceCurrentId} />
 										))}
 									</InfiniteScroll>
 									{currentPost?<Comments key={currentPost.id} post={currentPost}/>:<>

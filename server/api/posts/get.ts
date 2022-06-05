@@ -1,9 +1,10 @@
 import {Request, Response} from "express";
-import type { UserDataPartial, PostData, CommentData } from "lepton-client";
+import type { UserDataPartial, PostData, CommentData, Comment } from "lepton-client";
+import { Timestamp, WithId } from "mongodb";
 import { comments, posts, users } from "../../database";
 import { io } from "../../server-entry";
 import { Converter, hash } from "../../util";
-import {assertAuthorization, assertBody, Error} from "../util";
+import {assertAuthorization, assertBody, assertQuery, Error} from "../util";
 
 interface Data {
 	users: Record<string, UserDataPartial>;
@@ -14,18 +15,32 @@ interface Data {
 export default async function handler(req: Request, res: Response<Data | Error>) {
 	const query: {createdAt?: any} = {}
 	if (req.query.before) {
-		query.createdAt = {$lt: req.query.before};
+		if (isNaN(parseInt(String(req.query.before)))) {
+			res.status(400).json({error: `"before" must be a number`});
+			return;
+		}
+		query.createdAt = {$lt: Timestamp.fromNumber(parseInt(String(req.query.before)))};
 	};
 	const result = await posts.find(query).sort({_id:-1}).limit(10).toArray();
-	const commentDatas = await Promise.all(result.map(post=>{
-		return comments.findOne({post: post._id}).then(comment=>comment?Converter.toCommentData(comment):undefined)
-	})).then(e=>e.filter(e=>e)) as CommentData[];
+	let unfiltered = await Promise.all(result.map(post=>{
+		return comments.findOne({post: post._id})
+	}))
+	const commentResults = unfiltered.filter(comment=>comment) as Exclude<(typeof unfiltered)[number], null>[];
+
 	const usersRecognized: Record<string, boolean> = {};
 	const arr: Promise<UserDataPartial>[] = [];
 	for (const post of result) {
 		if (!usersRecognized[post.author.id.toString()]) {			
 			usersRecognized[post.author.id.toString()] = true;
 			arr.push(users.findOne(post.author).then(value=>{
+				return Converter.toUserDataPartial(value!);
+			}));
+		}
+	}
+	for (const comment of commentResults) {
+		if (!usersRecognized[comment.author.id.toString()]) {
+			usersRecognized[comment.author.id.toString()] = true;
+			arr.push(users.findOne(comment.author).then(value=>{
 				return Converter.toUserDataPartial(value!);
 			}));
 		}
@@ -40,6 +55,6 @@ export default async function handler(req: Request, res: Response<Data | Error>)
 	res.json({
 		users: dataMap,
 		posts: result.map(Converter.toPostData),
-		comments: commentDatas,
+		comments: commentResults.map(Converter.toCommentData),
 	}).status(200);
 }
