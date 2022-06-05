@@ -13,7 +13,10 @@ export function AccountSelectionItem({ token, onClick }: { onClick:()=>void, tok
 	} | null>(null);
 	const dispatch = useDispatch();
 	useEffect(() => {
-		client.getSelfInfo(token).then(setInfo);
+		client.getSelfInfo(token).then(setInfo).catch(error=>{
+			console.log(error);
+			dispatch(removeAccount(token));
+		});
 	}, [token]);
 	return (
 		<div className={Styles.account_selection_item}>
