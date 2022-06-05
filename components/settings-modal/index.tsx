@@ -19,12 +19,12 @@ function Section(props: {
 }
 
 export function Settings() {
-	const {isOpen} = useSelector((state: RootState) => state.settingsModal);
+	const {settingsModalOpen} = useSelector((state: RootState) => state.main);
 	const dispatch = useDispatch();
 	return <Modal ariaHideApp={false} className={Styles.settings_modal} closeTimeoutMS={300} onRequestClose={()=>{
 		dispatch(discardSettings());
 		dispatch(setSettingsModalOpen(false));
-	}} isOpen={isOpen}>
+	}} isOpen={settingsModalOpen}>
 		<h1>Settings</h1>
 		<button onClick={()=>{
 			dispatch(editSettings({

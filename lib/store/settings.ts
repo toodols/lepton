@@ -41,9 +41,8 @@ export const themes = {
 type settings = {theme: keyof typeof themes};
 
 //@ts-ignore
-const initialState: { isOpen: boolean; isEditing: boolean, settings: settings, originalSettings: settings} = {
+const initialState: { isEditing: boolean, settings: settings, originalSettings: settings} = {
 	isEditing: false,
-	isOpen: false,
 	settings: {
 		theme: "light",
 	}
