@@ -8,7 +8,6 @@ export function Sidebar() {
 		(state: RootState) => state.main.sidebarOpen
 	);
 	const dispatch = useDispatch();
-	// do not like adding data-open to both tags, but I want to keep the two separate
 	return (
 		<>
 			<div data-open={sidebarOpen} className={Styles.sidebar_container}>

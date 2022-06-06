@@ -5,7 +5,8 @@ import { Converter } from "../../util";
 
 export default async function handler(req: Request, res: Response) {
 	const {userid} = req.params;
-	console.log(userid);
+	if (!userid) return res.status(400).json({error: "Missing userid"});
+	
 	const user = await users.findOne({_id: new ObjectId(userid)});
 	if (user) {
 		res.json(Converter.toUserDataFull(user));

@@ -42,8 +42,12 @@ export function Post({ post, setCurrent, current }: { current: string | null, se
 						<button
 						className={Styles.deleteButton}
 						onClick={() => {
-							post.delete();
-							setIsBeingDeleted(true);
+							if (!isBeingDeleted) {
+								setIsBeingDeleted(true);
+								post.delete().finally(()=>{
+									setIsBeingDeleted(false)
+								});
+							}
 						}}
 						>
 							<FontAwesomeIcon icon={faTrash} />

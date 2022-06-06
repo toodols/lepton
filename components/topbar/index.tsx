@@ -12,6 +12,7 @@ import {
 	setTitle,
 } from "../../lib/store";
 import { AccountSelection } from "./account-selection";
+import { GroupSelection } from "./group-selection";
 import Styles from "./topbar.module.sass";
 
 export function Topbar() {
@@ -27,12 +28,14 @@ export function Topbar() {
 				onClick={() => {
 					dispatch(setSidebarOpen(true));
 				}}
+				className={Styles.menu_button}
 			>
 				<FontAwesomeIcon icon={faBars} />
 			</button>
 			<h2 className={Styles.title}>
 				{title}
 			</h2>
+			<GroupSelection/>
 			<div className={Styles.right}>
 				{isSignedIn ? (
 					<>

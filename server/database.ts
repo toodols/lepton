@@ -44,12 +44,21 @@ export interface Inventory extends Document {
 	createdAt: Timestamp;
 }
 
+export interface Group extends Document {
+	name: string;
+	isPublic: boolean;
+	updatedAt: Timestamp;
+	createdAt: Timestamp;
+	members: ObjectId[];
+}
+
 export interface Response {
 	users: Collection<User>;
 	posts: Collection<Post>;
 	comments: Collection<Comment>;
 	auth: Collection<Auth>;
 	inventory: Collection<Inventory>;
+	groups: Collection<Group>;
 }
 
 export const {
@@ -59,6 +68,7 @@ export const {
 	client.connect(err => {
 		const database = client.db("database");
 		resolve({
+			groups: database.collection("groups"),
 			comments: database.collection("comments"),
 			users: database.collection("users"),
 			posts: database.collection("posts"),

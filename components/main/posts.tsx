@@ -7,6 +7,7 @@ import { createContext, useEffect, useRef, useState } from "react";
 import { onPostsLoadedOld, resetPosts } from "../../lib/store/dataslice";
 import { Comments } from "./comments";
 import Styles from "./main.module.sass";
+import { GhostPost } from "./ghost-post";
 export const PostElementsContext = createContext<{
 	posts: Record<string, HTMLDivElement>;
 }>({ posts: {} });
@@ -44,6 +45,7 @@ export function Posts() {
 							return (
 								<>
 									<InfiniteScroll
+										className={Styles.posts_container}
 										onScroll={(e) => {
 											const target =
 												document.documentElement;
@@ -89,7 +91,7 @@ export function Posts() {
 											);
 										}}
 										hasMore={true}
-										loader={<div>hmmm</div>}
+										loader={<GhostPost/>}
 									>
 										{posts.map(id=>(
 											<Post key={id} setCurrent={setAutoCurrentId} post={client.postsCache.get(id)!} current={forceCurrentId} />

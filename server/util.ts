@@ -1,5 +1,5 @@
 import { createHash } from "crypto";
-import type { PostData, UserDataPartial, CommentData, UserDataFull } from "lepton-client";
+import type { PostData, UserDataPartial, CommentData, UserDataFull, ClientUserData } from "lepton-client";
 import { ObjectId, WithId } from "mongodb";
 import { Post, Comment, User } from "./database";
 
@@ -44,11 +44,15 @@ export namespace Converter {
 	}
 	export function toUserDataFull(user: WithId<User>): UserDataFull {
 		return {
-			createdAt: user.createdAt.toNumber(),
-			id: user._id.toString(),
-			username: user.username,
-			avatar: user.settings.avatar,
+			...toUserDataPartial(user),
 			description: user.settings.description,
+		}
+	}
+	export function toClientUserData(user: WithId<User>): ClientUserData {
+		return {
+			...toUserDataFull(user),
+			// email?
+			groups: user.groups,
 		}
 	}
 

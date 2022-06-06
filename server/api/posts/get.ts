@@ -1,10 +1,10 @@
 import {Request, Response} from "express";
-import type { UserDataPartial, PostData, CommentData, Comment } from "lepton-client";
-import { Timestamp, WithId } from "mongodb";
-import { comments, posts, users } from "../../database";
+import type { UserDataPartial, PostData, CommentData } from "lepton-client";
+import { Filter, Timestamp, WithId } from "mongodb";
+import { comments, Comment, Post, posts, users } from "../../database";
 import { io } from "../../server-entry";
 import { Converter, hash } from "../../util";
-import {assertAuthorization, assertBody, assertQuery, Error} from "../util";
+import {Checkables, createGuard, Error} from "../util";
 
 interface Data {
 	users: Record<string, UserDataPartial>;
@@ -12,24 +12,27 @@ interface Data {
 	comments: CommentData[];
 };
 
+const getPostsGuard = createGuard({
+	before: Checkables.optional(Checkables.integer),
+	group: Checkables.optional(Checkables.string)
+})
+
 export default async function handler(req: Request, res: Response<Data | Error>) {
-	const query: {createdAt?: any} = {}
-	if (req.query.before) {
-		if (isNaN(parseInt(String(req.query.before)))) {
-			res.status(400).json({error: `"before" must be a number`});
-			return;
-		}
-		query.createdAt = {$lt: Timestamp.fromNumber(parseInt(String(req.query.before)))};
-	};
-	const result = await posts.find(query).sort({_id:-1}).limit(10).toArray();
-	let unfiltered = await Promise.all(result.map(post=>{
-		return comments.findOne({post: post._id}, {sort: {_id: -1}});
-	}))
-	const commentResults = unfiltered.filter(comment=>comment) as Exclude<(typeof unfiltered)[number], null>[];
+	const result = getPostsGuard(req.query as any);
+	if ("error" in result) return res.status(400).json({error: result.error});
+
+	const {before} = result.value;
+	const query: Filter<Post> = {};
+	if (before) query.createdAt = {$lt: Timestamp.fromNumber(before)};
+
+	const postsResult = await posts.find(query).sort({_id:-1}).limit(10).toArray();
+	let unfiltered = await Promise.all(postsResult.map(post=>comments.findOne({post: post._id}, {sort: {_id: -1}})));
+
+	const commentResults = unfiltered.filter(comment=>comment) as WithId<Comment>[]
 
 	const usersRecognized: Record<string, boolean> = {};
 	const arr: Promise<UserDataPartial>[] = [];
-	for (const post of result) {
+	for (const post of postsResult) {
 		if (!usersRecognized[post.author.toString()]) {			
 			usersRecognized[post.author.toString()] = true;
 			arr.push(users.findOne(post.author).then(value=>{
@@ -54,7 +57,7 @@ export default async function handler(req: Request, res: Response<Data | Error>)
 
 	res.json({
 		users: dataMap,
-		posts: result.map(Converter.toPostData),
+		posts: postsResult.map(Converter.toPostData),
 		comments: commentResults.map(Converter.toCommentData),
 	}).status(200);
 }

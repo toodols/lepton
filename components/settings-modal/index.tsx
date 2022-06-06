@@ -1,5 +1,6 @@
-import { discardSettings, editSettings, saveSettings } from "../../lib/store/settings";
+import { discardSettings, editSettings, saveSettings, Theme } from "../../lib/store/settings";
 import { setSettingsModalOpen } from "../../lib/store";
+import Select from "react-select";
 
 import Modal from "react-modal";
 import { useDispatch, useSelector } from "react-redux";
@@ -11,33 +12,40 @@ function Section(props: {
 	children: React.ReactNode;
 }) {
 	return (
-		<div className={Styles.section}>
+		<section className={Styles.section}>
 			<h2>{props.title}</h2>
 			{props.children}
-		</div>
+		</section>
 	);
 }
 
 export function Settings() {
 	const {settingsModalOpen} = useSelector((state: RootState) => state.main);
+	const isEditing = useSelector((state: RootState) => state.settings.isEditing);
+
 	const dispatch = useDispatch();
 	return <Modal ariaHideApp={false} className={Styles.settings_modal} closeTimeoutMS={300} onRequestClose={()=>{
 		dispatch(discardSettings());
 		dispatch(setSettingsModalOpen(false));
 	}} isOpen={settingsModalOpen}>
 		<h1>Settings</h1>
-		<button onClick={()=>{
-			dispatch(editSettings({
-				theme: "dark"
-			}))
-		}}>Dark Mode</button>
-		<button onClick={()=>{
-			dispatch(editSettings({
-				theme: "light"
-			}))
-		}}>Light Mode</button>
-		<button onClick={()=>{
+		<button data-shown={isEditing} className={Styles.save} onClick={()=>{
 			dispatch(saveSettings())
 		}}>Save</button>
+		<Section title="Theme">
+			<Select onChange={(value)=>{
+				dispatch(editSettings({theme: value!.value as Theme}));
+			}} options={[{
+				label: "Light",
+				value: "light"
+			}, {
+				label: "Dark",
+				value: "dark"
+			}, {
+				label: "Default",
+				value: "default"
+			}]}/>
+		</Section>
+
 	</Modal>
 }

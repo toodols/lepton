@@ -1,21 +1,26 @@
 import {Request, Response} from "express";
 import { ObjectId } from "mongodb";
-import { auth, comments, posts, users } from "../../database";
+import { comments } from "../../database";
 import { io } from "../../server-entry";
-import { Converter, hash } from "../../util";
-import {assertAuthorization, assertBody, Error, getUserFromAuth} from "../util";
+import { Checkables, createGuard, Error, getUserFromAuth} from "../util";
 
 interface Data {
 	
 };
 
+const deleteCommentGuard = createGuard({
+	id: Checkables.objectId
+});
+
+
 export default async function handler(req: Request, res: Response<Data | Error>) {
-	if (assertBody({id: "string"}, req, res)) return;
+	const result = deleteCommentGuard(req.body);
+	if ("error" in result) return res.status(400).json({error: result.error});
 
 	const user = await getUserFromAuth(req, res);
 	if (!user) return;
 	
-	const comment = await comments.findOne({_id: new ObjectId(req.body.id)})
+	const comment = await comments.findOne({_id: new ObjectId(result.value.id)})
 	if (!comment) return void res.status(400).json({error: "Comment not found"});
 	if (!comment.author.equals(user._id)) return void res.status(403).json({error: "You are not the author of this comment"});
 

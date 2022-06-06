@@ -7,5 +7,5 @@ import { Error } from "../util";
 export default async function handler(req: Request, res: Response<ClientUserData | Error>) {	
 	const user = await getUserFromAuth(req, res);
 	if (!user) return;
-	res.json(Converter.toUserDataFull(user));
+	res.json(Converter.toClientUserData(user));
 }

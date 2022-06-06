@@ -6,11 +6,23 @@ $topbar-height: 50px
 	left: 0
 	right: 0
 	z-index: 1
-	background-color: var(--color-topbar)
+	background-color: var(--color-topbar-background)
 	display: flex
 	padding: 5px 5px
 	align-items: center
+	> button, .right > button
+		margin: 5px 5px
+		border: none
+	button:hover
+		background-color: var(--color-topbar-button-hover)
 
+	button
+		background-color: var(--color-topbar-button)
+		transition: background-color 0.2s ease-in-out	
+	.menu_button
+		width: 30px
+		height: 30px
+		flex-shrink: 0
 	.title 
 		margin: 5px
 	.right
@@ -22,13 +34,3 @@ $topbar-height: 50px
 		label
 			font-size: 17px
 			margin: 10px 10px
-
-		> button
-			margin: 5px 5px
-			border: none
-		button
-			background-color: var(--color-topbar-button)
-			transition: background-color 0.2s ease-in-out			
-		
-		button:hover
-			background-color: var(--color-topbar-button-hover)

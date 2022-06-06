@@ -4,26 +4,34 @@ import { ObjectId } from "mongodb";
 import { comments, posts, users } from "../../database";
 import { io } from "../../server-entry";
 import { Converter, hash } from "../../util";
-import {assertAuthorization, assertBody, assertQuery, Error} from "../util";
+import {Checkables, createGuard, Error} from "../util";
 
 interface Data {
 	users: Record<string, UserDataPartial>;
 	comments: CommentData[]
 };
 
+const getCommentsGuard = createGuard({
+	post: Checkables.objectId,
+	before: Checkables.optional(Checkables.integer),
+});
+
 export default async function handler(req: Request, res: Response<Data | Error>) {
-	if (assertQuery({post: "string"}, req, res)) return;
+	const result = getCommentsGuard(req.body);
+	if ("error" in result) return res.status(400).json({error: result.error});
+	const value = result.value;
+
 	const query: {createdAt?: any, post: ObjectId} = {
-		post: new ObjectId(req.query.post as string),
+		post: value.post,
 	}
-	if (req.query.before) {
-		query.createdAt = {$lt: req.query.before};
+	if (value.before) {
+		query.createdAt = {$lt: value.before};
 	};
-	const result = await comments.find(query).limit(10).toArray();
+	const findResult = await comments.find(query).limit(10).toArray();
 
 	const usersRecognized: Record<string, boolean> = {};
 	const arr: Promise<UserDataPartial>[] = [];
-	for (const comment of result) {
+	for (const comment of findResult) {
 		if (!usersRecognized[comment.author.id.toString()]) {			
 			usersRecognized[comment.author.id.toString()] = true;
 			arr.push(users.findOne(comment.author).then(value=>{
@@ -39,6 +47,6 @@ export default async function handler(req: Request, res: Response<Data | Error>)
 
 	res.json({
 		users: dataMap,
-		comments: result.map(Converter.toCommentData),
+		comments: findResult.map(Converter.toCommentData),
 	}).status(200);
 }

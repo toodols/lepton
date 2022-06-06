@@ -50,7 +50,7 @@ const mainSlice = createSlice({
 export const store = configureStore(
 	{
 		reducer: combineReducers({
-			settingsModal: settingsSlice.reducer,
+			settings: settingsSlice.reducer,
 			client: clientSlice.reducer,
 			main: mainSlice.reducer,
 			data: dataSlice.reducer,

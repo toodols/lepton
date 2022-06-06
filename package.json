@@ -5,7 +5,7 @@
   "type": "module",
   "repository": "https://github.com/toodols/lepton.git",
   "scripts": {
-    "dev": "tsc --project ./tsconfig.server.json && node --inspect --experimental-specifier-resolution=node ./out/server-entry.js",
+    "dev": "tsc --project ./lepton-client/tsconfig.json && tsc --project ./tsconfig.server.json && node --inspect --experimental-specifier-resolution=node ./out/server-entry.js",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
@@ -28,6 +28,7 @@
     "react-infinite-scroll-component": "^6.1.0",
     "react-modal": "^3.15.1",
     "react-redux": "^8.0.2",
+    "react-select": "^5.3.2",
     "sass": "^1.52.1",
     "socket.io": "^4.5.1"
   },
