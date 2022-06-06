@@ -1,8 +1,8 @@
 import { Post, PostData } from "./post";
 import { User, UserDataFull } from "./user";
 import { Comment, CommentData } from "./comment";
-import { Group } from "./group";
-import { ClientUser } from "./clientuser";
+import { Group, GroupDataFull } from "./group";
+import { ClientUser, ClientUserData } from "./clientuser";
 import { EventEmitter } from "events";
 import { fetch } from "cross-fetch";
 import { io } from "socket.io-client";
@@ -46,7 +46,7 @@ export class Client<Opts extends Options = {partial: false}> extends EventEmitte
 	commentsCache = new Map<string, Comment<Opts>>();
 	postsCache = new Map<string, Post<Opts>>();
 	usersCache = new Map<string, User<Opts>>();
-	groupsCache = new Map<string, Group>();
+	groupsCache = new Map<string, Group<Opts>>();
 
 	token?: string;
 	clientUser?: ClientUser<Opts>;
@@ -108,7 +108,7 @@ export class Client<Opts extends Options = {partial: false}> extends EventEmitte
 		});
 	}
 
-	async getSelfInfo(token: string){
+	async getSelfInfo(token: string): Promise<{user: ClientUserData, groups: Record<string, GroupDataFull>}> {
 		const result = await fetch(GET_SELF_URL, {
 			headers: {
 				Authorization: token,
@@ -122,7 +122,10 @@ export class Client<Opts extends Options = {partial: false}> extends EventEmitte
 
 	async useToken(token: string) {
 		const info = await this.getSelfInfo(token);
-		this.clientUser = new ClientUser(this, info);
+		for (const groupid in info.groups) {
+			Group.from(this, info.groups[groupid]);
+		}
+		this.clientUser = new ClientUser(this, info.user);
 		this.token = token;
 		this.emit("clientUserChanged");
 	}

@@ -7,6 +7,7 @@ interface InputProps {
 	type?: "password" | "text";
 	onChange?: (newValue: string) => void;
 	name: string;
+	onSubmit?: (value: string) => void;
 }
 
 export const Input = forwardRef<HTMLInputElement, InputProps>(
@@ -17,10 +18,11 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
 			defaultValue = "",
 			disabled = false,
 			type = "text",
+			onSubmit = ()=>{},
 		},
 		ref
 	) => {
-		const [value, setValue] = useState(defaultValue);
+			const [value, setValue] = useState(defaultValue);
 		return (
 			<input
 				ref={ref}
@@ -29,6 +31,11 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
 				type={type}
 				className={Styles.input}
 				value={value}
+				onKeyDown={(event) => {
+					if (event.key === "Enter") {
+						onSubmit(value);
+					}
+				}}
 				onChange={(event) => {
 					setValue(event.target.value);
 					onChange(event.target.value);

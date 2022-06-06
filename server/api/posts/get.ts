@@ -1,9 +1,8 @@
 import {Request, Response} from "express";
 import type { UserDataPartial, PostData, CommentData } from "lepton-client";
 import { Filter, Timestamp, WithId } from "mongodb";
-import { comments, Comment, Post, posts, users } from "../../database";
-import { io } from "../../server-entry";
-import { Converter, hash } from "../../util";
+import { comments, DatabaseTypes, posts, users } from "../../database";
+import { Converter } from "../../util";
 import {Checkables, createGuard, Error} from "../util";
 
 interface Data {
@@ -22,20 +21,20 @@ export default async function handler(req: Request, res: Response<Data | Error>)
 	if ("error" in result) return res.status(400).json({error: result.error});
 
 	const {before} = result.value;
-	const query: Filter<Post> = {};
+	const query: Filter<DatabaseTypes.Post> = {};
 	if (before) query.createdAt = {$lt: Timestamp.fromNumber(before)};
-
+	console.log(query);
 	const postsResult = await posts.find(query).sort({_id:-1}).limit(10).toArray();
 	let unfiltered = await Promise.all(postsResult.map(post=>comments.findOne({post: post._id}, {sort: {_id: -1}})));
 
-	const commentResults = unfiltered.filter(comment=>comment) as WithId<Comment>[]
+	const commentResults = unfiltered.filter(comment=>comment) as WithId<DatabaseTypes.Comment>[]
 
 	const usersRecognized: Record<string, boolean> = {};
 	const arr: Promise<UserDataPartial>[] = [];
 	for (const post of postsResult) {
 		if (!usersRecognized[post.author.toString()]) {			
 			usersRecognized[post.author.toString()] = true;
-			arr.push(users.findOne(post.author).then(value=>{
+			arr.push(users.findOne({_id: post.author}).then(value=>{
 				return Converter.toUserDataPartial(value!);
 			}));
 		}
@@ -43,7 +42,7 @@ export default async function handler(req: Request, res: Response<Data | Error>)
 	for (const comment of commentResults) {
 		if (!usersRecognized[comment.author.toString()]) {
 			usersRecognized[comment.author.toString()] = true;
-			arr.push(users.findOne(comment.author).then(value=>{
+			arr.push(users.findOne({_id: comment.author}).then(value=>{
 				return Converter.toUserDataPartial(value!);
 			}));
 		}

@@ -1,3 +1,18 @@
 @mixin border
 	border: .5px solid var(--color-border)
 	border-radius: 5px
+
+$breakpoint-desktop: 1200px
+$breakpoint-tablet: 992px
+
+@mixin desktop
+	@media (min-width: $breakpoint-desktop)
+		@content
+
+@mixin tablet
+	@media (min-width: $breakpoint-tablet)
+		@content
+
+@mixin mobile
+	@media (max-width: $breakpoint-tablet)
+		@content

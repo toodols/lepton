@@ -15,55 +15,61 @@ export interface PasswordAuth extends Document {
 
 type Auth = PasswordAuth;
 
-export interface User extends Document {
-	username: string;
-	settings: Settings, //may make own type instead of referencing Settings
-	inventory: ObjectId;
-	createdAt: Timestamp;
-	updatedAt: Timestamp;
-}
 
-export interface Comment extends Document {
-	content: string;
-	author: ObjectId;
-	post: ObjectId;
-	updatedAt: Timestamp;
-	createdAt: Timestamp;
-}
+export namespace DatabaseTypes {
+	interface DatedDocument {
+		createdAt: Timestamp;
+		updatedAt: Timestamp;
+	}
+	export interface User extends DatedDocument {
+		groups: ObjectId[];
+		username: string;
+		settings: Settings, //may make own type instead of referencing Settings
+		inventory: ObjectId;
+	}
 
-export interface Post extends Document {
-	author: ObjectId;
-	content: string;
-	updatedAt: Timestamp;
-	createdAt: Timestamp;
-	group?: ObjectId;
-}
+	export interface Comment extends DatedDocument {
+		content: string;
+		author: ObjectId;
+		post: ObjectId;
+	}
 
-export interface Inventory extends Document {
-	updatedAt: Timestamp;
-	createdAt: Timestamp;
-}
+	export interface Post extends DatedDocument {
+		author: ObjectId;
+		content: string;
+		group?: ObjectId;
+		votes: 0;
+	}
 
-export interface Group extends Document {
-	name: string;
-	isPublic: boolean;
-	updatedAt: Timestamp;
-	createdAt: Timestamp;
-	members: ObjectId[];
-}
+	export interface Inventory extends DatedDocument {
+	}
 
-export interface Response {
-	users: Collection<User>;
-	posts: Collection<Post>;
-	comments: Collection<Comment>;
-	auth: Collection<Auth>;
-	inventory: Collection<Inventory>;
-	groups: Collection<Group>;
+	export interface Group extends DatedDocument {
+		name: string;
+		isPublic: boolean;
+		members: ObjectId[];
+		icon: string;
+	}
+
+	export interface GroupUser extends DatedDocument {
+		group: ObjectId;
+		user: ObjectId;
+	}
+
+	export interface Response {
+		users: Collection<User>;
+		posts: Collection<Post>;
+		comments: Collection<Comment>;
+		auth: Collection<Auth>;
+		inventory: Collection<Inventory>;
+		groups: Collection<Group>;
+		groupUsers: Collection<GroupUser>;
+	}
 }
 
 export const {
-	users, posts, comments, auth, inventory
-} = await new Promise<Response>((resolve, reject) => {
+	users, posts, comments, auth, inventory, groups, groupUsers
+} = await new Promise<DatabaseTypes.Response>((resolve, reject) => {
 	const client = new MongoClient(MongoDB_URI);
 	client.connect(err => {
 		const database = client.db("database");
@@ -74,6 +80,7 @@ export const {
 			posts: database.collection("posts"),
 			auth: database.collection("auth"),
 			inventory: database.collection("inventory"),
+			groupUsers: database.collection("groupUsers")
 		})
 	});
 })

@@ -3,13 +3,17 @@ import { client } from "lib/client";
 
 export type Theme = "light" | "dark" | "default"
 
-type Settings = {theme: Theme};
+type Settings = {
+	theme: Theme,
+	description: string,
+};
 
 //@ts-ignore
 const initialState: { isEditing: boolean, settings: Settings, originalSettings: Settings} = {
 	isEditing: false,
 	settings: {
 		theme: "default",
+		description: "",
 	}
 };
 
@@ -30,14 +34,14 @@ export const settingsSlice = createSlice({
 			state.originalSettings = {...state.settings};
 			state.isEditing = false;
 			if (typeof localStorage !== "undefined") {
-				localStorage.setItem("settings", JSON.stringify(state.settings));
+				// stuff like bio cant be stored in localStorage
+				localStorage.setItem("settings", JSON.stringify({theme: state.settings}));
 			}
 			if (client.clientUser) {
 				client.saveSettings({...state.settings});
 			}
 		},
 		discardSettings: (state) => {
-			console.log(state.originalSettings);
 			state.settings = {...state.originalSettings};
 			state.isEditing = false;
 		},

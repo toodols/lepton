@@ -2,7 +2,7 @@ import {Request, Response} from "express";
 import { Timestamp } from "mongodb";
 import { auth, inventory, users } from "../database";
 import { hash, salt, token } from "../util";
-import {assertBody, Error, Permission} from "./util";
+import { Checkables, createGuard, Error, Permission} from "./util";
 
 interface Data {
 	token: string;
@@ -35,10 +35,17 @@ function verifyPassword(password: string): void | string {
 
 }
 
+const signUpGuard = createGuard({
+	username: Checkables.string,
+	password: Checkables.string,
+});
+
 export default async function handler(req: Request, res: Response<Error | Data>) {
-	if (assertBody({username: "string", password: "string"}, req, res)) return;
-	
-	const { username, password } = req.body;
+	const result = signUpGuard(req.body);
+	if ("error" in result) return res.status(400).json({error: result.error});
+
+
+	const { username, password } = result.value;
 	const msg = verifyPassword(password); if (msg) {return res.status(400).json({error: msg});}
 
 	const authDoc = await auth.findOne({ username })
@@ -60,6 +67,7 @@ export default async function handler(req: Request, res: Response<Error | Data>)
 			description: "",
 			theme: "light"
 		},
+		groups: [],
 		inventory: inventoryDoc.insertedId,
 		createdAt: Timestamp.fromNumber(Date.now()),
 		updatedAt: Timestamp.fromNumber(Date.now())
@@ -75,7 +83,7 @@ export default async function handler(req: Request, res: Response<Error | Data>)
 		salt: password_salt,
 		token: generatedToken,
 		user: user.insertedId,
-		permission: Permission.ALL
+		permission: Permission.ALL,
 	})
 
 	res.status(200).json({token: generatedToken});

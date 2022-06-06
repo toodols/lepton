@@ -1,9 +1,51 @@
+@import "../../styles/mixins"
+
+@include desktop
+	.settings_modal
+		width: 800px
+		height: 400px
+		aside
+			display: block
+
+@include mobile
+	.settings_modal
+		width: 300px
+		height: 600px
+
 .settings_modal
-	width: 600px
-	height: 450px
+	display: flex
+	flex-direction: column
+	.container
+		display: flex
+		height: 100%
+		overflow: scroll
+		aside
+			width: 200px
+			.nav_button
+				width: 100%
+				margin-bottom: 5px
+				display: block
+		main
+			width: 100%
+			overflow: scroll
+	header
+		height: 50px
+		font-size: 25px
+		padding: 10px
+		background: var(--color-modal-header)
+
+.option_description
+	float: right
+	font-size: 12px
 
 .section
 	display: block
+	h2
+		top: 0
+		padding: 5px
+		position: sticky
+		z-index: 1
+		background: var(--color-modal-header)
 .save
 	position: absolute
 	right: 0px

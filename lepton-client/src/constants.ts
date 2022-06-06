@@ -8,3 +8,6 @@ export const SIGN_UP_URL = "/api/signup";
 export const SIGN_IN_URL = "/api/signin";
 export const GET_SELF_URL = "/api/users/@me";
 export const GET_USER_URL = "/api/users/";
+export const CREATE_GROUP_URL = "/api/groups/create";
+export const DELETE_GROUP_URL= "/api/groups/delete";
+export const EDIT_GROUP_URL = "/api/groups/edit";

@@ -17,7 +17,7 @@ const getCommentsGuard = createGuard({
 });
 
 export default async function handler(req: Request, res: Response<Data | Error>) {
-	const result = getCommentsGuard(req.body);
+	const result = getCommentsGuard(req.query as any);
 	if ("error" in result) return res.status(400).json({error: result.error});
 	const value = result.value;
 
@@ -34,7 +34,7 @@ export default async function handler(req: Request, res: Response<Data | Error>)
 	for (const comment of findResult) {
 		if (!usersRecognized[comment.author.id.toString()]) {			
 			usersRecognized[comment.author.id.toString()] = true;
-			arr.push(users.findOne(comment.author).then(value=>{
+			arr.push(users.findOne({_id: comment.author}).then(value=>{
 				return Converter.toUserDataPartial(value!);
 			}));
 		}

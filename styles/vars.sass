@@ -1,49 +1,55 @@
 @mixin dark
 	--color-sidebar: #1a1a1a
-	--color-topbar-background: #2a2a2a
+	--color-topbar: #2a2a2a
 	--color-topbar-button: #2a2a2a
 	--color-topbar-button-hover: #1a1a1a
 	--color-account-selection-interface: #2a2a2a
-	--color-post-background: #1a1a1a
+	--color-post: #1a1a1a
 	--color-post-preview: #1a1a1a
 	--color-post-preview-hover: #2a2a2a
 	--color-comment-hover: #1a1a1a
 	--color-comment: #1a1a1a
 	--color-background: #1a1a1a
 	--color-text: #ffffff
-	--color-button-background: #444
-	--color-input-background: #444
-	--color-modal-background: #1a1a1a
+	--color-button: #444
+	--color-input: #444
+	--color-select: #444
+	--color-select-hover: #333
+	--color-modal: #1a1a1a
+	--color-modal-header: #2a2a2a
 	--color-border: #666
 	--color-sidebar-button: #2a2a2a
 	--color-accent: green
 
 @mixin light
 	--color-sidebar: #ffffff
-	--color-topbar-background: #f5f5f5
+	--color-topbar: #f5f5f5
 	--color-topbar-button: #f5f5f5
 	--color-sidebar-button: #f5f5f5
 	--color-topbar-button-hover: #e5e5e5
 	--color-account-selection-interface: #f5f5f5
-	--color-post-background: #ffffff
+	--color-post: #ffffff
 	--color-post-preview: #ffffff
 	--color-post-preview-hover: #e5e5e5
 	--color-comment-hover: #f5f5f5
 	--color-comment: #ffffff
 	--color-background: #ffffff
 	--color-text: #000000
-	--color-button-background: #eee
-	--color-input-background: #eee
-	--color-modal-background: #ffffff
+	--color-button: #eee
+	--color-input: #eee
+	--color-select: #eee
+	--color-select-hover: #ddd
+	--color-modal: #ffffff
+	--color-modal-header: #f5f5f5
 	--color-border: #ccc
 	--color-accent: green
 
 @media (prefers-color-scheme: dark)
-	body
+	body[data-theme=default]
 		@include dark
 
 @media (prefers-color-scheme: light)
-	body
+	body[data-theme=default]
 		@include light
 
 body[data-theme=dark]

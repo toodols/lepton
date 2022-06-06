@@ -1,3 +1,5 @@
+@import "./mixins"
+
 html, body
 	padding: 0
 	margin: 0
@@ -21,16 +23,41 @@ button
 	cursor: pointer
 	border-radius: 5px
 	color: var(--color-text)
-	background-color: var(--color-button-background)
+	background-color: var(--color-button)
 
 input
-	background-color: var(--color-input-background)
+	background-color: var(--color-input)
 	color: var(--color-text)
 	outline: none
 
+div
+	.react-select__control
+		background: var(--color-select)
+		box-shadow: unset
+		cursor: pointer
+		transition: background-color 0.5s
+		&:hover, &
+			@include border
+	.react-select__single-value
+		color: var(--color-text)
+	.react-select__option
+		transition: background-color 0.5s
+		background: var(--color-select)
+		cursor: pointer
+	.react-select__menu
+		z-index: 2
+	.react-select__menu-notice--no-options
+		cursor: default
+	.react-select__option--is-selected
+		color: var(--color-accent)
+	.react-select__option:hover
+		background: var(--color-select-hover)
+	.react-select__menu
+		background-color: var(--color-select)
 
 button[disabled]
 	cursor: not-allowed
 
 *
 	box-sizing: border-box
+	transition: background-color 0.5s

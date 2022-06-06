@@ -8,8 +8,8 @@ import { Checkables, createGuard, Error, getUserFromAuth } from "../util";
 interface Data {}
 
 const createPostGuard = createGuard({
-	content: Checkables.string,
-	group: Checkables.optional(Checkables.objectId)
+	post: Checkables.objectId,
+	type: Checkables.either<"down" | "up">(["down", "up"])
 });
 
 export default async function handler(
@@ -18,28 +18,13 @@ export default async function handler(
 ) {
 	const result = createPostGuard(req.body);
 	if ("error" in result) return res.status(400).json({ error: result.error });
-	
 
 	const user = await getUserFromAuth(req, res);
 	if (!user) return;
-	
-	const post = await posts.insertOne({
-		content: result.value.content,
-		author: user._id,
-		group: result.value.group ?? undefined,
-		votes: 0,
-		createdAt: Timestamp.fromNumber(Date.now()),
-		updatedAt: Timestamp.fromNumber(Date.now()),
-	});
 
-	if (post.acknowledged) {
-		const data = await posts.findOne({ _id: post.insertedId });
-		io.emit("post", {
-			post: Converter.toPostData(data!),
-			author: Converter.toUserDataPartial(user),
-		});
-		res.status(200).json({});
-	} else {
-		res.status(500).json({ error: "Failed to create post" });
-	}
+	const post = await posts.findOne({ _id: result.value.post });
+	if (!post) return res.status(400).json({ error: "Post not found" });
+
+	
+	// todo
 }

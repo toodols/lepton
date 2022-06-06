@@ -63,7 +63,7 @@
 	border-radius: 5px
 	word-wrap: break-word
 	white-space: pre-wrap
-	background-color: var(--color-post-background)
+	background-color: var(--color-post)
 	.preview
 		margin: 5px
 		display: flex
@@ -76,7 +76,7 @@
 			&::after
 				content: ":"
 		@include border
-		transition: background 0.5s
+
 		
 		&:hover
 			background: var(--color-post-preview-hover)
@@ -91,7 +91,7 @@
 			left: 0
 			width: 100%
 			height: 50px
-			background: linear-gradient(to bottom, rgb(0, 0, 0, 0) 0%, var(--color-post-background) 100%)
+			background: linear-gradient(to bottom, rgb(0, 0, 0, 0) 0%, var(--color-post) 100%)
 		
 	.show_more
 		display: none

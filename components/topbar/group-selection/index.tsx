@@ -4,7 +4,7 @@ import AsyncCreatableSelect from 'react-select/async-creatable';
 import Styles from "./group-selection.module.sass";
 
 export function GroupSelection(){
-	return <AsyncCreatableSelect className={Styles.group_selection} onCreateOption={(opt)=>{
+	return <AsyncCreatableSelect className={Styles.group_selection} classNamePrefix="react-select" onCreateOption={(opt)=>{
 		console.log(opt)
 	}} isValidNewOption={(text)=>{
 		return false;

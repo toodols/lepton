@@ -1,7 +1,7 @@
 import { createHash } from "crypto";
-import type { PostData, UserDataPartial, CommentData, UserDataFull, ClientUserData } from "lepton-client";
+import type { PostData, UserDataPartial, CommentData, UserDataFull, ClientUserData, GroupData } from "lepton-client";
 import { ObjectId, WithId } from "mongodb";
-import { Post, Comment, User } from "./database";
+import { DatabaseTypes } from "./database";
 
 function hex(n: number){
 	let s = "";
@@ -24,7 +24,7 @@ export function token(){
 }
 
 export namespace Converter {
-	export function toPostData(post: WithId<Post>): PostData {
+	export function toPostData(post: WithId<DatabaseTypes.Post>): PostData {
 		return {
 			createdAt: post.createdAt.toNumber(),
 			updatedAt: post.updatedAt.toNumber(),
@@ -34,7 +34,16 @@ export namespace Converter {
 			group: post.group?.toString(),
 		}
 	}
-	export function toUserDataPartial(user: WithId<User>): UserDataPartial {
+	export function toGroupDataFull(group: WithId<DatabaseTypes.Group>): GroupData {
+		return {
+			id: group._id.toString(),
+			name: group.name,
+			createdAt: group.createdAt.toNumber(),
+			updatedAt: group.updatedAt.toNumber(),
+			icon: group.icon,
+		}
+	}
+	export function toUserDataPartial(user: WithId<DatabaseTypes.User>): UserDataPartial {
 		return {
 			createdAt: user.createdAt.toNumber(),
 			id: user._id.toString(),
@@ -42,21 +51,21 @@ export namespace Converter {
 			avatar: user.settings.avatar,
 		}
 	}
-	export function toUserDataFull(user: WithId<User>): UserDataFull {
+	export function toUserDataFull(user: WithId<DatabaseTypes.User>): UserDataFull {
 		return {
 			...toUserDataPartial(user),
 			description: user.settings.description,
 		}
 	}
-	export function toClientUserData(user: WithId<User>): ClientUserData {
+	export function toClientUserData(user: WithId<DatabaseTypes.User>): ClientUserData {
 		return {
 			...toUserDataFull(user),
 			// email?
-			groups: user.groups,
+			groups: user.groups.map(g => g.toString()),
 		}
 	}
 
-	export function toCommentData(comment: WithId<Comment>): CommentData {
+	export function toCommentData(comment: WithId<DatabaseTypes.Comment>): CommentData {
 		return {
 			createdAt: comment.createdAt.toNumber(),
 			updatedAt: comment.updatedAt.toNumber(),

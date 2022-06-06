@@ -54,7 +54,7 @@ export class Post<Opts extends Options> extends EventEmitter {
 	content: string;
 	lastComment?: Comment<Opts>;
 	author: User<Opts>;
-	group?: Group;
+	group?: Group<Opts>;
 	createdAt: number;
 
 	private _commentsLoader?: CommentsLoader<Opts>;

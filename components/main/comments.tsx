@@ -1,6 +1,7 @@
 import { faComment, faTrash } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Avatar } from "../util/avatar";
+import { Input } from "../util/input";
 import { client, Post, Comment } from "lib/client";
 import { useUpdatable } from "lib/useUpdatable";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -54,16 +55,14 @@ export function Comments({ post }: { post: Post }) {
 				<h2>{post.author.username}</h2>
 
 				<div className={Styles.comments_container}>{elements}</div>
-				<input
-					placeholder="Enter comment message here"
+				<Input
+					name="Enter comment message here"
 					ref={inputRef}
-					onKeyDown={(event) => {
-						if (event.key === "Enter") {
-							post.comment(inputRef.current!.value);
-							inputRef.current!.value = "";
-						}
+					onSubmit={()=>{
+						post.comment(inputRef.current!.value);
+						inputRef.current!.value = "";
 					}}
-				></input>
+				></Input>
 			</div>
 		);
 	} else {
