@@ -1,8 +1,5 @@
 import { Request, Response } from "express";
-import { Timestamp } from "mongodb";
-import { auth, posts, users } from "../../database";
-import { io } from "../../server-entry";
-import { Converter, hash } from "../../util";
+import { posts } from "../../database";
 import { Checkables, createGuard, Error, getUserFromAuth } from "../util";
 
 interface Data {}

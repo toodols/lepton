@@ -60,6 +60,7 @@ export namespace Converter {
 	export function toClientInfoData(user: WithId<DatabaseTypes.User>): ClientInfoData {
 		return {
 			groups: user.groups.map(g => g.toString()),
+			settings: user.settings,
 		}
 	}
 

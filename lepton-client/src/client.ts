@@ -5,7 +5,7 @@ import { Group, GroupDataFull } from "./group";
 import { EventEmitter } from "events";
 import { fetch } from "cross-fetch";
 import { io } from "socket.io-client";
-import { CREATE_POST_URL, GET_COMMENTS_URL, GET_POSTS_URL, GET_SELF_URL, GET_USER_URL, SIGN_IN_URL, SIGN_UP_URL } from "./constants";
+import { CREATE_POST_URL, GET_COMMENTS_URL, GET_POSTS_URL, GET_SELF_URL, GET_USER_URL, SIGN_IN_URL, SIGN_UP_URL, CREATE_GROUP_URL, UPDATE_SETTINGS_URL, SEARCH_GROUPS_URL } from "./constants";
 import { Settings } from "./types";
 import { ClientInfo, ClientInfoData } from "./clientinfo";
 
@@ -13,7 +13,8 @@ const URL = process.env.NODE_ENV === "development" ? "/api/socket" : "wss://idk 
 
 export interface Options {
 	/**
-	 * 
+	 * Inspired by discord.js, allows a class to be partial, meaning only containing minimum information.
+	 * By default, partial=false, extra parts of the class will always be fetched in order to simply use of the class.
 	 */
 	partial: boolean;
 }
@@ -96,9 +97,8 @@ export class Client<Opts extends Options = {partial: false}> extends EventEmitte
 		return createdComments;
 	}
 
-	// @TODO add groupid
 	@signedIn()
-	async createPost(props: { content: string }) {
+	async createPost(props: { content: string, group?: string }) {
 		const post = await fetch(CREATE_POST_URL, {
 			method: "POST",
 			body: JSON.stringify(props),
@@ -122,12 +122,24 @@ export class Client<Opts extends Options = {partial: false}> extends EventEmitte
 	}
 
 	async searchGroup(name: string){
-		
+		const result = await fetch(`${SEARCH_GROUPS_URL}?name=${name}`, {}).then((e) => e.json());
+
 	}
 
 	@signedIn()
-	async createGroup(name: string){
-
+	async createGroup(props: {name: string, isPublic: boolean}){
+		const result = await fetch(CREATE_GROUP_URL, {
+			method: "POST",
+			body: JSON.stringify(props),
+			headers: {
+				"content-type": "application/json",
+				Authorization: this.token!,
+			},
+		}).then((e) => e.json());
+		if (result.error) {
+			throw new Error(result.error);
+		}
+		return Group.from(this, result);
 	}
 
 	async useToken(token: string) {
@@ -170,13 +182,19 @@ export class Client<Opts extends Options = {partial: false}> extends EventEmitte
 	}
 
 	@signedIn(true)
-	async saveSettings(settings: Settings){
-		// TODO
-	}
-
-	@signedIn(true)
-	async getSettings(){
-
+	async updateSettings(settings: Settings){
+		const result = await fetch(UPDATE_SETTINGS_URL, {
+			method: "POST",
+			headers: {
+				"content-type": "application/json",
+				Authorization: this.token!,
+			},
+			body: JSON.stringify(settings),
+		}).then(e=>e.json())
+		if (result.error) {
+			throw new Error(result.error);
+		}
+		return result.settings;
 	}
 
 	async getToken(username: string, password: string){
@@ -212,7 +230,7 @@ export class Client<Opts extends Options = {partial: false}> extends EventEmitte
 		if (response.error) {
 			throw new Error(response.error);
 		}
-		return User.from(this, response);
+		return User.from(this, response.user);
 	}
 
 	constructor(options?: Opts) {

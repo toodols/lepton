@@ -16,10 +16,8 @@ export function Comments({ post }: { post: Post }) {
 	const userid = useSelector((state: RootState) => state.client.userId);
 
 	let last: Comment | undefined;
-	console.log("map")
 	const elements = loader.loaded.map((commentid) => {
 		const comment = client.commentsCache.get(commentid)!;
-		console.log(comment.author, last?.author);
 		const res = (
 			<div className={Styles.box} key={comment.id}>
 				{comment.author !== last?.author ? (

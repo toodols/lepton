@@ -2,7 +2,7 @@
 
 import { Request, Response } from "express";
 import { ObjectId } from "mongodb";
-import { auth, users } from "../database";
+import { auth, DatabaseTypes, users } from "../database";
 
 export interface Error {
 	error: string;
@@ -147,4 +147,11 @@ export async function getUserFromAuth(
 	if (!user)
 		return void res.status(500).json({ error: "Error finding user" });
 	return user;
+}
+
+export function createGroupUser(user: ObjectId | DatabaseTypes.User, group: ObjectId | DatabaseTypes.Group) {
+	return {
+		user,
+		group,
+	};
 }

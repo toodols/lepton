@@ -47,8 +47,8 @@ export namespace DatabaseTypes {
 	export interface Group extends DatedDocument {
 		name: string;
 		isPublic: boolean;
-		members: ObjectId[];
 		icon: string;
+		description: string;
 	}
 
 	export interface GroupUser extends DatedDocument {
@@ -73,14 +73,38 @@ export const {
 	const client = new MongoClient(MongoDB_URI);
 	client.connect(err => {
 		const database = client.db("database");
-		resolve({
+		const collections: DatabaseTypes.Response = {
 			groups: database.collection("groups"),
 			comments: database.collection("comments"),
 			users: database.collection("users"),
 			posts: database.collection("posts"),
 			auth: database.collection("auth"),
 			inventory: database.collection("inventory"),
-			groupUsers: database.collection("groupUsers")
-		})
+			groupUsers: database.collection("groupUsers"),
+		};
+		// indexes
+		
+		// find auths by their token
+		collections.auth.createIndex("token", { unique: true });
+
+		// find groupusers by their group and user
+		collections.groupUsers.createIndex(["group", "user"], { unique: true });
+
+		// find posts in any group by newest
+		// editing a post should bring it back to the top, which is why updatedAt is used
+		collections.posts.createIndex({group: 1, updatedAt: -1});
+		
+		// find posts for an author by newest
+		collections.posts.createIndex({author: 1, createdAt: -1});
+		
+		// find posts in a group by votes
+		collections.posts.createIndex({group: 1, votes: 1});
+		
+		// find comments for a author by newest
+		collections.comments.createIndex({author: 1, createdAt: -1});
+		
+		// find comments for a post by newest
+		collections.comments.createIndex({post: 1, createdAt: -1});
+		resolve(collections);
 	});
 })

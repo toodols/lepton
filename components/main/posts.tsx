@@ -68,13 +68,11 @@ export function Posts() {
 										}}
 										dataLength={posts.length}
 										next={async () => {
-											console.log(client.postsCache.size)
 											if (
 											
 												client.postsCache.size	=== 0
 											)
 												return;
-												console.log("trying to load next");
 											dispatch(
 												onPostsLoadedOld(
 													(

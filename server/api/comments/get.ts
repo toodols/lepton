@@ -1,10 +1,9 @@
-import {Request, Response} from "express";
+import { Request, Response } from "express";
 import { CommentData, UserDataPartial } from "lepton-client";
 import { ObjectId } from "mongodb";
-import { comments, posts, users } from "../../database";
-import { io } from "../../server-entry";
-import { Converter, hash } from "../../util";
-import {Checkables, createGuard, Error} from "../util";
+import { comments, users } from "../../database";
+import { Converter } from "../../util";
+import { Checkables, createGuard, Error } from "../util";
 
 interface Data {
 	users: Record<string, UserDataPartial>;

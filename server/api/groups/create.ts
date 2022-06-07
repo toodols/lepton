@@ -1,15 +1,14 @@
 import { Request, Response } from "express";
-import { ObjectId, Timestamp } from "mongodb";
-import { auth, comments, posts, users } from "../../database";
-import { io } from "../../server-entry";
-import { Converter, hash } from "../../util";
+import { Timestamp } from "mongodb";
+import { groups } from "server/database";
 import { Checkables, createGuard, Error, getUserFromAuth } from "../util";
 
 interface Data {}
 
 const createGroupGuard = createGuard({
 	name: Checkables.string,
-	isPublic: Checkables.boolean
+	isPublic: Checkables.boolean,
+	description: Checkables.string,
 })
 
 export default async function handler(
@@ -18,10 +17,17 @@ export default async function handler(
 ) {
 	const result = createGroupGuard(req.body);
 	if ("error" in result) return res.status(400).json({error: result.error});
-	
+	const {name, isPublic, description} = result.value;
 	const user = await getUserFromAuth(req, res);
 	if (!user) return;
 
+	groups.insertOne({
+		name: name,
+		isPublic: isPublic,
+		icon: "", // @todo: add icon,
+		description: description,
+		updatedAt: Timestamp.fromNumber(Date.now()),
+		createdAt: Timestamp.fromNumber(Date.now()),
+	})
 
-	//todo
 }
