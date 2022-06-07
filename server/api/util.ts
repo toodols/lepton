@@ -47,7 +47,11 @@ export function createGuard<T extends Guard>(
 			if (typeof obj[prop] === "function") {
 				v = obj[prop](t[prop]);
 			} else if (typeof obj[prop] === "object") {
-				v = checkObject(obj[prop], t[prop]);
+				if (obj[prop].optional === true) {
+					v = obj[prop].value(t[prop]);
+				} else {
+					v = checkObject(obj[prop], t[prop]);
+				}
 			}
 			if ("error" in v) {
 				return v;
@@ -59,7 +63,15 @@ export function createGuard<T extends Guard>(
 	};
 	return (t: unknown) => {
 		if (typeof obj === "object") {
-			return checkObject(obj, t);
+			if ("optional" in obj && obj.optional === true) {
+				if (t) {
+					return { value: null }	
+				} else {
+					return checkObject(obj.value, t);
+				}
+			} else {
+				return checkObject(obj, t);
+			}
 		} else {
 			if (typeof t === "string") {
 				return obj(t);

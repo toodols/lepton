@@ -23,7 +23,6 @@ export default async function handler(req: Request, res: Response<Data | Error>)
 	const {before} = result.value;
 	const query: Filter<DatabaseTypes.Post> = {};
 	if (before) query.createdAt = {$lt: Timestamp.fromNumber(before)};
-	console.log(query);
 	const postsResult = await posts.find(query).sort({_id:-1}).limit(10).toArray();
 	let unfiltered = await Promise.all(postsResult.map(post=>comments.findOne({post: post._id}, {sort: {_id: -1}})));
 
