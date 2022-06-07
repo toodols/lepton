@@ -10,6 +10,7 @@ export interface PostData {
 	author: string;
 	content: string;
 	group?: string;
+	// commentCount: number;
 	createdAt: number;
 	updatedAt: number;
 }

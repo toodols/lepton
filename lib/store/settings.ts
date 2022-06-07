@@ -4,7 +4,7 @@ import { client } from "lib/client";
 export type Theme = "light" | "dark" | "default"
 
 type Settings = {
-	theme: Theme,
+	theme: string,
 	description: string,
 };
 
@@ -31,14 +31,23 @@ export const settingsSlice = createSlice({
 	initialState: initialState,
 	reducers: {
 		saveSettings: (state) => {
+			const changed: Partial<Settings> = {};
+			for (const _key in state.settings) {
+				const key = _key as keyof Settings;
+				if (state.settings[key] !== state.originalSettings[key]) {
+					changed[key] = state.settings[key];
+				}
+			}
+
 			state.originalSettings = {...state.settings};
+			
 			state.isEditing = false;
 			if (typeof localStorage !== "undefined") {
 				// stuff like bio cant be stored in localStorage
 				localStorage.setItem("settings", JSON.stringify({theme: state.settings.theme}));
 			}
 			if (client.clientUser) {
-				client.saveSettings({...state.settings});
+				client.updateSettings({...state.settings});
 			}
 		},
 		discardSettings: (state) => {
@@ -47,7 +56,13 @@ export const settingsSlice = createSlice({
 		},
 		editSettings: (state, action: PayloadAction<Partial<typeof initialState["settings"]>>)=>{
 			state.settings = {...state.settings, ...action.payload};
-			state.isEditing = true;
+			// compare if state.settings and state.originalSettings are the same
+			console.log(JSON.stringify(state.settings), JSON.stringify(state.originalSettings));
+			if (JSON.stringify(state.settings)!==JSON.stringify(state.originalSettings)) {
+				state.isEditing = true;
+			} else {
+				state.isEditing = false;
+			}
 		},
 	},
 });

@@ -26,7 +26,7 @@ import votePostHandler from "./posts/vote";
 export function apiRouter(app: Application) {
 	app.post("/api/signin", signInHandler)
 	app.post("/api/signup", signUpHandler)
-	app.get("/api/updatesettings", updateSettingsHandler)
+	app.post("/api/updatesettings", updateSettingsHandler)
 	
 	app.post("/api/posts/create", createPostHandler)
 	app.get("/api/posts/get", getPostsHandler)

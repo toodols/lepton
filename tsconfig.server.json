@@ -10,5 +10,8 @@
     },
     "include": [
         "server/**/*.ts",
-    ]
+    ],
+	"exclude": [
+		"lepton-client/**/*.ts",
+	]
 }

@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { Timestamp } from "mongodb";
-import { groups } from "server/database";
+import { groups } from "../../database";
 import { Checkables, createGuard, Error, getUserFromAuth } from "../util";
 
 interface Data {}

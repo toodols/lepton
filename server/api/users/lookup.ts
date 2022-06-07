@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { UserDataFull } from "lepton-client/dist";
+import { UserDataFull } from "lepton-client";
 import { ObjectId } from "mongodb";
 import { users } from "../../database";
 import { Converter } from "../../util";

@@ -52,6 +52,25 @@ function CustomOption(
 	);
 }
 
+function SettingsSelect(props: {
+	value: string;
+	onChange: (newValue: string)=>void,
+	options: { value: string; label: string; description?: string }[];
+}) {
+	return (
+		<Select
+			value={props.options.find((e) => e.value === props.value)}
+			classNamePrefix="react-select"
+			components={{ Option: CustomOption }}
+			onChange={(value) => {
+				//@ts-ignore
+				props.onChange(value.value);
+			}}
+			options={props.options}
+		/>
+	);
+}
+
 export function Settings() {
 	const { settingsModalOpen } = useSelector((state: RootState) => state.main);
 	const isEditing = useSelector(
@@ -62,6 +81,10 @@ export function Settings() {
 	const refs = useRef<Record<string, HTMLElement>>({});
 
 	const dispatch = useDispatch();
+
+	const settingValues = useSelector(
+		(state: RootState) => state.settings.settings
+	);
 	return (
 		<Modal
 			ariaHideApp={false}
@@ -116,14 +139,12 @@ export function Settings() {
 					<main ref={mainRef}>
 						<Section title="Appearance">
 							<h3>Theme</h3>
-							<Select
-								classNamePrefix="react-select"
-								components={{ Option: CustomOption }}
-								onChange={(value) => {
+							<SettingsSelect
+								value={settingValues.theme}
+								onChange={(value)=>{
 									dispatch(
 										editSettings({
-											theme: (value as any)
-												.value as Theme,
+											theme: value
 										})
 									);
 								}}

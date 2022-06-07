@@ -24,7 +24,6 @@ export default async function handler(
 	req: Request,
 	res: Response<Data | Error>
 ) {
-	if (req.method !== "POST") res.status(405).end();
 	const result = changePasswordGuard(req.body);
 	if ("error" in result) return res.status(400).json({ error: result.error });
 
