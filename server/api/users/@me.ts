@@ -1,13 +1,14 @@
 import { Request, Response } from "express";
-import { ClientUserData, GroupDataFull } from "lepton-client";
+import { ClientInfoData, GroupDataFull, UserDataFull } from "lepton-client";
 import { groups } from "../../database";
 import { Converter } from "../../util";
 import { getUserFromAuth } from "../util";
 import { Error } from "../util";
 
 interface Data {
-	user: ClientUserData;
+	user: UserDataFull;
 	groups: Record<string, GroupDataFull>;
+	info: ClientInfoData;
 }
 
 export default async function handler(
@@ -26,7 +27,8 @@ export default async function handler(
 	}))
 
 	res.json({
-		user: Converter.toClientUserData(user),
+		user: Converter.toUserDataFull(user),
+		info: Converter.toClientInfoData(user),
 		groups: foundGroups.reduce<Record<string, GroupDataFull>>((acc, group) => {
 			if (group) {
 				acc[group._id.toString()] = Converter.toGroupDataFull(group);

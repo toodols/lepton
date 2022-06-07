@@ -1,5 +1,5 @@
 import { Avatar } from "components/util/avatar";
-import { useUpdatable } from "lib/useUpdatable";
+import { useUpdatable } from "../../lib/useUpdatable";
 import {Comment as CommentObject} from "../../lib/client";
 import Styles from "./main.module.sass";
 

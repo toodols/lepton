@@ -35,7 +35,7 @@ export const settingsSlice = createSlice({
 			state.isEditing = false;
 			if (typeof localStorage !== "undefined") {
 				// stuff like bio cant be stored in localStorage
-				localStorage.setItem("settings", JSON.stringify({theme: state.settings}));
+				localStorage.setItem("settings", JSON.stringify({theme: state.settings.theme}));
 			}
 			if (client.clientUser) {
 				client.saveSettings({...state.settings});

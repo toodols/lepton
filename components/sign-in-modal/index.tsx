@@ -32,7 +32,7 @@ export function Signin() {
 		dispatch(setSignInModalOpen(false));
 	}}>
 		<div key="signin" className={Styles.page} data-shown={menuType==="signin"}>
-			Sign In to Lepton
+			<header>Sign In to Lepton</header>
 			<Input disabled={isLoading} name="Username" ref={signInUsernameRef}/>
 			<Input disabled={isLoading} name="Password" type="password" ref={signInPasswordRef}/>
 			<button disabled={isLoading} onClick={()=>{
@@ -53,7 +53,7 @@ export function Signin() {
 			}}>Sign Up Instead</button>
 		</div>
 		<div key="signup" className={Styles.page} data-shown={menuType==="signup"}>
-			Sign Up for Lepton
+			<header>Sign Up for Lepton</header>
 			<Input disabled={isLoading} name="Username" ref={signUpUsernameRef}/>
 			<Input disabled={isLoading} name="Password" type="password" ref={signUpPasswordRef}/>
 			<Input disabled={isLoading} name="Confirm Password" type="password" ref={signupConfirmPasswordRef}/>

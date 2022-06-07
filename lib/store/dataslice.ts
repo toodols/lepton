@@ -1,7 +1,4 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { stat } from "fs";
-import {Client, ClientUser} from "lepton-client";
-import { client } from "../client";
 
 export const dataSlice = createSlice({
 	name: "Data",

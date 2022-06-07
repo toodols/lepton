@@ -12,7 +12,7 @@ export function CreatePostModal() {
 	return <Modal ariaHideApp={false} className={Styles.create_post_modal} isOpen={isOpen} closeTimeoutMS={300} onRequestClose={()=>{
 		dispatch(setCreatePostModalOpen(false));
 	}}>
-		<h1>Create Post</h1>
+		<header>Create Post</header>
 		<textarea defaultValue="I think I am very sad right now" ref={ref}></textarea>
 		<button onClick={()=>{
 			client.createPost({

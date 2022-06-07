@@ -11,6 +11,8 @@ interface MainState {
 	signInMenuType: "signin" | "signup" | "forgot" | "reset",
 	settingsModalOpen: boolean,
 	createPostModalOpen: boolean,
+	createGroupModalOpen: boolean,
+	createGroupModalNameValue: string,
 	title: string,
 }
 
@@ -21,7 +23,9 @@ const mainSlice = createSlice({
 		signInMenuOpen: false,
 		settingsModalOpen: false,
 		signInMenuType: "signin",
+		createGroupModalNameValue: "",
 		createPostModalOpen: false,
+		createGroupModalOpen: false,
 		title: "...",
 	} as MainState,
 	reducers: {
@@ -39,6 +43,15 @@ const mainSlice = createSlice({
 		},
 		setSettingsModalOpen(state, action: PayloadAction<boolean>) {
 			state.settingsModalOpen = action.payload;
+		},
+
+		setCreateGroupModalOpen(state, action: PayloadAction<{open: false} | {open: true, name: string}>) {
+			if (action.payload.open) {
+				state.createGroupModalNameValue = action.payload.name;
+			} else {
+				state.createGroupModalNameValue = "";
+			}
+			state.createGroupModalOpen = action.payload.open;
 		},
 		setTitle(state, action: PayloadAction<string>) {
 			state.title = action.payload;
@@ -59,6 +72,6 @@ export const store = configureStore(
 )
 init();
 
-export const { setTitle, setSettingsModalOpen, setSidebarOpen, setSignInModalOpen, setCreatePostModalOpen, setSigninMenuType } = mainSlice.actions;
+export const { setTitle, setCreateGroupModalOpen, setSettingsModalOpen, setSidebarOpen, setSignInModalOpen, setCreatePostModalOpen, setSigninMenuType } = mainSlice.actions;
 
 export type RootState = ReturnType<typeof store.getState>;

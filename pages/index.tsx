@@ -6,6 +6,7 @@ import { ReactNode } from "react";
 import { Layout } from "../components/layout";
 import { useDispatch } from "react-redux";
 import { setTitle } from "lib/store";
+import { CreateGroupModal } from "components/create-group-modal";
 
 export default function Home() {
 	const dispatch = useDispatch();
@@ -14,6 +15,7 @@ export default function Home() {
 		<>
 			<Posts/>
 			<CreatePostModal />
+			<CreateGroupModal/>
 		</>
 	);
 };

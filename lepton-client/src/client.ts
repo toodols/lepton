@@ -2,12 +2,12 @@ import { Post, PostData } from "./post";
 import { User, UserDataFull } from "./user";
 import { Comment, CommentData } from "./comment";
 import { Group, GroupDataFull } from "./group";
-import { ClientUser, ClientUserData } from "./clientuser";
 import { EventEmitter } from "events";
 import { fetch } from "cross-fetch";
 import { io } from "socket.io-client";
 import { CREATE_POST_URL, GET_COMMENTS_URL, GET_POSTS_URL, GET_SELF_URL, GET_USER_URL, SIGN_IN_URL, SIGN_UP_URL } from "./constants";
 import { Settings } from "./types";
+import { ClientInfo, ClientInfoData } from "./clientinfo";
 
 const URL = process.env.NODE_ENV === "development" ? "/api/socket" : "wss://idk lmao";
 
@@ -49,7 +49,8 @@ export class Client<Opts extends Options = {partial: false}> extends EventEmitte
 	groupsCache = new Map<string, Group<Opts>>();
 
 	token?: string;
-	clientUser?: ClientUser<Opts>;
+	clientUser?: User<Opts>;
+	clientInfo?: ClientInfo<Opts>;
 	options: Opts;
 
 	async getPosts(props: { before: number }): Promise<Post<Opts>[]>;
@@ -108,7 +109,7 @@ export class Client<Opts extends Options = {partial: false}> extends EventEmitte
 		});
 	}
 
-	async getSelfInfo(token: string): Promise<{user: ClientUserData, groups: Record<string, GroupDataFull>}> {
+	async getSelfInfo(token: string): Promise<{user: UserDataFull, info: ClientInfoData, groups: Record<string, GroupDataFull>}> {
 		const result = await fetch(GET_SELF_URL, {
 			headers: {
 				Authorization: token,
@@ -120,12 +121,22 @@ export class Client<Opts extends Options = {partial: false}> extends EventEmitte
 		return result;
 	}
 
+	async searchGroup(name: string){
+		
+	}
+
+	@signedIn()
+	async createGroup(name: string){
+
+	}
+
 	async useToken(token: string) {
 		const info = await this.getSelfInfo(token);
 		for (const groupid in info.groups) {
 			Group.from(this, info.groups[groupid]);
 		}
-		this.clientUser = new ClientUser(this, info.user);
+		this.clientUser = User.from(this, info.user);
+		this.clientInfo = new ClientInfo(this, info.info, this.clientUser);
 		this.token = token;
 		this.emit("clientUserChanged");
 	}

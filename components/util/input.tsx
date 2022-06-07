@@ -22,22 +22,20 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
 		},
 		ref
 	) => {
-			const [value, setValue] = useState(defaultValue);
 		return (
 			<input
+				defaultValue={defaultValue}
 				ref={ref}
 				disabled={disabled}
 				placeholder={name}
 				type={type}
 				className={Styles.input}
-				value={value}
 				onKeyDown={(event) => {
 					if (event.key === "Enter") {
-						onSubmit(value);
+						onSubmit(event.currentTarget.value);
 					}
 				}}
 				onChange={(event) => {
-					setValue(event.target.value);
 					onChange(event.target.value);
 				}}
 			/>

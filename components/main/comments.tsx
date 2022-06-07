@@ -3,7 +3,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Avatar } from "../util/avatar";
 import { Input } from "../util/input";
 import { client, Post, Comment } from "lib/client";
-import { useUpdatable } from "lib/useUpdatable";
+import { useUpdatable } from "../../lib/useUpdatable";
 import { useEffect, useMemo, useRef, useState } from "react";
 import Styles from "./main.module.sass";
 import { useSelector } from "react-redux";
@@ -16,9 +16,10 @@ export function Comments({ post }: { post: Post }) {
 	const userid = useSelector((state: RootState) => state.client.userId);
 
 	let last: Comment | undefined;
+	console.log("map")
 	const elements = loader.loaded.map((commentid) => {
 		const comment = client.commentsCache.get(commentid)!;
-
+		console.log(comment.author, last?.author);
 		const res = (
 			<div className={Styles.box} key={comment.id}>
 				{comment.author !== last?.author ? (
