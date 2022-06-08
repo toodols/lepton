@@ -121,13 +121,16 @@ export class Client<Opts extends Options = {partial: false}> extends EventEmitte
 		return result;
 	}
 
-	async searchGroup(name: string){
+	async searchGroups(name: string): Promise<Group<Opts>[]> {
 		const result = await fetch(`${SEARCH_GROUPS_URL}?name=${name}`, {}).then((e) => e.json());
-
+		if (result.error) {
+			throw new Error(result.error);
+		}
+		return result.groups.map((group: any) => Group.from(this, group));	
 	}
 
 	@signedIn()
-	async createGroup(props: {name: string, isPublic: boolean}){
+	async createGroup(props: {name: string, isPublic: boolean, description: string}){
 		const result = await fetch(CREATE_GROUP_URL, {
 			method: "POST",
 			body: JSON.stringify(props),

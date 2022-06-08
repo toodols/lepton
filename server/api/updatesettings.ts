@@ -41,7 +41,6 @@ export default async function handler(
 	if (value.theme) {
 		toUpdate["settings.theme"] = value.theme;
 	}
-	console.log("toUpdate", toUpdate);
 	users.updateOne(
 		{ _id: user._id },
 		{

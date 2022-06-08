@@ -28,6 +28,7 @@ export default async function handler(
 		author: user._id,
 		group: result.value.group ?? undefined,
 		votes: 0,
+		voters: {},
 		createdAt: Timestamp.fromNumber(Date.now()),
 		updatedAt: Timestamp.fromNumber(Date.now()),
 	});

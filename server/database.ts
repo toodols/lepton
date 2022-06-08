@@ -2,25 +2,26 @@ import { Settings } from 'lepton-client';
 import { MongoClient, Collection, Document, ObjectId, Timestamp } from 'mongodb';
 import { Permission } from './api/util';
 import { MongoDB_URI } from "./env";
-export interface PasswordAuth extends Document {
-	username: string;
-	hashed_password: string;
-	salt: string;
-	token: string;
-	user: ObjectId;
-	createdAt: Timestamp;
-	updatedAt: Timestamp;
-	permission: Permission
-}
 
-type Auth = PasswordAuth;
 
 
 export namespace DatabaseTypes {
-	interface DatedDocument {
+	interface DatedDocument extends Document {
 		createdAt: Timestamp;
 		updatedAt: Timestamp;
 	}
+	
+	export interface PasswordAuth extends DatedDocument {
+		username: string;
+		hashed_password: string;
+		salt: string;
+		token: string;
+		user: ObjectId;
+		createdAt: Timestamp;
+		updatedAt: Timestamp;
+		permission: Permission
+	}
+	export type Auth = PasswordAuth;
 	export interface User extends DatedDocument {
 		groups: ObjectId[];
 		username: string;
@@ -38,7 +39,11 @@ export namespace DatabaseTypes {
 		author: ObjectId;
 		content: string;
 		group?: ObjectId;
-		votes: 0;
+		voters: { [user: string]: 1 | -1 };
+		/** The number of votes will not always be up to date with voters
+		 * It is calculated periodically
+		 */
+		votes: number;
 	}
 
 	export interface Inventory extends DatedDocument {
@@ -71,7 +76,7 @@ export const {
 	users, posts, comments, auth, inventory, groups, groupUsers
 } = await new Promise<DatabaseTypes.Response>((resolve, reject) => {
 	const client = new MongoClient(MongoDB_URI);
-	client.connect(err => {
+	client.connect(async err => {
 		const database = client.db("database");
 		const collections: DatabaseTypes.Response = {
 			groups: database.collection("groups"),
@@ -85,26 +90,23 @@ export const {
 		// indexes
 		
 		// find auths by their token
-		collections.auth.createIndex("token", { unique: true });
+		await collections.auth.createIndex("token", { unique: true });
 
 		// find groupusers by their group and user
-		collections.groupUsers.createIndex(["group", "user"], { unique: true });
+		await collections.groupUsers.createIndex(["group", "user"], { unique: true });
 
 		// find posts in any group by newest
 		// editing a post should bring it back to the top, which is why updatedAt is used
-		collections.posts.createIndex({group: 1, updatedAt: -1});
+		await collections.posts.createIndex({group: 1, updatedAt: -1});
 		
 		// find posts for an author by newest
-		collections.posts.createIndex({author: 1, createdAt: -1});
-		
-		// find posts in a group by votes
-		collections.posts.createIndex({group: 1, votes: 1});
-		
+		await collections.posts.createIndex({author: 1, createdAt: -1});
+				
 		// find comments for a author by newest
-		collections.comments.createIndex({author: 1, createdAt: -1});
+		await collections.comments.createIndex({author: 1, createdAt: -1});
 		
 		// find comments for a post by newest
-		collections.comments.createIndex({post: 1, createdAt: -1});
+		await collections.comments.createIndex({post: 1, createdAt: -1});
 		resolve(collections);
 	});
 })

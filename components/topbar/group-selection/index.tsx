@@ -13,7 +13,10 @@ export function GroupSelection(){
 	}} formatCreateLabel={(value)=>{
 		return `Create Group "${value}"`
 	}} defaultOptions={true} loadOptions={async (query)=>{
-		client.searchGroups(query)
-		return [];
+		const result = await client.searchGroups(query)
+		return result.map((group)=>({
+			value: group.id,
+			label: group.name
+		}));
 	}}/>
 }

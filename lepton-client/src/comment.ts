@@ -17,6 +17,7 @@ export class Comment<Opts extends Options> extends EventEmitter {
 	content: string;
 	author: User<Opts>;
 	post: Post<Opts>;
+	createdAt: number;
 	
 	static from<Opts extends Options>(client: Client<Opts>, data: CommentData): Comment<Opts> {
 		if (client.commentsCache.has(data.id)){
@@ -46,6 +47,7 @@ export class Comment<Opts extends Options> extends EventEmitter {
 		super();
 		this.id = data.id;
 		this.content = data.content;
+		this.createdAt = data.createdAt;
 		this.author = client.usersCache.get(data.author)!;
 		this.post = client.postsCache.get(data.post)!;
 		client.commentsCache.set(this.id, this);

@@ -3,7 +3,7 @@ import { Post as PostObject } from "../../lib/client";
 import Styles from "./main.module.sass";
 import { useUpdatable } from "../../lib/useUpdatable";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faComment, faTrash } from "@fortawesome/free-solid-svg-icons";
+import { faArrowUp, faComment, faTrash } from "@fortawesome/free-solid-svg-icons";
 import { useSelector } from "react-redux";
 import { RootState } from "../../lib/store";
 import { useContext, useState } from "react";
@@ -16,6 +16,7 @@ export function Post({ post, setCurrent, current }: { current: string | null, se
 	useUpdatable(post);
 	let contentRef = useTruncate<HTMLDivElement>();
 	const userid = useSelector((state: RootState) => state.client.userId)
+	const isSignedIn = useSelector((state: RootState) => state.client.isSignedIn)
 	const [isBeingDeleted, setIsBeingDeleted] = useState(false);
 	const [isExpanded, setIsExpanded] = useState(false);
 	const ctx = useContext(PostElementsContext);
@@ -37,6 +38,13 @@ export function Post({ post, setCurrent, current }: { current: string | null, se
 						}}>
 							<FontAwesomeIcon icon={faComment}/>
 						</button>
+					{isSignedIn?<>
+						<button onClick={()=>{
+							post.vote(1);
+						}}>
+							<FontAwesomeIcon icon={faArrowUp}/>
+						</button>
+					</>:<></>}
 					{post.author.id.toString() === userid ? (
 						<>
 						<button

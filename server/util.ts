@@ -43,6 +43,11 @@ export namespace Converter {
 			icon: group.icon,
 		}
 	}
+	export function toGroupDataPartial(group: WithId<DatabaseTypes.Group>): GroupData {
+		// todo: implement partial group data
+		return toGroupDataFull(group);
+	}
+			
 	export function toUserDataPartial(user: WithId<DatabaseTypes.User>): UserDataPartial {
 		return {
 			createdAt: user.createdAt.toNumber(),

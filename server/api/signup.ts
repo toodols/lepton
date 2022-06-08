@@ -68,6 +68,7 @@ export default async function handler(req: Request, res: Response<Error | Data>)
 			theme: "light"
 		},
 		groups: [],
+		followers: {},
 		inventory: inventoryDoc.insertedId,
 		createdAt: Timestamp.fromNumber(Date.now()),
 		updatedAt: Timestamp.fromNumber(Date.now())

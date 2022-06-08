@@ -1,8 +1,8 @@
 // provides some utility functions for the api just to handle some common error messages, especially authorization and body.
 
 import { Request, Response } from "express";
-import { ObjectId } from "mongodb";
-import { auth, DatabaseTypes, users } from "../database";
+import { ObjectId, Timestamp } from "mongodb";
+import { auth, DatabaseTypes, groupUsers, users } from "../database";
 
 export interface Error {
 	error: string;
@@ -38,7 +38,7 @@ export function createGuard<T extends Guard>(
 		let result = {} as any;
 		for (const prop in obj as any) {
 			let v;
-			if (!t[prop]) {
+			if (t[prop]==undefined) {
 				if (!obj[prop].optional) {
 					return { error: `Missing ${prop}` };
 				}
@@ -65,7 +65,7 @@ export function createGuard<T extends Guard>(
 		if (typeof obj === "object") {
 			if ("optional" in obj && obj.optional === true) {
 				if (t) {
-					return { value: null }	
+					return { value: null };
 				} else {
 					return checkObject(obj.value, t);
 				}
@@ -98,9 +98,9 @@ export namespace Checkables {
 		}
 	}
 	export function boolean(input: unknown): CheckResult<boolean> {
-		if (input === "true") {
+		if (input === true || input === "true") {
 			return { value: true };
-		} else if (input === "false") {
+		} else if (input === false || input === "false") {
 			return { value: false };
 		} else {
 			return { error: "Bad Boolean" };
@@ -161,9 +161,26 @@ export async function getUserFromAuth(
 	return user;
 }
 
-export function createGroupUser(user: ObjectId | DatabaseTypes.User, group: ObjectId | DatabaseTypes.Group) {
-	return {
-		user,
-		group,
-	};
+export async function getGroupUser(
+	user: ObjectId | DatabaseTypes.User,
+	group: ObjectId | DatabaseTypes.Group
+) {
+	const userid: ObjectId = user instanceof ObjectId ? user : user._id;
+	const groupid: ObjectId = group instanceof ObjectId ? group : group._id;
+
+	const guser = await groupUsers.findOne({ userid, groupid });
+	if (!guser) {
+		const insertResult = await groupUsers.insertOne({
+			user: userid,
+			group: groupid,
+			createdAt: Timestamp.fromNumber(Date.now()),
+			updatedAt: Timestamp.fromNumber(Date.now()),
+		});
+		if (insertResult.acknowledged) {
+			return await groupUsers.findOne({ _id: insertResult.insertedId });
+		} else {
+			return null
+		}
+	}
+	return guser;
 }

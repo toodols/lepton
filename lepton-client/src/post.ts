@@ -1,7 +1,7 @@
 import { EventEmitter } from "events";
 import { Client, Options, signedIn } from "./client";
 import { Comment } from "./comment";
-import { CREATE_COMMENT_URL } from "./constants";
+import { CREATE_COMMENT_URL, VOTE_POST_URL } from "./constants";
 import { Group } from "./group";
 import { User } from "./user";
 
@@ -31,6 +31,9 @@ export class CommentsLoader<Opts extends Options> extends EventEmitter {
 		this.client.getComments({post: this.post.id}).then(comments => {
 			this.isLoading = false;
 			this.loaded = comments.map(e=>e.id);
+			this.loaded = this.loaded.sort((a,b)=>{
+				return this.client.commentsCache.get(a)!.createdAt - this.client.commentsCache.get(b)!.createdAt;
+			});
 			this.emit("update");
 		});
 	}
@@ -67,6 +70,24 @@ export class Post<Opts extends Options> extends EventEmitter {
 			});
 		}
 		return this._commentsLoader;
+	}
+
+	@signedIn()
+	async vote(sign: 1 | 0 | -1){
+		const result = await fetch(VOTE_POST_URL, {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+				"Authorization": this.client.token!,
+			},
+			body: JSON.stringify({
+				post: this.id,
+				sign,
+			})
+		}).then(e=>e.json());
+		if (result.error) {
+			throw new Error(result.error);
+		}
 	}
 
 	onNewComment(id: string){

@@ -21,7 +21,7 @@ export default async function handler(
 	const user = await getUserFromAuth(req, res);
 	if (!user) return;
 
-	groups.insertOne({
+	const iresult = await groups.insertOne({
 		name: name,
 		isPublic: isPublic,
 		icon: "", // @todo: add icon,
@@ -29,5 +29,13 @@ export default async function handler(
 		updatedAt: Timestamp.fromNumber(Date.now()),
 		createdAt: Timestamp.fromNumber(Date.now()),
 	})
-
+	if (iresult.acknowledged) {
+		const data = await groups.findOne({_id: iresult.insertedId});
+		res.json({})
+		// io.emit("group", {
+		// 	group: Converter.toGroupData(data!),
+		// }
+	} else {
+		res.status(500).json({error: "Failed to create group"});
+	}
 }
