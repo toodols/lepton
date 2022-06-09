@@ -73,7 +73,7 @@ export class Post<Opts extends Options> extends EventEmitter {
 	}
 
 	@signedIn()
-	async vote(sign: 1 | 0 | -1){
+	async vote(value: 1 | 0 | -1){
 		const result = await fetch(VOTE_POST_URL, {
 			method: "POST",
 			headers: {
@@ -82,7 +82,7 @@ export class Post<Opts extends Options> extends EventEmitter {
 			},
 			body: JSON.stringify({
 				post: this.id,
-				sign,
+				value,
 			})
 		}).then(e=>e.json());
 		if (result.error) {

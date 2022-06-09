@@ -1,3 +1,4 @@
+import e from 'express';
 import { Settings } from 'lepton-client';
 import { MongoClient, Collection, Document, ObjectId, Timestamp } from 'mongodb';
 import { Permission } from './api/util';
@@ -22,11 +23,22 @@ export namespace DatabaseTypes {
 		permission: Permission
 	}
 	export type Auth = PasswordAuth;
+
+	export const enum Flags {
+		None = 0,
+		Owner = 1,
+		Developer = 2,
+		Moderator = 4,
+	}
 	export interface User extends DatedDocument {
 		groups: ObjectId[];
 		username: string;
 		settings: Settings, //may make own type instead of referencing Settings
-		inventory: ObjectId;
+		inventory: {item: ObjectId, count: number}[];
+		money: number;
+		flags: Flags;
+		followers: number;
+		following: number;
 	}
 
 	export interface Comment extends DatedDocument {
@@ -39,14 +51,10 @@ export namespace DatabaseTypes {
 		author: ObjectId;
 		content: string;
 		group?: ObjectId;
-		voters: { [user: string]: 1 | -1 };
 		/** The number of votes will not always be up to date with voters
 		 * It is calculated periodically
 		 */
 		votes: number;
-	}
-
-	export interface Inventory extends DatedDocument {
 	}
 
 	export interface Group extends DatedDocument {
@@ -60,20 +68,35 @@ export namespace DatabaseTypes {
 		group: ObjectId;
 		user: ObjectId;
 	}
+	export interface Follow extends Document {
+		user: ObjectId;
+		follower: ObjectId;
+	}
+
+	export interface Vote extends Document {
+		post: ObjectId;
+		user: ObjectId;
+		value: -1 | 0 | 1;
+	}
+	
+	export interface Item extends DatedDocument {
+		name: string;
+	}
 
 	export interface Response {
 		users: Collection<User>;
 		posts: Collection<Post>;
 		comments: Collection<Comment>;
 		auth: Collection<Auth>;
-		inventory: Collection<Inventory>;
 		groups: Collection<Group>;
 		groupUsers: Collection<GroupUser>;
+		follows: Collection<Follow>;
+		votes: Collection<Vote>;
 	}
 }
 
 export const {
-	users, posts, comments, auth, inventory, groups, groupUsers
+	users, posts, comments, auth, groups, groupUsers, follows, votes
 } = await new Promise<DatabaseTypes.Response>((resolve, reject) => {
 	const client = new MongoClient(MongoDB_URI);
 	client.connect(async err => {
@@ -84,7 +107,8 @@ export const {
 			users: database.collection("users"),
 			posts: database.collection("posts"),
 			auth: database.collection("auth"),
-			inventory: database.collection("inventory"),
+			follows: database.collection("follows"),
+			votes: database.collection("votes"),
 			groupUsers: database.collection("groupUsers"),
 		};
 		// indexes
@@ -107,6 +131,22 @@ export const {
 		
 		// find comments for a post by newest
 		await collections.comments.createIndex({post: 1, createdAt: -1});
+
+		// find votes for a post;
+		await collections.votes.createIndex({post: 1});
+
+		// find user's vote for a post
+		await collections.votes.createIndex(["user", "post"], { unique: true });
+
+		// find following for a user
+		await collections.follows.createIndex({follower: 1});
+
+		// find followers for a user
+		await collections.follows.createIndex({user: 1});
+
+		// find if user has followed another user
+		await collections.follows.createIndex(["user", "follower"], { unique: true });
+		
 		resolve(collections);
 	});
 })

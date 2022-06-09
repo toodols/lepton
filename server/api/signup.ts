@@ -1,6 +1,6 @@
 import {Request, Response} from "express";
 import { Timestamp } from "mongodb";
-import { auth, inventory, users } from "../database";
+import { auth, users, DatabaseTypes } from "../database";
 import { hash, salt, token } from "../util";
 import { Checkables, createGuard, Error, Permission} from "./util";
 
@@ -53,12 +53,6 @@ export default async function handler(req: Request, res: Response<Error | Data>)
 	const password_salt = salt();
 	const hashed_password = hash(password, password_salt);
 
-	const inventoryDoc = await inventory.insertOne({
-		createdAt: Timestamp.fromNumber(Date.now()),
-		updatedAt: Timestamp.fromNumber(Date.now())
-	});
-
-	if (!inventoryDoc.acknowledged) return res.status(500).json({error: "Error creating inventory"});
 
 	const user = await users.insertOne({
 		username,
@@ -67,11 +61,14 @@ export default async function handler(req: Request, res: Response<Error | Data>)
 			description: "",
 			theme: "light"
 		},
+		followers: 0,
+		following: 0,
 		groups: [],
-		followers: {},
-		inventory: inventoryDoc.insertedId,
+		inventory: [],
 		createdAt: Timestamp.fromNumber(Date.now()),
-		updatedAt: Timestamp.fromNumber(Date.now())
+		updatedAt: Timestamp.fromNumber(Date.now()),
+		flags: DatabaseTypes.Flags.None,
+		money: 0,
 	});
 	if (!user.acknowledged) return res.status(500).json({error: "Error creating user"});
 

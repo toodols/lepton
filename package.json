@@ -6,6 +6,7 @@
   "repository": "https://github.com/toodols/lepton.git",
   "scripts": {
     "dev": "tsc --project ./lepton-client/tsconfig.json && tsc --project ./tsconfig.server.json && node --inspect --experimental-specifier-resolution=node ./out/server-entry.js",
+	"dropcollections": "tsc --project ./tsconfig.server.json && node --experimental-specifier-resolution=node ./out/dropall.js",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"

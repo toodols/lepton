@@ -1,4 +1,5 @@
-import { Client, Options } from "./client";
+import { Client, Options, signedIn } from "./client";
+import { FOLLOW_USER_URL, UNFOLLOW_USER_URL } from "./constants";
 
 export interface UserDataPartial {
 	id: string;
@@ -25,6 +26,36 @@ export class User<Opts extends Options> {
 			return val;
 		}
 		return new User(client, post);
+	}
+
+	@signedIn()
+	async follow(){
+		const result = await fetch(FOLLOW_USER_URL, {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+				"Authorization": this.client.token!
+			},
+		}).then(e=>e.json());
+		if (result.error) {
+			throw new Error(result.error);
+		}
+		return result.alreadyFollowed
+	}
+
+	@signedIn()
+	async unfollow(){
+		const result = await fetch(UNFOLLOW_USER_URL, {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+				"Authorization": this.client.token!
+			},
+		}).then(e=>e.json());
+		if (result.error) {
+			throw new Error(result.error);
+		}
+		return result.alreadyUnfollowed
 	}
 
 	update(data: UserData){
