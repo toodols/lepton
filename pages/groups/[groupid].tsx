@@ -27,6 +27,7 @@ export default function GroupHandler() {
 	if (group) {
 		return <div>
 			Name: {group.name}
+			<br/>
 			Description: {group.description}
 		</div>
 	} else {
