@@ -1,4 +1,4 @@
-import { faBars } from "@fortawesome/free-solid-svg-icons";
+import { faBars, faGear, faPlus } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useRouter } from "next/router";
 import { useEffect } from "react";
@@ -10,6 +10,7 @@ import {
 	setSidebarOpen,
 	setCreatePostModalOpen,
 	setTitle,
+	setSettingsModalOpen,
 } from "../../lib/store";
 import { AccountSelection } from "./account-selection";
 import { GroupSelection } from "./group-selection";
@@ -37,6 +38,12 @@ export function Topbar() {
 			</h2>
 			{(router.pathname==="/" || router.pathname === "/groups/[groupid]")?(<GroupSelection/>):<></>}
 			<div className={Styles.right}>
+				<button onClick={()=>{
+						dispatch(setSidebarOpen(false));
+						dispatch(setSettingsModalOpen(true))
+					}}>
+						<FontAwesomeIcon icon={faGear}/>
+					</button>
 				{isSignedIn ? (
 					<>
 						{(router.pathname==="/" || router.pathname === "/groups/[groupid]")? (
@@ -45,7 +52,7 @@ export function Topbar() {
 									dispatch(setCreatePostModalOpen(true));
 								}}
 							>
-								Create Post
+								<FontAwesomeIcon icon={faPlus} />
 							</button>
 						) : (
 							<></>

@@ -37,12 +37,6 @@ export function Sidebar() {
 							Backrooms
 						</button>
 					</Link>
-					<button onClick={()=>{
-						dispatch(setSidebarOpen(false));
-						dispatch(setSettingsModalOpen(true))
-					}}>
-						Settings
-					</button>
 				</aside>
 			</div>
 		</>
