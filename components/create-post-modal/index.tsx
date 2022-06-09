@@ -1,3 +1,4 @@
+import { useRouter } from "next/router";
 import { useRef, useState } from "react";
 import Modal from "react-modal";
 import { useDispatch, useSelector } from "react-redux";
@@ -9,6 +10,9 @@ export function CreatePostModal() {
 	const [isLoading, setIsLoading] = useState(false);
 	const isOpen = useSelector((state: RootState) => state.main.createPostModalOpen);
 	const ref = useRef<HTMLTextAreaElement>(null);
+	const router = useRouter();
+	const group = router.pathname==="/groups/[groupid]"? String(router.query.groupid) : undefined;
+
 	return <Modal ariaHideApp={false} className={Styles.create_post_modal} isOpen={isOpen} closeTimeoutMS={300} onRequestClose={()=>{
 		dispatch(setCreatePostModalOpen(false));
 	}}>
@@ -16,7 +20,8 @@ export function CreatePostModal() {
 		<textarea defaultValue="I think I am very sad right now" ref={ref}></textarea>
 		<button onClick={()=>{
 			client.createPost({
-				content: ref.current!.value
+				content: ref.current!.value,
+				group
 			});
 			// dispatch(setCreatePostModalOpen(false));
 		}}>Create Post</button>

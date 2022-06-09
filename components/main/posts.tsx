@@ -12,14 +12,16 @@ export const PostElementsContext = createContext<{
 	posts: Record<string, HTMLDivElement>;
 }>({ posts: {} });
 
-export function Posts() {
+export function Posts({groupid}: {groupid?: string}) {
 	const posts = useSelector((state: RootState) => state.data.posts);
 	const dispatch = useDispatch();
 	useEffect(() => {
 		dispatch(resetPosts());
 		async function sub() {
 			dispatch(
-				onPostsLoadedOld((await client.getPosts()).map((e) => e.id))
+				onPostsLoadedOld((await client.getPosts({
+					group: groupid,
+				})).map((e) => e.id))
 			);
 		}
 		sub();
@@ -73,17 +75,17 @@ export function Posts() {
 												client.postsCache.size	=== 0
 											)
 												return;
+											const query: {before?: number, group?: string} = {};
+											if (groupid)
+												query.group = groupid;
+											let mostRecent = client.postsCache.get(posts[posts.length-1]);
+											if (mostRecent) {
+												query.before = mostRecent.createdAt;
+											}
 											dispatch(
 												onPostsLoadedOld(
 													(
-														await client.getPosts({
-															before: client.postsCache.get(
-																posts[
-																	posts.length -
-																		1
-																]
-															)!.createdAt,
-														})
+														await client.getPosts(query)
 													).map((e) => e.id)
 												)
 											);

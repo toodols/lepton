@@ -1,6 +1,6 @@
 import e from 'express';
 import { Settings } from 'lepton-client';
-import { MongoClient, Collection, Document, ObjectId, Timestamp } from 'mongodb';
+import { MongoClient, Collection, Document, ObjectId, Timestamp, Db } from 'mongodb';
 import { Permission } from './api/util';
 import { MongoDB_URI } from "./env";
 
@@ -93,11 +93,12 @@ export namespace DatabaseTypes {
 		groupUsers: Collection<GroupUser>;
 		follows: Collection<Follow>;
 		votes: Collection<Vote>;
+		database: Db
 	}
 }
 
 export const {
-	users, posts, comments, auth, groups, groupUsers, follows, votes
+	users, posts, comments, auth, groups, groupUsers, follows, votes, database
 } = await new Promise<DatabaseTypes.Response>((resolve, reject) => {
 	const client = new MongoClient(MongoDB_URI);
 	client.connect(async err => {
@@ -111,6 +112,7 @@ export const {
 			follows: database.collection("follows"),
 			votes: database.collection("votes"),
 			groupUsers: database.collection("groupUsers"),
+			database,
 		};
 		// indexes
 		

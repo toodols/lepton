@@ -19,10 +19,15 @@ const getPostsGuard = createGuard({
 export default async function handler(req: Request, res: Response<Data | Error>) {
 	const result = getPostsGuard(req.query as any);
 	if ("error" in result) return res.status(400).json({error: result.error});
-
-	const {before} = result.value;
+	const {before, group} = result.value;
 	const query: Filter<DatabaseTypes.Post> = {};
 	if (before) query.createdAt = {$lt: Timestamp.fromNumber(before)};
+	if (group) {
+		query.group = group
+	} else {
+		// doesnt even work
+		query.group = {$exists: false}
+	};
 	const postsResult = await posts.find(query).sort({updatedAt:-1}).limit(10).toArray();
 	let unfiltered = await Promise.all(postsResult.map(post=>comments.findOne({post: post._id}, {sort: {_id: -1}})));
 

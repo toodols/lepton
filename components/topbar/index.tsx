@@ -39,7 +39,7 @@ export function Topbar() {
 			<div className={Styles.right}>
 				{isSignedIn ? (
 					<>
-						{router.pathname === "/" ? (
+						{(router.pathname==="/" || router.pathname === "/groups/[groupid]")? (
 							<button
 								onClick={() => {
 									dispatch(setCreatePostModalOpen(true));

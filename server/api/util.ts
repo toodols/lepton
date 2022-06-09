@@ -1,8 +1,8 @@
 // provides some utility functions for the api just to handle some common error messages, especially authorization and body.
 
 import { Request, Response } from "express";
-import { ObjectId, Timestamp } from "mongodb";
-import { auth, DatabaseTypes, groupUsers, users } from "../database";
+import { ObjectId, Timestamp, WithId } from "mongodb";
+import { auth, database, DatabaseTypes, groupUsers, users } from "../database";
 
 export interface Error {
 	error: string;
@@ -145,6 +145,7 @@ export async function getUserFromAuth(
 	if (!token) {
 		res.status(401);
 	}
+
 	const authDoc = await auth.findOne({ token });
 	if (!authDoc) return void res.status(400).json({ error: "Invalid token" });
 	if (
@@ -161,7 +162,7 @@ export async function getUserFromAuth(
 	return user;
 }
 
-export async function getGroupUser(
+export async function withGroupUser(
 	user: ObjectId | DatabaseTypes.User,
 	group: ObjectId | DatabaseTypes.Group
 ) {

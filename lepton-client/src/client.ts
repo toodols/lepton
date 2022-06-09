@@ -9,7 +9,7 @@ import { CREATE_POST_URL, GET_COMMENTS_URL, GET_POSTS_URL, GET_SELF_URL, GET_USE
 import { Settings } from "./types";
 import { ClientInfo, ClientInfoData } from "./clientinfo";
 
-const URL = process.env.NODE_ENV === "development" ? "/api/socket" : "wss://idk lmao";
+const SOCKET_URL = process.env.NODE_ENV === "development" ? "/api/socket" : "wss://idk lmao";
 
 export interface Options {
 	/**
@@ -54,11 +54,19 @@ export class Client<Opts extends Options = {partial: false}> extends EventEmitte
 	clientInfo?: ClientInfo<Opts>;
 	options: Opts;
 
-	async getPosts(props: { before: number }): Promise<Post<Opts>[]>;
-	async getPosts(): Promise<Post<Opts>[]>;
-	async getPosts(props?: { before: number }) {
+	async getPosts(props?: { before?: number, group?: string}) {
+		const url = new URLSearchParams();
+		if (props?.before) {
+			url.set("before", props.before.toString());
+		}
+		if (props?.group) {
+			url.set("group", props.group);
+		}
+
+
+
 		const { posts, users, comments }: { posts: PostData[]; users: UserDataFull[], comments: CommentData[] } = await fetch(
-			GET_POSTS_URL + (props?.before ? `?before=${props.before}` : "")
+			GET_POSTS_URL + (url.toString() ? `?${url.toString()}` : "")
 		).then((e) => e.json());
 
 		for (const userid in users) {
