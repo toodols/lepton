@@ -34,7 +34,7 @@ export class User<Opts extends Options> {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
-				"Authorization": this.client.token!
+				"Authorization": `Bearer ${this.client.token!}`,
 			},
 		}).then(e=>e.json());
 		if (result.error) {
@@ -49,7 +49,7 @@ export class User<Opts extends Options> {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
-				"Authorization": this.client.token!
+				"Authorization": `Bearer ${this.client.token!}`,
 			},
 		}).then(e=>e.json());
 		if (result.error) {

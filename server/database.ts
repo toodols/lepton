@@ -16,12 +16,12 @@ export namespace DatabaseTypes {
 		username: string;
 		hashed_password: string;
 		salt: string;
-		token: string;
 		user: ObjectId;
 		createdAt: Timestamp;
 		updatedAt: Timestamp;
-		permission: Permission
+		permission: Permission;
 	}
+
 	export type Auth = PasswordAuth;
 
 	export const enum Flags {
@@ -85,10 +85,10 @@ export namespace DatabaseTypes {
 	}
 
 	export interface Response {
+		auth: Collection<Auth>;
 		users: Collection<User>;
 		posts: Collection<Post>;
 		comments: Collection<Comment>;
-		auth: Collection<Auth>;
 		groups: Collection<Group>;
 		groupUsers: Collection<GroupUser>;
 		follows: Collection<Follow>;
@@ -98,17 +98,17 @@ export namespace DatabaseTypes {
 }
 
 export const {
-	users, posts, comments, auth, groups, groupUsers, follows, votes, database
+	users, posts, comments, groups, groupUsers, follows, votes, database, auth
 } = await new Promise<DatabaseTypes.Response>((resolve, reject) => {
 	const client = new MongoClient(MongoDB_URI);
 	client.connect(async err => {
 		const database = client.db("database");
 		const collections: DatabaseTypes.Response = {
+			auth: database.collection("auth"),
 			groups: database.collection("groups"),
 			comments: database.collection("comments"),
 			users: database.collection("users"),
 			posts: database.collection("posts"),
-			auth: database.collection("auth"),
 			follows: database.collection("follows"),
 			votes: database.collection("votes"),
 			groupUsers: database.collection("groupUsers"),
@@ -116,9 +116,6 @@ export const {
 		};
 		// indexes
 		
-		// find auths by their token
-		await collections.auth.createIndex("token", { unique: true });
-
 		// find groupusers by their group and user
 		await collections.groupUsers.createIndex(["group", "user"], { unique: true });
 

@@ -9,9 +9,11 @@
  */
 
 import {Request, Response} from "express";
-import { auth, users } from "../database";
+import { jwt_secret } from "../env";
+import { auth } from "../database";
 import { hash } from "../util";
 import {Checkables, createGuard, Error} from "./util";
+import jwt from "jsonwebtoken";
 
 interface Data {
 	token: string;
@@ -33,7 +35,8 @@ export default async function handler(req: Request, res: Response<Data | Error>)
 		const password_salt = authDoc.salt;
 		const hashed_password = hash(password, password_salt);
 		if (hashed_password === authDoc.hashed_password) {
-			return res.json({token: authDoc.token});
+			const token = jwt.sign({user: authDoc.user, permission: authDoc.permission}, jwt_secret);
+			return res.json({token});
 		} else {
 			return res.status(401).json({error: "Incorrect password"});
 		}

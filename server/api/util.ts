@@ -3,7 +3,8 @@
 import { Request, Response } from "express";
 import { ObjectId, Timestamp, WithId } from "mongodb";
 import { auth, database, DatabaseTypes, groupUsers, users } from "../database";
-
+import jwt from "jsonwebtoken";
+import { jwt_secret } from "../env";
 export interface Error {
 	error: string;
 }
@@ -144,22 +145,26 @@ export async function getUserFromAuth(
 	const token = req.headers.authorization;
 	if (!token) {
 		res.status(401);
+		return;
 	}
 
-	const authDoc = await auth.findOne({ token });
-	if (!authDoc) return void res.status(400).json({ error: "Invalid token" });
-	if (
-		!(
-			authDoc.permission &&
-			(authDoc.permission === Permission.ALL ||
-				permission & authDoc.permission)
-		)
-	)
-		return void res.status(403).json({ error: "Insufficient permissions" });
-	const user = await users.findOne({ _id: authDoc.user });
-	if (!user)
-		return void res.status(500).json({ error: "Error finding user" });
-	return user;
+	const inner = token.replace(/^Bearer\s+/, "");
+
+	const e = jwt.verify(inner, jwt_secret);
+	if (typeof e === "string") {
+		return void res.status(401).send({ error: "token doesn't even work" });
+	} else {
+		if (
+			!(
+				e.permission &&
+				(e.permission === Permission.ALL ||
+					permission & e.permission)
+			)
+		) {
+			return void res.status(403).json({ error: "Insufficient permissions" });
+		}
+		return await users.findOne({ _id: new ObjectId(e.user) }) ?? undefined;
+	}
 }
 
 export async function withGroupUser(

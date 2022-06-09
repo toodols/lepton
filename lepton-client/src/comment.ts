@@ -32,7 +32,7 @@ export class Comment<Opts extends Options> extends EventEmitter {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
-				"Authorization": this.client.token!,
+				"Authorization": `Bearer ${this.client.token}`,
 			},
 			body: JSON.stringify({
 				id: this.id,

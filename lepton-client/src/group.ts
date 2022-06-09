@@ -28,7 +28,7 @@ export class Group<Opts extends Options> {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
-				Authorization: `${this.client.token}`,
+				Authorization: this.client.token?`Bearer ${this.client.token}`:"",
 			},
 			body: JSON.stringify({
 				id: this.id,

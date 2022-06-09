@@ -19,10 +19,6 @@ export function hash(password: string, salt: string) {
 	return createHash("sha256").update(password).update(salt).digest("hex");
 }
 
-export function token(){
-	return hex(16);
-}
-
 export namespace Converter {
 	export function toPostData(post: WithId<DatabaseTypes.Post>): PostData {
 		return {

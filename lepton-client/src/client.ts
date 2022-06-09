@@ -109,7 +109,7 @@ export class Client<Opts extends Options = {partial: false}> extends EventEmitte
 			body: JSON.stringify(props),
 			headers: {
 				"content-type": "application/json",
-				Authorization: this.token!,
+				Authorization: `Bearer ${this.token!}`,
 			},
 		});
 	}
@@ -117,7 +117,7 @@ export class Client<Opts extends Options = {partial: false}> extends EventEmitte
 	async getSelfInfo(token: string): Promise<{user: UserDataFull, info: ClientInfoData, groups: Record<string, GroupDataFull>}> {
 		const result = await fetch(GET_SELF_URL, {
 			headers: {
-				Authorization: token,
+				Authorization: `Bearer ${token}`,
 			},
 		}).then((e) => e.json());
 		if (result.error) {
@@ -129,7 +129,7 @@ export class Client<Opts extends Options = {partial: false}> extends EventEmitte
 	async getGroup(groupid: string): Promise<Group<Opts> | undefined> {
 		const result = await fetch(`${GET_GROUP_URL}${groupid}`, {
 			headers: {
-				Authorization: this.token!,
+				Authorization: `Bearer ${this.token!}`,
 				"Content-Type": "application/json",
 			},
 		}).then((e) => e.json());
@@ -154,7 +154,7 @@ export class Client<Opts extends Options = {partial: false}> extends EventEmitte
 			body: JSON.stringify(props),
 			headers: {
 				"content-type": "application/json",
-				Authorization: this.token!,
+				Authorization: `Bearer ${this.token!}`,
 			},
 		}).then((e) => e.json());
 		if (result.error) {
@@ -208,7 +208,7 @@ export class Client<Opts extends Options = {partial: false}> extends EventEmitte
 			method: "POST",
 			headers: {
 				"content-type": "application/json",
-				Authorization: this.token!,
+				Authorization: `Bearer ${this.token!}`,
 			},
 			body: JSON.stringify(settings),
 		}).then(e=>e.json())
