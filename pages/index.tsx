@@ -2,7 +2,7 @@
 
 import { CreatePostModal } from "../components/create-post-modal";
 import { Posts } from "../components/main/posts";
-import { ReactNode } from "react";
+import { ReactNode, useEffect } from "react";
 import { Layout } from "../components/layout";
 import { useDispatch } from "react-redux";
 import { setTitle } from "lib/store";
@@ -10,7 +10,9 @@ import { CreateGroupModal } from "components/create-group-modal";
 
 export default function Home() {
 	const dispatch = useDispatch();
-	dispatch(setTitle("Home"));
+	useEffect(()=>{
+		dispatch(setTitle("Home"));
+	}, [])
 	return (
 		<>
 			<Posts/>

@@ -1,6 +1,5 @@
 import { client } from "lib/client";
 import { RootState, setCreateGroupModalOpen } from "lib/store";
-import { setViewingGroupId } from "lib/store/dataslice";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -10,20 +9,49 @@ import Styles from "./group-selection.module.sass";
 
 export function GroupSelection() {
 	const dispatch = useDispatch();
-	const currentGroupId = useSelector((state: RootState) => state.data.viewingGroupId);
 	const router = useRouter();
+	const currentGroupId =
+		router.pathname === "/groups/[groupid]"
+			? String(router.query.groupid)
+			: undefined;
 	return (
 		<AsyncCreatableSelect
 			isValidNewOption={() => {
 				return !!client.clientUser;
 			}}
 			onChange={(value: any) => {
-				console.log(value)
-				dispatch(setViewingGroupId({id: value.value, router}));
+				if (value.value) {
+					router.push(`/groups/${value.value}`);
+				} else {
+					router.push("/");
+				}
 			}}
+			allowCreateWhileLoading={true}
 			value={{
 				value: currentGroupId,
-				label: currentGroupId?client.groupsCache.get(currentGroupId)?.name:"..."
+				label: currentGroupId
+					? client.groupsCache.get(currentGroupId)?.name
+					: "Home",
+			}}
+			styles={{
+				control: (provided) => ({
+					...provided,
+					minHeight: "100%",
+					height: "100%"
+				}),
+				valueContainer: (provided) => ({
+					...provided,
+					height: "100%",
+					minHeight: "100%",
+					display: "flex",
+					padding: "0px 6px",
+				}),
+				indicatorsContainer: (provided) => ({
+					...provided,
+					height: "100%",
+					minHeight: "100%",
+				}),
+				// indicatorsContainer: () => ({ height: "100%" }),
 			}}
 			className={Styles.group_selection}
 			classNamePrefix="react-select"
@@ -36,10 +64,20 @@ export function GroupSelection() {
 			defaultOptions={true}
 			loadOptions={async (query) => {
 				const result = await client.searchGroups(query);
-				return result.map((group) => ({
+				const mapped = result.map((group) => ({
 					value: group.id,
 					label: group.name,
 				}));
+				// for some reason react-select caches search results
+				// fucking gay
+				// if (currentGroupId !== undefined) {
+				mapped.unshift({
+					value: undefined as any,
+					label: "Home",
+				});
+				// }
+				console.log(mapped)
+				return mapped;
 			}}
 		/>
 	);

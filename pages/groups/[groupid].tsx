@@ -9,7 +9,6 @@ export default function GroupHandler() {
 	const router = useRouter();
 	const dispatch = useDispatch();
 	const groupid = router.query.groupid;
-	console.log(groupid)
 	const [group, setGroup] = useState<Group | undefined>(client.groupsCache.get(groupid as string));
 	useEffect(()=>{
 		if (groupid) {
