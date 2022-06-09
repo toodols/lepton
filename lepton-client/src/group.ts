@@ -6,6 +6,8 @@ export interface GroupDataPartial {
 	name: string;
 	createdAt: number;
 	updatedAt: number;
+	description: string;
+	isPublic: boolean;
 	icon: string;
 }
 export interface GroupDataFull extends GroupDataPartial {}
@@ -16,7 +18,8 @@ export class Group<Opts extends Options> {
 	id: string;
 	name: string;
 	icon: string;
-	// isPublic: boolean;
+	description: string;
+	isPublic: boolean;
 	// full: boolean;
 
 	@signedIn()
@@ -49,5 +52,7 @@ export class Group<Opts extends Options> {
 		this.name = from.name;
 		this.client.groupsCache.set(this.id, this);
 		this.icon = from.icon;
+		this.isPublic = from.isPublic;
+		this.description = from.description
 	}
 }

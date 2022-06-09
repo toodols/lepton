@@ -35,7 +35,7 @@ export function Topbar() {
 			<h2 className={Styles.title}>
 				{title}
 			</h2>
-			{router.pathname==="/"?(<GroupSelection/>):<></>}
+			{(router.pathname==="/" || router.pathname === "/groups/[groupid]")?(<GroupSelection/>):<></>}
 			<div className={Styles.right}>
 				{isSignedIn ? (
 					<>

@@ -175,6 +175,7 @@ export async function getGroupUser(
 			group: groupid,
 			createdAt: Timestamp.fromNumber(Date.now()),
 			updatedAt: Timestamp.fromNumber(Date.now()),
+			isInGroup: true,
 		});
 		if (insertResult.acknowledged) {
 			return await groupUsers.findOne({ _id: insertResult.insertedId });

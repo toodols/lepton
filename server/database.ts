@@ -67,6 +67,7 @@ export namespace DatabaseTypes {
 	export interface GroupUser extends DatedDocument {
 		group: ObjectId;
 		user: ObjectId;
+		isInGroup: boolean;
 	}
 	export interface Follow extends Document {
 		user: ObjectId;
@@ -118,6 +119,9 @@ export const {
 
 		// find groupusers by their group and user
 		await collections.groupUsers.createIndex(["group", "user"], { unique: true });
+
+		// find members of a group
+		await collections.groupUsers.createIndex(["group", "isInGroup"]);
 
 		// find posts in any group by newest
 		// editing a post should bring it back to the top, which is why updatedAt is used

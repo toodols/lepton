@@ -59,7 +59,8 @@ export default async function handler(req: Request, res: Response<Error | Data>)
 		settings: {
 			avatar: "/avatar.png",
 			description: "",
-			theme: "light"
+			theme: "light",
+			banner: "",
 		},
 		followers: 0,
 		following: 0,

@@ -41,6 +41,8 @@ export namespace Converter {
 			createdAt: group.createdAt.toNumber(),
 			updatedAt: group.updatedAt.toNumber(),
 			icon: group.icon,
+			description: group.description,
+			isPublic: group.isPublic,
 		}
 	}
 	export function toGroupDataPartial(group: WithId<DatabaseTypes.Group>): GroupData {

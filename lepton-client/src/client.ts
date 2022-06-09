@@ -5,7 +5,7 @@ import { Group, GroupDataFull } from "./group";
 import { EventEmitter } from "events";
 import { fetch } from "cross-fetch";
 import { io } from "socket.io-client";
-import { CREATE_POST_URL, GET_COMMENTS_URL, GET_POSTS_URL, GET_SELF_URL, GET_USER_URL, SIGN_IN_URL, SIGN_UP_URL, CREATE_GROUP_URL, UPDATE_SETTINGS_URL, SEARCH_GROUPS_URL } from "./constants";
+import { CREATE_POST_URL, GET_COMMENTS_URL, GET_POSTS_URL, GET_SELF_URL, GET_USER_URL, SIGN_IN_URL, SIGN_UP_URL, CREATE_GROUP_URL, UPDATE_SETTINGS_URL, SEARCH_GROUPS_URL, GET_GROUP_URL } from "./constants";
 import { Settings } from "./types";
 import { ClientInfo, ClientInfoData } from "./clientinfo";
 
@@ -119,6 +119,19 @@ export class Client<Opts extends Options = {partial: false}> extends EventEmitte
 			throw new Error(result.error);
 		}
 		return result;
+	}
+
+	async getGroup(groupid: string): Promise<Group<Opts> | undefined> {
+		const result = await fetch(`${GET_GROUP_URL}${groupid}`, {
+			headers: {
+				Authorization: this.token!,
+				"Content-Type": "application/json",
+			},
+		}).then((e) => e.json());
+		if (result.error) {
+			throw new Error(result.error);
+		}
+		return Group.from(this, result.group);
 	}
 
 	async searchGroups(name: string): Promise<Group<Opts>[]> {

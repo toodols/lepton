@@ -19,3 +19,4 @@ export const CREATE_GROUP_URL = "/api/groups/create";
 export const DELETE_GROUP_URL= "/api/groups/delete";
 export const EDIT_GROUP_URL = "/api/groups/edit";
 export const SEARCH_GROUPS_URL = "/api/groups/search";
+export const GET_GROUP_URL = "/api/groups/lookup/";

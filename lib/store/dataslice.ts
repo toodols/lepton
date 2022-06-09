@@ -1,11 +1,25 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { NextRouter } from "next/router";
+import { setTitle, store } from ".";
+import {client} from "../client";
 
 export const dataSlice = createSlice({
 	name: "Data",
 	initialState: {
+		viewingGroupId: undefined as string | undefined,
 		posts: [] as string[],
 	},
 	reducers: {
+		setViewingGroupId(state, {payload: {id, router}}: PayloadAction<{id: string | undefined, router: NextRouter}>) {
+			if (state.viewingGroupId === id) return;
+			state.viewingGroupId = id;
+			if (id) {
+				const group = client.groupsCache.get(id)!;
+				router.push(`/groups/${group.id}`);
+			} else {
+				router.push("/");
+			}
+		},
 		resetPosts(state) {
 			state.posts = [];
 		},
@@ -25,4 +39,4 @@ export const dataSlice = createSlice({
 	}
 });
 
-export const { resetPosts, onPostAdded, onPostsLoadedOld, onPostDeleted } = dataSlice.actions;
+export const { setViewingGroupId, resetPosts, onPostAdded, onPostsLoadedOld, onPostDeleted } = dataSlice.actions;

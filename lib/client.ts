@@ -1,5 +1,5 @@
 
-import {Client, Comment as _Comment, Post as _Post, User as _User} from "lepton-client";
+import {Client, Comment as _Comment, Post as _Post, User as _User, Group as _Group} from "lepton-client";
 import { store } from "./store";
 import { onClientUserChanged } from "./store/clientslice";
 import { onPostAdded, onPostDeleted, onPostsLoadedOld } from "./store/dataslice";
@@ -8,6 +8,7 @@ export type Options = {partial: true};
 export type Comment = _Comment<Options>;
 export type Post = _Post<Options>;
 export type User = _User<Options>;
+export type Group = _Group<Options>;
 
 export const client = new Client({partial: true});
 
