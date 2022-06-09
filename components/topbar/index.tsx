@@ -43,6 +43,7 @@ export function Topbar() {
 						dispatch(setSettingsModalOpen(true))
 					}}>
 						<FontAwesomeIcon icon={faGear}/>
+						Settings
 					</button>
 				{isSignedIn ? (
 					<>
@@ -53,6 +54,7 @@ export function Topbar() {
 								}}
 							>
 								<FontAwesomeIcon icon={faPlus} />
+								New Post
 							</button>
 						) : (
 							<></>

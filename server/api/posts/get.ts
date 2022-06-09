@@ -9,11 +9,12 @@ interface Data {
 	users: Record<string, UserDataPartial>;
 	posts: PostData[];
 	comments: CommentData[];
+	hasMore: boolean;
 };
 
 const getPostsGuard = createGuard({
 	before: Checkables.optional(Checkables.integer),
-	group: Checkables.optional(Checkables.string)
+	group: Checkables.optional(Checkables.objectId)
 })
 
 export default async function handler(req: Request, res: Response<Data | Error>) {
@@ -25,17 +26,20 @@ export default async function handler(req: Request, res: Response<Data | Error>)
 	if (group) {
 		query.group = group
 	} else {
-		// doesnt even work
-		query.group = {$exists: false}
+		// group is null
+		query.group = {$eq: null}
 	};
-	const postsResult = await posts.find(query).sort({updatedAt:-1}).limit(10).toArray();
-	let unfiltered = await Promise.all(postsResult.map(post=>comments.findOne({post: post._id}, {sort: {_id: -1}})));
+	const amountToLoad = 10;
+	const postsResult = await posts.find(query).sort({updatedAt:-1}).limit(amountToLoad+1).toArray();
+	const hasMore = postsResult.length > amountToLoad;
+	const actualPostsResult = postsResult.slice(0, amountToLoad);
+	let unfiltered = await Promise.all(actualPostsResult.map(post=>comments.findOne({post: post._id}, {sort: {_id: -1}})));
 
 	const commentResults = unfiltered.filter(comment=>comment) as WithId<DatabaseTypes.Comment>[]
 
 	const usersRecognized: Record<string, boolean> = {};
 	const arr: Promise<UserDataPartial>[] = [];
-	for (const post of postsResult) {
+	for (const post of actualPostsResult) {
 		if (!usersRecognized[post.author.toString()]) {			
 			usersRecognized[post.author.toString()] = true;
 			arr.push(users.findOne({_id: post.author}).then(value=>{
@@ -59,8 +63,9 @@ export default async function handler(req: Request, res: Response<Data | Error>)
 
 
 	res.json({
+		hasMore,
 		users: dataMap,
-		posts: postsResult.map(Converter.toPostData),
+		posts: actualPostsResult.map(Converter.toPostData),
 		comments: commentResults.map(Converter.toCommentData),
 	}).status(200);
 }

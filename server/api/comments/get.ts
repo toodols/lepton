@@ -7,7 +7,8 @@ import { Checkables, createGuard, Error } from "../util";
 
 interface Data {
 	users: Record<string, UserDataPartial>;
-	comments: CommentData[]
+	comments: CommentData[];
+	hasMore: boolean;
 };
 
 const getCommentsGuard = createGuard({
@@ -26,11 +27,13 @@ export default async function handler(req: Request, res: Response<Data | Error>)
 	if (value.before) {
 		query.createdAt = {$lt: value.before};
 	};
-	const findResult = await comments.find(query, {sort: {createdAt: -1}}).limit(10).toArray();
-
+	const amountToLoad = 10;
+	const findResult = await comments.find(query, {sort: {createdAt: -1}}).limit(amountToLoad+1).toArray();
+	const actualFindResult = findResult.slice(0, amountToLoad);
+	const hasMore = actualFindResult.length > amountToLoad;
 	const usersRecognized: Record<string, boolean> = {};
 	const arr: Promise<UserDataPartial>[] = [];
-	for (const comment of findResult) {
+	for (const comment of actualFindResult) {
 		if (!usersRecognized[comment.author.toString()]) {			
 			usersRecognized[comment.author.toString()] = true;
 			arr.push(users.findOne({_id: comment.author}).then(value=>{
@@ -45,7 +48,8 @@ export default async function handler(req: Request, res: Response<Data | Error>)
 	};
 
 	res.json({
+		hasMore,
 		users: dataMap,
-		comments: findResult.map(Converter.toCommentData),
+		comments: actualFindResult.map(Converter.toCommentData),
 	}).status(200);
 }

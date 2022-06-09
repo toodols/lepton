@@ -2,7 +2,6 @@ import { combineReducers, configureStore, createSlice, createStore, PayloadActio
 import { Post } from "lepton-client";
 import { client, init } from "lib/client";
 import { clientSlice } from "./clientslice";
-import { dataSlice } from "./dataslice";
 import { settingsSlice } from "./settings";
 
 interface MainState {
@@ -66,7 +65,6 @@ export const store = configureStore(
 			settings: settingsSlice.reducer,
 			client: clientSlice.reducer,
 			main: mainSlice.reducer,
-			data: dataSlice.reducer,
 		})
 	}
 )

@@ -63,9 +63,7 @@ export class Client<Opts extends Options = {partial: false}> extends EventEmitte
 			url.set("group", props.group);
 		}
 
-
-
-		const { posts, users, comments }: { posts: PostData[]; users: UserDataFull[], comments: CommentData[] } = await fetch(
+		const { posts, users, comments, hasMore }: { hasMore: boolean, posts: PostData[]; users: UserDataFull[], comments: CommentData[] } = await fetch(
 			GET_POSTS_URL + (url.toString() ? `?${url.toString()}` : "")
 		).then((e) => e.json());
 
@@ -85,11 +83,11 @@ export class Client<Opts extends Options = {partial: false}> extends EventEmitte
 			c.post.lastComment = c;
 		}
 
-		return createdPosts;
+		return {posts: createdPosts, hasMore};
 	}
 
-	async getComments(props: {post: string, before?: number}): Promise<Comment<Opts>[]> {
-		const {comments, users}: {comments: CommentData[], users: UserDataFull[]} = await fetch(
+	async getComments(props: {post: string, before?: number}): Promise<{comments: Comment<Opts>[], hasMore: boolean}> {
+		const {comments, users, hasMore}: {comments: CommentData[], users: UserDataFull[], hasMore: boolean} = await fetch(
 			GET_COMMENTS_URL + `?post=${props.post}` + (props.before ? `&before=${props.before}` : "")
 		).then((e) => e.json());
 
@@ -101,8 +99,7 @@ export class Client<Opts extends Options = {partial: false}> extends EventEmitte
 		for (const comment of comments) {
 			createdComments.push(Comment.from(this, comment));
 		}
-
-		return createdComments;
+		return {comments: createdComments, hasMore};
 	}
 
 	@signedIn()

@@ -1,4 +1,4 @@
-import { faClose } from "@fortawesome/free-solid-svg-icons";
+import { faClose, faSignOut, faTrash } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Avatar } from "../../util/avatar";
 import { client } from "lib/client";
@@ -30,9 +30,7 @@ export function AccountSelectionItem({ token, onClick }: { onClick:()=>void, tok
 			>
 				{info ? (
 					<>
-						<div className={Styles.img_container}>
-							<Avatar className={Styles.image} src={info.avatar} />
-						</div>
+						<Avatar className={Styles.image} src={info.avatar} size={20} />
 						{info.username}
 					</>
 				) : (
@@ -43,7 +41,7 @@ export function AccountSelectionItem({ token, onClick }: { onClick:()=>void, tok
 			</button>
 			<button onClick={()=>{
 				dispatch(removeAccount(token));
-			}} className={Styles.remove}><FontAwesomeIcon icon={faClose}/></button>
+			}} className={Styles.remove}><FontAwesomeIcon icon={faSignOut}/></button>
 		</div>
 	);
 }

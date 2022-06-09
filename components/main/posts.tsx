@@ -2,9 +2,9 @@ import { useSelector, useDispatch } from "react-redux";
 import { client } from "../../lib/client";
 import { RootState } from "../../lib/store";
 import { Post } from "./post";
+import {Post as PostObject} from "../../lib/client";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { createContext, useEffect, useRef, useState } from "react";
-import { onPostsLoadedOld, resetPosts } from "../../lib/store/dataslice";
 import { Comments } from "./comments";
 import Styles from "./main.module.sass";
 import { GhostPost } from "./ghost-post";
@@ -13,20 +13,33 @@ export const PostElementsContext = createContext<{
 }>({ posts: {} });
 
 export function Posts({groupid}: {groupid?: string}) {
-	const posts = useSelector((state: RootState) => state.data.posts);
+	const [posts, setPosts] = useState<string[]>([]);
+	const [hasMore, setHasMore] = useState(true);
 	const dispatch = useDispatch();
 	useEffect(() => {
-		dispatch(resetPosts());
+		setPosts([]);
 		async function sub() {
-			dispatch(
-				onPostsLoadedOld((await client.getPosts({
-					group: groupid,
-				})).map((e) => e.id))
-			);
+			const res = await client.getPosts({group: groupid});
+			setHasMore(res.hasMore);
+			setPosts(res.posts.map(e=>e.id));
 		}
 		sub();
 	// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, []);
+	}, [groupid]);
+	useEffect(()=>{
+		const handler = (postid: string)=>{
+			setPosts((posts)=>[postid, ...posts]);
+		}
+		client.on("postAdded", handler)
+		const deleteHandler = (postid: string)=>{
+			setPosts((posts)=>posts.filter(e=>e!==postid));
+		}
+		client.on("postDeleted", deleteHandler)
+		return ()=>{
+			client.removeListener("postAdded", handler)
+			client.removeListener("postDeleted", deleteHandler)
+		};
+	}, [])
 	const [autoCurrentId, setAutoCurrentId] = useState<string | null>(null);
 	const [forceCurrentId, setForceCurrentId] = useState<string | null>(null);
 	const currentPost = (forceCurrentId &&
@@ -82,15 +95,10 @@ export function Posts({groupid}: {groupid?: string}) {
 											if (mostRecent) {
 												query.before = mostRecent.createdAt;
 											}
-											dispatch(
-												onPostsLoadedOld(
-													(
-														await client.getPosts(query)
-													).map((e) => e.id)
-												)
-											);
+											const res = await client.getPosts(query);
+											setPosts((posts)=>[...posts, ...res.posts.map(e=>e.id)]);
 										}}
-										hasMore={true}
+										hasMore={hasMore}
 										loader={<GhostPost/>}
 									>
 										{posts.map(id=>(

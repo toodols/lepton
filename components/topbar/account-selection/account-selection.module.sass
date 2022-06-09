@@ -4,7 +4,7 @@
 	position: relative
 	margin: 0px
 	display: flex
-	
+
 	.button
 		padding: 5px
 		div
@@ -24,6 +24,11 @@
 		border-radius: 5px
 		transition: opacity .3s
 		padding-top: 5px
+		button
+			padding: 5px
+		button:not(.remove) > svg, button > img
+			margin: 0px 5px
+	
 		.account_selection_item
 			display: flex
 			align-items: center

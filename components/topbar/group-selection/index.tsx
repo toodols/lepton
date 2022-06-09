@@ -68,15 +68,10 @@ export function GroupSelection() {
 					value: group.id,
 					label: group.name,
 				}));
-				// for some reason react-select caches search results
-				// fucking gay
-				// if (currentGroupId !== undefined) {
 				mapped.unshift({
 					value: undefined as any,
 					label: "Home",
 				});
-				// }
-				console.log(mapped)
 				return mapped;
 			}}
 		/>

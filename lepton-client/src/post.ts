@@ -22,18 +22,20 @@ export class CommentsLoader<Opts extends Options> extends EventEmitter {
 	client: Client<Opts>;
 	isLoading = false;
 	loaded: string[] = [];
+	hasMore = true;
 	loadUp(){
 		
 	}
 	load(){
 		if(this.isLoading) return;
 		this.isLoading = true;
-		this.client.getComments({post: this.post.id}).then(comments => {
+		this.client.getComments({post: this.post.id}).then(({comments, hasMore}) => {
 			this.isLoading = false;
 			this.loaded = comments.map(e=>e.id);
 			this.loaded = this.loaded.sort((a,b)=>{
 				return this.client.commentsCache.get(a)!.createdAt - this.client.commentsCache.get(b)!.createdAt;
 			});
+			this.hasMore = hasMore;
 			this.emit("update");
 		});
 	}

@@ -6,6 +6,8 @@ import { useState } from "react";
 import { client } from "lib/client";
 import { AccountSelectionItem } from "./accountselectionitem";
 import { removeAllAccounts } from "lib/store/clientslice";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faSignOut, faUserPlus } from "@fortawesome/free-solid-svg-icons";
 
 export function AccountSelection() {
 	const clientState = useSelector((state: RootState) => state.client);
@@ -28,11 +30,11 @@ export function AccountSelection() {
 			<button onClick={()=>{
 				dispatch(setSignInModalOpen(true));
 				setIsVisible(false);
-			}}>Add Account</button>
+			}}><FontAwesomeIcon style={{width: 20}} icon={faUserPlus}/>Add Account</button>
 			<button onClick={()=>{
 				dispatch(removeAllAccounts());
 				client.signOut();
-			}}>Sign Out All</button>
+			}}><FontAwesomeIcon style={{width: 20}} icon={faSignOut}/>Sign Out All</button>
 		</div>
 	</div>
 }

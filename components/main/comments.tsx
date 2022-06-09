@@ -14,7 +14,7 @@ export function Comments({ post }: { post: Post }) {
 	const loader = post.commentsLoader;
 	useUpdatable(loader);
 	const userid = useSelector((state: RootState) => state.client.userId);
-
+	
 	let last: Comment | undefined;
 	const elements = loader.loaded.map((commentid) => {
 		const comment = client.commentsCache.get(commentid)!;
@@ -48,23 +48,27 @@ export function Comments({ post }: { post: Post }) {
 		return res;
 	});
 	const inputRef = useRef<HTMLInputElement>(null);
-	if (post && loader) {
-		return (
-			<div className={Styles.comments}>
-				<h2>{post.author.username}</h2>
-
+	return (
+		<div className={Styles.comments}>
+			<h2>{post.author.username}</h2>
+			{loader.loaded.length>0 ? (
 				<div className={Styles.comments_container}>{elements}</div>
-				<Input
-					name="Enter comment message here"
-					ref={inputRef}
-					onSubmit={()=>{
-						post.comment(inputRef.current!.value);
-						inputRef.current!.value = "";
-					}}
-				></Input>
-			</div>
-		);
-	} else {
-		return <div className={Styles.comments}>Loading ...</div>;
-	}
+			) : loader.hasMore?
+				<>
+					<div>Loading</div>
+				</> : <>
+					<div style={{height: "100%"}}>No Comments</div>
+				</>
+			}
+
+			<Input
+				name="Enter comment message here"
+				ref={inputRef}
+				onSubmit={() => {
+					post.comment(inputRef.current!.value);
+					inputRef.current!.value = "";
+				}}
+			></Input>
+		</div>
+	);
 }
