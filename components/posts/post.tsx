@@ -1,13 +1,13 @@
 import { CommentPreview } from "./comment-preview";
 import { Post as PostObject } from "../../lib/client";
-import Styles from "./main.module.sass";
+import Styles from "./posts.module.sass";
 import { useUpdatable } from "../../lib/useUpdatable";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowUp, faComment, faTrash } from "@fortawesome/free-solid-svg-icons";
 import { useSelector } from "react-redux";
 import { RootState } from "../../lib/store";
 import { useContext, useState } from "react";
-import {PostElementsContext} from "./posts";
+import {PostElementsContext} from ".";
 import { Avatar } from "../util/avatar";
 import { useTruncate } from "lib/truncate";
 import Link from "next/link";
@@ -29,10 +29,10 @@ export function Post({ post, setCurrent, current }: { current: string | null, se
 				delete ctx.posts[post.id];
 			}
 		}} data-deleting={isBeingDeleted} data-expanded={isExpanded} className={Styles.post}>
-			<div className={Styles.post_topbar}>
+			<div className={Styles.postTopbar}>
 				<Avatar src={post.author.avatar}/>
 				<Link href={`/users/${post.author.id}`}>{post.author.username}</Link>
-				<div className={Styles.action_bar}>
+				<div className={Styles.actionBar}>
 					<button onClick={()=>{
 							setCurrent(post.id)
 						}}>
@@ -68,9 +68,9 @@ export function Post({ post, setCurrent, current }: { current: string | null, se
 			</div>
 			<div ref={contentRef} className={Styles.content}>
 				{post.content}
-				<div className={Styles.overflow_gradient}></div>
+				<div className={Styles.overflowGradient}></div>
 			</div>
-			<button className={Styles.show_more} onClick={()=>{
+			<button className={Styles.showMore} onClick={()=>{
 				setIsExpanded(!isExpanded);
 			}}>{isExpanded?"Show Less":"Show More"}</button>
 			{post.lastComment ? (

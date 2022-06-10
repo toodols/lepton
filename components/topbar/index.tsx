@@ -1,4 +1,10 @@
-import { faBars, faGear, faPlus } from "@fortawesome/free-solid-svg-icons";
+import {
+	faBars,
+	faEye,
+	faGear,
+	faPeopleGroup,
+	faPlus,
+} from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useRouter } from "next/router";
 import { useEffect } from "react";
@@ -29,25 +35,44 @@ export function Topbar() {
 				onClick={() => {
 					dispatch(setSidebarOpen(true));
 				}}
-				className={Styles.menu_button}
+				className={Styles.menuButton}
 			>
 				<FontAwesomeIcon icon={faBars} />
 			</button>
-			<h2 className={Styles.title}>
-				{title}
-			</h2>
-			{(router.pathname==="/" || router.pathname === "/groups/[groupid]")?(<GroupSelection/>):<></>}
+			<h2 className={Styles.title}>{title}</h2>
+			{router.pathname === "/" ||
+			router.pathname === "/groups/[groupid]" ? (
+				<>
+					<GroupSelection />
+				</>
+			) : (
+				<></>
+			)}
 			<div className={Styles.right}>
-				<button onClick={()=>{
+				{router.pathname === "/" ||
+				router.pathname === "/groups/[groupid]" ? (
+					<>
+						<button>
+							<FontAwesomeIcon icon={faPeopleGroup}/>
+							Join Group
+						</button>
+					</>
+				) : (
+					<></>
+				)}
+				<button
+					onClick={() => {
 						dispatch(setSidebarOpen(false));
-						dispatch(setSettingsModalOpen(true))
-					}}>
-						<FontAwesomeIcon icon={faGear}/>
-						Settings
-					</button>
+						dispatch(setSettingsModalOpen(true));
+					}}
+				>
+					<FontAwesomeIcon icon={faGear} />
+					Settings
+				</button>
 				{isSignedIn ? (
 					<>
-						{(router.pathname==="/" || router.pathname === "/groups/[groupid]")? (
+						{router.pathname === "/" ||
+						router.pathname === "/groups/[groupid]" ? (
 							<button
 								onClick={() => {
 									dispatch(setCreatePostModalOpen(true));

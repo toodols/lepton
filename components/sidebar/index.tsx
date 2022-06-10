@@ -1,3 +1,4 @@
+import { client } from "lib/client";
 import Link from "next/link";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState, setSettingsModalOpen, setSidebarOpen } from "../../lib/store";
@@ -7,15 +8,16 @@ export function Sidebar() {
 	const sidebarOpen = useSelector(
 		(state: RootState) => state.main.sidebarOpen
 	);
+	const userid = useSelector((state: RootState) => state.client.userId);
 	const dispatch = useDispatch();
 	return (
 		<>
-			<div data-open={sidebarOpen} className={Styles.sidebar_container}>
+			<div data-open={sidebarOpen} className={Styles.sidebarContainer}>
 				<div
 					onClick={() => {
 						dispatch(setSidebarOpen(false));
 					}}
-					className={Styles.sidebar_backdrop}
+					className={Styles.sidebarBackdrop}
 				></div>
 				<aside className={Styles.sidebar}>
 					<h1>Lepton</h1>
@@ -28,6 +30,13 @@ export function Sidebar() {
 							Home
 						</button>
 					</Link>
+					{userid ? (
+						<Link href={`/users/${userid}`}>
+							<button onClick={()=>{
+								dispatch(setSidebarOpen(false));
+							}}>Profile</button>
+						</Link>
+					): <></>}
 					<Link href="/backrooms" passHref>
 						<button
 							onClick={() => {

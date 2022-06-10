@@ -5,7 +5,7 @@ import { Input } from "../util/input";
 import { client, Post, Comment } from "lib/client";
 import { useUpdatable } from "../../lib/useUpdatable";
 import { useEffect, useMemo, useRef, useState } from "react";
-import Styles from "./main.module.sass";
+import Styles from "./posts.module.sass";
 import { useSelector } from "react-redux";
 import { RootState } from "lib/store";
 
@@ -52,7 +52,7 @@ export function Comments({ post }: { post: Post }) {
 		<div className={Styles.comments}>
 			<h2>{post.author.username}</h2>
 			{loader.loaded.length>0 ? (
-				<div className={Styles.comments_container}>{elements}</div>
+				<div className={Styles.commentsContainer}>{elements}</div>
 			) : loader.hasMore?
 				<>
 					<div>Loading</div>

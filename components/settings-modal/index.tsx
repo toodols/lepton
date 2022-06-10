@@ -40,7 +40,7 @@ function CustomOption(
 				<>
 					{props.children}
 					{props.data.description ? (
-						<span className={Styles.option_description}>
+						<span className={Styles.optionDescription}>
 							{props.data.description}
 						</span>
 					) : (
@@ -85,10 +85,11 @@ export function Settings() {
 	const settingValues = useSelector(
 		(state: RootState) => state.settings.settings
 	);
+	const username = useSelector((state: RootState) => state.client.username);
 	return (
 		<Modal
 			ariaHideApp={false}
-			className={Styles.settings_modal}
+			className={Styles.settingsModal}
 			closeTimeoutMS={300}
 			onRequestClose={() => {
 				dispatch(discardSettings());
@@ -122,7 +123,7 @@ export function Settings() {
 									return (
 										<button
 											key={e}
-											className={Styles.nav_button}
+											className={Styles.navButton}
 											onClick={() => {
 												ctx[e]?.scrollIntoView({
 													behavior: "smooth",
@@ -168,7 +169,7 @@ export function Settings() {
 						</Section>
 						<Section title="Account">
 							<h3>Username</h3>
-							Username
+							{username}
 							<h3>Password</h3>
 							Password
 							<h3>Avatar</h3>

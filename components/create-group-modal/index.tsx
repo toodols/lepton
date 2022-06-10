@@ -13,8 +13,7 @@ export function CreateGroupModal(){
 	let nameRef = useRef<HTMLInputElement>(null);
 	let descriptionRef = useRef<HTMLTextAreaElement>(null);
 	const [publicity, setPublicity] = useState({label: "Public", value: "public"});
-
-	return <Modal ariaHideApp={false} className={Styles.create_group_modal} isOpen={isOpen} closeTimeoutMS={300} onRequestClose={()=>{
+	return <Modal ariaHideApp={false} className={Styles.createGroupModal} isOpen={isOpen} closeTimeoutMS={300} onRequestClose={()=>{
 		dispatch(setCreateGroupModalOpen({open: false}));
 	}}>
 		<header>Create Group</header>

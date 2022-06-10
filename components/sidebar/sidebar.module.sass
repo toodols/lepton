@@ -1,4 +1,4 @@
-.sidebar_container
+.sidebarContainer
 	z-index: 1
 	position: fixed
 
@@ -24,7 +24,7 @@
 		&:hover
 			background-color: var(--color-sidebar-button-hover)
 		
-.sidebar_backdrop
+.sidebarBackdrop
 	left: 0
 	top: 0
 	width: 100%
@@ -35,14 +35,14 @@
 	backdrop-filter: blur(10px)
 	background-color: rgba(0,0,0,0.5)
 
-.sidebar_container[data-open="false"]
-	.sidebar_backdrop
+.sidebarContainer[data-open="false"]
+	.sidebarBackdrop
 		opacity: 0
 		pointer-events: none
 
 
-.sidebar_container[data-open="true"]
-	.sidebar_backdrop
+.sidebarContainer[data-open="true"]
+	.sidebarBackdrop
 		opacity: 0.3
 		transition: opacity 0.3s
 		-webkit-backdrop-filter: blur(0px)

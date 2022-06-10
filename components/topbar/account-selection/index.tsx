@@ -14,7 +14,7 @@ export function AccountSelection() {
 	const [isVisible, setIsVisible] = useState(false);
 
 	const dispatch = useDispatch();
-	return <div className={Styles.account_selection}>
+	return <div className={Styles.accountSelection}>
 		<button className={Styles.button} onClick={()=>{
 			setIsVisible(!isVisible);
 		}}>

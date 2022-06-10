@@ -1,4 +1,4 @@
-import Styles from "./main.module.sass";
+import Styles from "./posts.module.sass";
 
 export function GhostPost(){
 	return <>

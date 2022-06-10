@@ -1,7 +1,7 @@
 import { CreateGroupModal } from "components/create-group-modal";
 import { CreatePostModal } from "components/create-post-modal";
 import { Layout } from "components/layout";
-import { Posts } from "components/main/posts";
+import { Posts } from "components/posts";
 import { client, Group } from "lib/client";
 import { setTitle } from "lib/store";
 import { useRouter } from "next/router";
@@ -15,13 +15,15 @@ export default function GroupHandler() {
 	const [group, setGroup] = useState<Group | undefined>(
 		client.groupsCache.get(groupid as string)
 	);
+	const [errored, setErrored] = useState(false);
+
 	useEffect(() => {
 		if (groupid) {
 			client
 				.getGroup(groupid as string)
 				.then(setGroup)
 				.catch((e) => {
-					console.log("oh no");
+					setErrored(true);
 				});
 		}
 		// eslint-disable-next-line react-hooks/exhaustive-deps
@@ -45,6 +47,10 @@ export default function GroupHandler() {
 				<CreateGroupModal/>
 			</>
 		);
+	} else if (errored) {
+		return <div>
+			This group does not exist
+		</div>;
 	} else {
 		return <div>Loading...</div>;
 	}

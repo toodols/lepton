@@ -27,7 +27,7 @@ export function Signin() {
 	return <Modal ariaHideApp={false} data={{
 		error: !!error,
 		menutype: menuType,
-	}} className={Styles.signin_modal} isOpen={isOpen} closeTimeoutMS={300} onRequestClose={()=>{
+	}} className={Styles.signinModal} isOpen={isOpen} closeTimeoutMS={300} onRequestClose={()=>{
 		if (isLoading) return;
 		dispatch(setSignInModalOpen(false));
 	}}>
@@ -35,22 +35,24 @@ export function Signin() {
 			<header>Sign In to Lepton</header>
 			<Input disabled={isLoading} name="Username" ref={signInUsernameRef}/>
 			<Input disabled={isLoading} name="Password" type="password" ref={signInPasswordRef}/>
-			<button disabled={isLoading} onClick={()=>{
-				setIsLoading(true);
-				client.getToken(signInUsernameRef.current!.value, signInPasswordRef.current!.value).then((tok)=>{
-					client.useToken(tok);
-					dispatch(addAccount(tok))
-					dispatch(setSignInModalOpen(false));
-					
-				}).catch((err)=>{
-					setError(err.message);
-				}).finally(()=>{
-					setIsLoading(false);
-				});
-			}}>Sign In</button>
-			<button disabled={isLoading} onClick={()=>{
-				dispatch(setSigninMenuType("signup"));
-			}}>Sign Up Instead</button>
+			<div>
+				<button className={Styles.signUp} disabled={isLoading} onClick={()=>{
+					setIsLoading(true);
+					client.getToken(signInUsernameRef.current!.value, signInPasswordRef.current!.value).then((tok)=>{
+						client.useToken(tok);
+						dispatch(addAccount(tok))
+						dispatch(setSignInModalOpen(false));
+						
+					}).catch((err)=>{
+						setError(err.message);
+					}).finally(()=>{
+						setIsLoading(false);
+					});
+				}}>Sign In</button>
+				<button disabled={isLoading} onClick={()=>{
+					dispatch(setSigninMenuType("signup"));
+				}}>Sign Up</button>
+			</div>
 		</div>
 		<div key="signup" className={Styles.page} data-shown={menuType==="signup"}>
 			<header>Sign Up for Lepton</header>

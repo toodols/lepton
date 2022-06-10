@@ -13,7 +13,7 @@ export function CreatePostModal() {
 	const router = useRouter();
 	const group = router.pathname==="/groups/[groupid]"? String(router.query.groupid) : undefined;
 
-	return <Modal ariaHideApp={false} className={Styles.create_post_modal} isOpen={isOpen} closeTimeoutMS={300} onRequestClose={()=>{
+	return <Modal ariaHideApp={false} className={Styles.createPostModal} isOpen={isOpen} closeTimeoutMS={300} onRequestClose={()=>{
 		dispatch(setCreatePostModalOpen(false));
 	}}>
 		<header>Create Post</header>

@@ -21,7 +21,7 @@ export function AccountSelectionItem({ token, onClick }: { onClick:()=>void, tok
 		});
 	}, [token, dispatch]);
 	return (
-		<div className={Styles.account_selection_item}>
+		<div className={Styles.accountSelectionItem}>
 			<button
 				onClick={() => {
 					client.useToken(token);
@@ -34,7 +34,7 @@ export function AccountSelectionItem({ token, onClick }: { onClick:()=>void, tok
 						{info.username}
 					</>
 				) : (
-					<div className={Styles.img_container}>
+					<div className={Styles.imgContainer}>
 						Loading ...
 					</div>
 				)}

@@ -1,12 +1,10 @@
-import { useSelector, useDispatch } from "react-redux";
+import { useDispatch } from "react-redux";
 import { client } from "../../lib/client";
-import { RootState } from "../../lib/store";
 import { Post } from "./post";
-import {Post as PostObject} from "../../lib/client";
 import InfiniteScroll from "react-infinite-scroll-component";
-import { createContext, useEffect, useRef, useState } from "react";
+import { createContext, useEffect, useState } from "react";
 import { Comments } from "./comments";
-import Styles from "./main.module.sass";
+import Styles from "./posts.module.sass";
 import { GhostPost } from "./ghost-post";
 export const PostElementsContext = createContext<{
 	posts: Record<string, HTMLDivElement>;
@@ -60,7 +58,7 @@ export function Posts({groupid}: {groupid?: string}) {
 							return (
 								<>
 									<InfiniteScroll
-										className={Styles.posts_container}
+										className={Styles.postsContainer}
 										onScroll={(e) => {
 											const target =
 												document.documentElement;

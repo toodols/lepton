@@ -1,7 +1,7 @@
 import { Avatar } from "components/util/avatar";
 import { useUpdatable } from "../../lib/useUpdatable";
 import {Comment as CommentObject} from "../../lib/client";
-import Styles from "./main.module.sass";
+import Styles from "./posts.module.sass";
 
 export function CommentPreview({comment, select}: {comment: CommentObject, select: ()=>void}) {
 	useUpdatable(comment);

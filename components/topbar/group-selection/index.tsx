@@ -53,7 +53,7 @@ export function GroupSelection() {
 				}),
 				// indicatorsContainer: () => ({ height: "100%" }),
 			}}
-			className={Styles.group_selection}
+			className={Styles.groupSelection}
 			classNamePrefix="react-select"
 			onCreateOption={(opt) => {
 				dispatch(setCreateGroupModalOpen({ open: true, name: opt }));
