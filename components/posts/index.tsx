@@ -100,7 +100,7 @@ export function Posts({groupid}: {groupid?: string}) {
 										loader={<GhostPost/>}
 									>
 										{posts.map(id=>(
-											<Post key={id} setCurrent={setAutoCurrentId} post={client.postsCache.get(id)!} current={forceCurrentId} />
+											<Post key={id} setCurrent={setForceCurrentId} post={client.postsCache.get(id)!} current={forceCurrentId} />
 										))}
 									</InfiniteScroll>
 									{currentPost?<Comments key={currentPost.id} post={currentPost}/>:<>

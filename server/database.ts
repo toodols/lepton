@@ -1,10 +1,7 @@
-import e from 'express';
 import { Settings } from 'lepton-client';
 import { MongoClient, Collection, Document, ObjectId, Timestamp, Db } from 'mongodb';
 import { Permission } from './api/util';
 import { MongoDB_URI } from "./env";
-
-
 
 export namespace DatabaseTypes {
 	interface DatedDocument extends Document {

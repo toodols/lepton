@@ -59,7 +59,7 @@ export function GroupSelection() {
 				dispatch(setCreateGroupModalOpen({ open: true, name: opt }));
 			}}
 			formatCreateLabel={(value) => {
-				return `Create Group "${value}"`;
+				return `Create Group "${value || "New Group"}"`;
 			}}
 			defaultOptions={true}
 			loadOptions={async (query) => {
