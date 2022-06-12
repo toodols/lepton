@@ -11,6 +11,14 @@ import {PostElementsContext} from ".";
 import { Avatar } from "../util/avatar";
 import { useTruncate } from "lib/truncate";
 import Link from "next/link";
+import { Flags } from "lepton-client";
+
+function Roles({flags}: {flags: Flags}){
+	if (flags & Flags.Developer) return <span className={Styles.role}>Developer</span>;
+	if (flags & Flags.Owner) return <span className={Styles.role}>Owner</span>;
+	if (flags & Flags.Moderator) return <span className={Styles.role}>Moderator</span>;
+	return <></>
+}
 
 export function Post({ post, setCurrent, current }: { current: string | null, setCurrent: (id: string)=>void, post: PostObject }) {
 	useUpdatable(post);
@@ -31,7 +39,7 @@ export function Post({ post, setCurrent, current }: { current: string | null, se
 		}} data-deleting={isBeingDeleted} data-expanded={isExpanded} className={Styles.post}>
 			<div className={Styles.postTopbar}>
 				<Avatar src={post.author.avatar}/>
-				<Link href={`/users/${post.author.id}`}>{post.author.username}</Link>
+				<Link href={`/users/${post.author.id}`}>{post.author.username}</Link> <Roles flags={post.author.flags}/>
 				<div className={Styles.actionBar}>
 					<button onClick={()=>{
 							setCurrent(post.id)

@@ -11,6 +11,16 @@ const nextApp = next({ dev });
 const handle = nextApp.getRequestHandler();
 const port = process.env.PORT || 3000;
 
+import {createClient} from "redis";
+import { REDIS_URI } from "./env";
+
+const redisclient = createClient({
+	url: REDIS_URI
+});
+
+await redisclient.connect();
+
+
 await nextApp.prepare()
 const app = express();
 export const io = new socketio.Server();

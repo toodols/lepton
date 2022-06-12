@@ -10,6 +10,6 @@ export function CommentPreview({comment, select}: {comment: CommentObject, selec
 	}} className={Styles.preview}>
 		<Avatar src={comment.author.avatar} size={20} />
 		<div className={Styles.author}>{comment.author.username}</div>
-		<div>{comment.content}</div>
+		<span>{comment.content}</span>
 	</button>
 }

@@ -52,11 +52,13 @@ export namespace Converter {
 			id: user._id.toString(),
 			username: user.username,
 			avatar: user.settings.avatar,
+			flags: user.flags as number,
 		}
 	}
 	export function toUserDataFull(user: WithId<DatabaseTypes.User>): UserDataFull {
 		return {
 			...toUserDataPartial(user),
+			money: user.money,
 			description: user.settings.description,
 		}
 	}

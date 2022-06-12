@@ -1,15 +1,24 @@
 import { Client, Options, signedIn } from "./client";
 import { FOLLOW_USER_URL, UNFOLLOW_USER_URL } from "./constants";
 
+export enum Flags {
+	None = 0,
+	Owner = 1,
+	Developer = 2,
+	Moderator = 4,
+}
+
 export interface UserDataPartial {
 	id: string;
 	username: string;
 	createdAt: number;
 	avatar: string;
+	flags: Flags;
 }
 
 export interface UserDataFull extends UserDataPartial {
 	description: string;
+	money: number;
 }
 type UserData = UserDataFull | UserDataPartial;
 type Maybe<T, Opts extends Options> = Opts["partial"] extends true ? T | undefined : T
@@ -18,6 +27,7 @@ function isFull(v: UserData): v is UserDataFull {
 }
 
 export class User<Opts extends Options> {
+	flags: Flags;
 	
 	static from<T extends Options>(client: Client<T>, post: UserData){
 		if (client.usersCache.has(post.id)){
@@ -72,14 +82,18 @@ export class User<Opts extends Options> {
 	full: Opts["partial"] extends true ? boolean : true;
 	//@ts-ignore
 	description: Maybe<string, Opts>;
-
+	//@ts-ignore
+	money: Maybe<number, Opts>;
+	
 	constructor(public client: Client<Opts>, from: UserDataFull | UserDataPartial) {
 		//@ts-ignore
 		this.full = isFull(from);
 		this.id = from.id;
 		this.username = from.username;		
 		this.avatar = from.avatar;
+		this.flags = from.flags;
 		if (isFull(from)) {
+			this.money = from.money;
 			this.description = from.description;
 		}
 		this.client.usersCache.set(this.id, this);

@@ -6,3 +6,4 @@ function oh_no<T>(v: string): T {
 
 export const jwt_secret = process.env.JWT_SECRET || oh_no<string>("JWT_SECRET");
 export const MongoDB_URI = process.env.MONGODB_URI || oh_no<string>("MONGODB_URI");
+export const REDIS_URI = process.env.REDIS_URI || oh_no<string>("REDIS_URI");

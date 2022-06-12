@@ -8,14 +8,16 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import Styles from "./posts.module.sass";
 import { useSelector } from "react-redux";
 import { RootState } from "lib/store";
+import InfiniteScroll from "react-infinite-scroll-component";
 
 // assuming post will never change
 export function Comments({ post }: { post: Post }) {
 	const loader = post.commentsLoader;
 	useUpdatable(loader);
 	const userid = useSelector((state: RootState) => state.client.userId);
-	
+
 	let last: Comment | undefined;
+	const hasMore = loader.hasMore;
 	const elements = loader.loaded.map((commentid) => {
 		const comment = client.commentsCache.get(commentid)!;
 		const res = (
@@ -51,15 +53,21 @@ export function Comments({ post }: { post: Post }) {
 	return (
 		<div className={Styles.comments}>
 			<h2>{post.author.username}</h2>
-			{loader.loaded.length>0 ? (
-				<div className={Styles.commentsContainer}>{elements}</div>
-			) : loader.hasMore?
-				<>
-					<div>Loading</div>
-				</> : <>
-					<div style={{height: "100%"}}>No Comments</div>
-				</>
-			}
+			<div id="comments" className={Styles.commentsContainer}>
+				<InfiniteScroll
+					scrollableTarget="comments"
+					inverse
+					dataLength={loader.loaded.length}
+					hasMore={hasMore}
+					next={() => {
+						console.log("next");
+						loader.loadUp();
+					}}
+					loader={<div>Ghost</div>}
+				>
+					{elements}
+				</InfiniteScroll>
+			</div>
 
 			<Input
 				name="Enter comment message here"
