@@ -31,6 +31,11 @@ export function Layout({children}: PropsWithChildren<{}>) {
 		<Head>
 			<title>{title} - Lepton</title>
 		</Head>
+		<noscript>
+			<div style={{position: "fixed", fontSize: 50, zIndex: 10000, width: "100%", height: "100%", background: "white"}}>
+			Why you disable script daddy?
+			</div>
+		</noscript>
 		<Topbar/>
 		{children}
 		<Signin />
