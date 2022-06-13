@@ -1,4 +1,4 @@
-import { Client, Options, signedIn } from "./client";
+import { Client, DefaultOpts, Options, signedIn } from "./client";
 import { fetch } from "cross-fetch";
 import { DELETE_GROUP_URL } from "./constants";
 export interface GroupDataPartial {
@@ -14,7 +14,7 @@ export interface GroupDataFull extends GroupDataPartial {}
 
 export type GroupData = GroupDataPartial | GroupDataFull;
 
-export class Group<Opts extends Options> {
+export class Group<Opts extends Options = DefaultOpts> {
 	id: string;
 	name: string;
 	icon: string;

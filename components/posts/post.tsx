@@ -22,6 +22,8 @@ function Roles({flags}: {flags: Flags}){
 
 export function Post({ post, setCurrent, current }: { current: string | null, setCurrent: (id: string)=>void, post: PostObject }) {
 	useUpdatable(post);
+	const [update, setUpdate] = useState(0);
+
 	let contentRef = useTruncate<HTMLDivElement>();
 	const userid = useSelector((state: RootState) => state.client.userId)
 	const isSignedIn = useSelector((state: RootState) => state.client.isSignedIn)
@@ -82,7 +84,9 @@ export function Post({ post, setCurrent, current }: { current: string | null, se
 				setIsExpanded(!isExpanded);
 			}}>{isExpanded?"Show Less":"Show More"}</button>
 			{post.lastComment ? (
-				<CommentPreview select={()=>{setCurrent(post.id)}} comment={post.lastComment} />
+				<CommentPreview select={()=>{setCurrent(post.id)}} comment={post.lastComment} update={()=>{
+					setUpdate(update+1)
+				}} />
 			) : (
 				<></>
 			)}

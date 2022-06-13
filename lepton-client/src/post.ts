@@ -1,9 +1,10 @@
 import { EventEmitter } from "events";
-import { Client, Options, signedIn } from "./client";
+import { Client, DefaultOpts, Options, signedIn } from "./client";
 import { Comment } from "./comment";
 import { CREATE_COMMENT_URL, VOTE_POST_URL } from "./constants";
 import { Group } from "./group";
 import { User } from "./user";
+import { fetch } from "cross-fetch";
 
 export interface PostData {
 	id: string;
@@ -18,7 +19,7 @@ export interface PostData {
 // keeping track of a post's comments is too expensive
 // so there's an optional class that can be used to fetch and listen to new comments
 // when it is no longer needed it can be removed
-export class CommentsLoader<Opts extends Options> extends EventEmitter {
+export class CommentsLoader<Opts extends Options = DefaultOpts> extends EventEmitter {
 	client: Client<Opts>;
 	isLoading = false;
 	loaded: string[] = [];
@@ -47,6 +48,10 @@ export class CommentsLoader<Opts extends Options> extends EventEmitter {
 	}
 }
 
+export interface Post<Opts> {
+	on(event: "commentAdded", listener: (comment: Comment<Opts>) => void): this;
+}
+
 export class Post<Opts extends Options> extends EventEmitter {
 
 	static from<Opts extends Options>(client: Client<Opts>, post: PostData){
@@ -58,12 +63,22 @@ export class Post<Opts extends Options> extends EventEmitter {
 
 	id: string;
 	content: string;
+
+	/**
+	 * Tracks the last comment, not guaranteed to be accurate.
+	 * Used in the website to display the last comment.
+	 * It is not recommended to be used in bots.
+	 */
 	lastComment?: Comment<Opts>;
 	author: User<Opts>;
 	group?: Group<Opts>;
 	createdAt: number;
 
-	private _commentsLoader?: CommentsLoader<Opts>;
+	/**
+	 * @private
+	 * Use .commentsLoader to get loader
+	 */
+	_commentsLoader?: CommentsLoader<Opts>;
 
 	get commentsLoader(): CommentsLoader<Opts> {
 		if (!this._commentsLoader){
@@ -97,6 +112,7 @@ export class Post<Opts extends Options> extends EventEmitter {
 		this._commentsLoader?.loaded.push(id);
 		this._commentsLoader?.emit("update");
 		this.lastComment = comment;
+		this.emit("comment", comment);
 		this.emit("update");
 	}
 
@@ -137,13 +153,6 @@ export class Post<Opts extends Options> extends EventEmitter {
 		// destruction is handled by the client with postDeleted emit
 	}
 
-	commentAdded(){
-		this.emit("update");
-	}
-
-	// afterInit(){
-	// 	this.lastComment = this.client.commentsCache.get(this.id)!;
-	// }
 	constructor(public client: Client<Opts>, from: PostData){
 		super();
 		this.id = from.id;

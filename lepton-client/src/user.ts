@@ -1,4 +1,4 @@
-import { Client, Options, signedIn } from "./client";
+import { Client, DefaultOpts, Options, signedIn } from "./client";
 import { FOLLOW_USER_URL, UNFOLLOW_USER_URL } from "./constants";
 
 export enum Flags {
@@ -26,7 +26,7 @@ function isFull(v: UserData): v is UserDataFull {
 	return "description" in v
 }
 
-export class User<Opts extends Options> {
+export class User<Opts extends Options = DefaultOpts> {
 	flags: Flags;
 	
 	static from<T extends Options>(client: Client<T>, post: UserData){

@@ -3,8 +3,11 @@ import { useUpdatable } from "../../lib/useUpdatable";
 import {Comment as CommentObject} from "../../lib/client";
 import Styles from "./posts.module.sass";
 
-export function CommentPreview({comment, select}: {comment: CommentObject, select: ()=>void}) {
+export function CommentPreview({comment, select, update}: {comment: CommentObject, select: ()=>void, update: ()=>void}) {
 	useUpdatable(comment);
+	comment.on("deleted", ()=>{
+		update()
+	})
 	return <button onClick={()=>{
 		select()
 	}} className={Styles.preview}>

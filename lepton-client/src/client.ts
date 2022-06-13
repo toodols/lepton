@@ -1,4 +1,4 @@
-import { Post, PostData } from "./post";
+import { CommentsLoader, Post, PostData } from "./post";
 import { User, UserDataFull } from "./user";
 import { Comment, CommentData } from "./comment";
 import { Group, GroupDataFull } from "./group";
@@ -9,7 +9,7 @@ import { CREATE_POST_URL, GET_COMMENTS_URL, GET_POSTS_URL, GET_SELF_URL, GET_USE
 import { Settings } from "./types";
 import { ClientInfo, ClientInfoData } from "./clientinfo";
 
-const SOCKET_URL = process.env.NODE_ENV === "development" ? "/api/socket" : "wss://idk lmao";
+// const SOCKET_URL = process.env.NODE_ENV === "development" ? "/api/socket" : "wss://idk lmao";
 
 export interface Options {
 	/**
@@ -43,7 +43,17 @@ export function signedIn(isSignedIn = true) {
 	};
 }
 
-export class Client<Opts extends Options = {partial: false}> extends EventEmitter {
+export type DefaultOpts = {partial: false};
+
+export interface Client<Opts> {
+	on(event: "postAdded", listener: (post: Post<Opts>) => void): this;
+	on(event: "postDeleted", listener: (post: Post<Opts>) => void): this;
+	on(event: "commentAdded", listener: (comment: Comment<Opts>) => void): this;
+	on(event: "commentDeleted", listener: (comment: Comment<Opts>) => void): this;
+	on(event: "clientUserChanged", listener: () => void): this;
+}
+
+export class Client<Opts extends Options = DefaultOpts> extends EventEmitter {
 	commentsCache = new Map<string, Comment<Opts>>();
 	postsCache = new Map<string, Post<Opts>>();
 	usersCache = new Map<string, User<Opts>>();
@@ -273,38 +283,45 @@ export class Client<Opts extends Options = {partial: false}> extends EventEmitte
 		// @ts-ignore
 		this.options = options || {partial: true};
 
-		const socketio = this.socketio = io();
+		const socketio = this.socketio = typeof window === "undefined" ? io("http://localhost:3000") : io();
 		socketio.on("post", ({ post, author }: { post: PostData; author: UserDataFull }) => {
 			User.from(this, author);
 
 			// there is no need to call afterinit on post because there are no comments
-			Post.from(this, post);
-			this.emit("postAdded", post.id);
+			const p = Post.from(this, post);
+			this.emit("postAdded", p);
 		});
 		socketio.on("comment", ({comment, author}: { author: UserDataFull, comment: CommentData})=>{
 			User.from(this, author);
 			const post = this.postsCache.get(comment.post)
 			if (post) {
-				Comment.from(this, comment);
+				const c = Comment.from(this, comment);
 				post.onNewComment(comment.id);
-				this.emit("commentAdded", comment.id);
+				this.emit("commentAdded", c);
 			}
 		})
 		socketio.on("postDeleted", (id) => {
 			if (this.postsCache.has(id)) {
-				this.emit("postDeleted", id);
+				this.emit("postDeleted", this.postsCache.get(id));
 				this.postsCache.get(id)!.emit("deleted");
 				this.postsCache.delete(id);
 			}
 		});
 		socketio.on("commentDeleted", (id) => {
 			if (this.commentsCache.has(id)) {
-				this.emit("commentDeleted", id);
+				this.emit("commentDeleted", this.commentsCache.get(id));
 				const comment = this.commentsCache.get(id)!;
+				const post = comment.post;
+				const loader: CommentsLoader<Opts> | undefined = comment.post._commentsLoader;
+				if (post.lastComment === comment) {
+					const newId = loader ? loader.loaded.filter(e=>e!==id)[loader.loaded.length-1] : undefined;
+					post.lastComment = newId ? this.commentsCache.get(newId) : undefined;
+				}
 				comment.emit("deleted");
-				const loader = comment.post.commentsLoader;
-				loader.loaded = loader.loaded.filter((e) => e !== id);
-				loader.emit("update");
+				if (loader) {
+					loader.loaded = loader.loaded.filter((e) => e !== id);
+					loader.emit("update");
+				}
 				this.commentsCache.delete(id);
 			}
 		})

@@ -1,7 +1,8 @@
 import { EventEmitter } from "events";
-import { Client, Options, signedIn } from "./client";
+import { Client, DefaultOpts, Options, signedIn } from "./client";
 import type { Post } from "./post";
 import type { User } from "./user";
+import { fetch } from "cross-fetch";
 
 export interface CommentData {
 	id: string;
@@ -12,7 +13,11 @@ export interface CommentData {
 	updatedAt: number;
 }
 
-export class Comment<Opts extends Options> extends EventEmitter {
+export interface Comment<Opts> {
+	on(event: "deleted", listener: () => void): this;
+}
+
+export class Comment<Opts extends Options = DefaultOpts> extends EventEmitter {
 	id: string;
 	content: string;
 	author: User<Opts>;

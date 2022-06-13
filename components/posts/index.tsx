@@ -1,5 +1,5 @@
 import { useDispatch } from "react-redux";
-import { client } from "../../lib/client";
+import { client, Post as PostObj } from "../../lib/client";
 import { Post } from "./post";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { createContext, useEffect, useState } from "react";
@@ -11,7 +11,7 @@ export const PostElementsContext = createContext<{
 }>({ posts: {} });
 
 export function Posts({groupid}: {groupid?: string}) {
-	const [posts, setPosts] = useState<string[]>([]);
+	const [posts, setPosts] = useState<PostObj[]>([]);
 	const [hasMore, setHasMore] = useState(true);
 	const dispatch = useDispatch();
 	useEffect(() => {
@@ -19,18 +19,18 @@ export function Posts({groupid}: {groupid?: string}) {
 		async function sub() {
 			const res = await client.getPosts({group: groupid});
 			setHasMore(res.hasMore);
-			setPosts(res.posts.map(e=>e.id));
+			setPosts(res.posts);
 		}
 		sub();
 	// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [groupid]);
 	useEffect(()=>{
-		const handler = (postid: string)=>{
-			setPosts((posts)=>[postid, ...posts]);
+		const handler = (post: PostObj)=>{
+			setPosts((posts)=>[post, ...posts]);
 		}
 		client.on("postAdded", handler)
-		const deleteHandler = (postid: string)=>{
-			setPosts((posts)=>posts.filter(e=>e!==postid));
+		const deleteHandler = (post: PostObj)=>{
+			setPosts((posts)=>posts.filter(e=>e!==post));
 		}
 		client.on("postDeleted", deleteHandler)
 		return ()=>{
@@ -89,17 +89,17 @@ export function Posts({groupid}: {groupid?: string}) {
 											const query: {before?: number, group?: string} = {};
 											if (groupid)
 												query.group = groupid;
-											let mostRecent = client.postsCache.get(posts[posts.length-1]);
+											let mostRecent = posts[posts.length-1];
 											if (mostRecent) {
 												query.before = mostRecent.createdAt;
 											}
 											const res = await client.getPosts(query);
-											setPosts((posts)=>[...posts, ...res.posts.map(e=>e.id)]);
+											setPosts((posts)=>[...posts, ...res.posts]);
 										}}
 										hasMore={hasMore}
 										loader={<GhostPost/>}
 									>
-										{posts.map(id=>(
+										{posts.map(({id})=>(
 											<Post key={id} setCurrent={setForceCurrentId} post={client.postsCache.get(id)!} current={forceCurrentId} />
 										))}
 									</InfiniteScroll>
