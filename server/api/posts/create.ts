@@ -35,10 +35,17 @@ export default async function handler(
 
 	if (post.acknowledged) {
 		const data = await posts.findOne({ _id: post.insertedId });
-		io.emit("post", {
-			post: Converter.toPostData(data!),
-			author: Converter.toUserDataPartial(user),
-		});
+		if (result.value.group) {
+			io.to("group:"+result.value.group).emit("post", {
+				post: Converter.toPostData(data!),
+				author: Converter.toUserDataPartial(user),
+			});
+		} else {
+			io.emit("post", {
+				post: Converter.toPostData(data!),
+				author: Converter.toUserDataPartial(user),
+			});
+		}
 		res.status(200).json({});
 	} else {
 		res.status(500).json({ error: "Failed to create post" });

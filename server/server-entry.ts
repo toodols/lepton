@@ -6,32 +6,95 @@ import { apiRouter } from "./api";
 import bodyparser from "body-parser";
 import * as socketio from "socket.io";
 import http from "http";
+import yargs from "yargs";
+import jwt from "jsonwebtoken";
+import {createClient} from "redis";
+import { jwt_secret, REDIS_URI } from "./env";
+import { createAdapter } from "@socket.io/redis-adapter";
+import { DatabaseTypes, users } from "./database";
+import { ObjectId } from "mongodb";
+import {instrument} from "@socket.io/admin-ui";
+import path from "path";
+
+const args = await yargs(process.argv).argv;
 const dev = process.env.NODE_ENV !== "production";
 const nextApp = next({ dev });
 const handle = nextApp.getRequestHandler();
-const port = process.env.PORT || 3000;
 
-import {createClient} from "redis";
-import { REDIS_URI } from "./env";
-
-const redisclient = createClient({
-	url: REDIS_URI
-});
-
-await redisclient.connect();
-
+const port = args.port || process.env.PORT || 3000;
 
 await nextApp.prepare()
 const app = express();
-export const io = new socketio.Server();
+export const io = new socketio.Server({
+	cors: {
+		origin: ["https://admin.socket.io"],
+		credentials: true,
+	}
+});
+
 const server = http.createServer(app)
 io.attach(server);
 app.use(bodyparser.json());
+
+instrument(io, {
+	auth: false
+});
+
+const redisClient = createClient({
+	url: REDIS_URI
+});
+
+const subscriber = redisClient.duplicate();
+
+await subscriber.connect()
+await redisClient.connect();
+io.adapter(createAdapter(redisClient, subscriber));
+
 apiRouter(app);
 
 io.on('connection', (socket: socketio.Socket) => {
-	console.log('connection');
-	socket.emit('status', 'Hello from Socket.io');
+	let joinedGroups: string[] = [];
+	let watchingGroups: string[] = [];
+
+	function updateRooms(newJoined: string[], newWatching: string[]=watchingGroups) {
+		let currentRooms = new Set([...joinedGroups, ...watchingGroups]);
+		let newRooms = new Set([...newJoined, ...newWatching]);
+		socket.join(Array.from(newRooms).map(e=>`group:${e}`));
+		for (const room of Array.from(currentRooms).filter(room => !newRooms.has(room))) {
+			socket.leave(room);
+		};
+		joinedGroups = newJoined;
+		watchingGroups = newWatching;
+	}
+	socket.on("auth", async (token: string)=>{
+		const inner = token.replace(/^Bearer\s+/, "");
+		const e = jwt.verify(inner, jwt_secret);
+		
+		if (typeof e === "string") {
+			return {error: "token doesn't work"};
+		} else {
+			if (
+				!(
+					e.permission &&
+					(e.permission === DatabaseTypes.Permission.ALL ||
+						e.permission & DatabaseTypes.Permission.GROUP_EVENTS)
+				)
+			) {
+				return { error: "Insufficient permissions" };
+			}
+			
+			const user = await users.findOne({ _id: new ObjectId(e.user) }) ?? undefined;
+			if (user) {
+				updateRooms(user.groups.map(e=>e.toString()))
+			} else {
+				return {error: "user not found"};
+			}
+		}
+	})
+
+	socket.on("watchingGroups", (groups: string[])=>{
+		updateRooms(joinedGroups, groups.filter(e=>e!==undefined));
+	})
 
 	socket.on('disconnect', () => {
 		console.log('client disconnected');

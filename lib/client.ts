@@ -10,7 +10,10 @@ export type User = _User<Options>;
 export type Group = _Group<Options>;
 
 export const client = new Client({partial: true});
-
+if (typeof window !== "undefined") {
+	//@ts-ignore
+	window.client = client;
+}
 client.on("clientUserChanged", () => {
 	store.dispatch(onClientUserChanged());
 })

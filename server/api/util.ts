@@ -9,12 +9,6 @@ export interface Error {
 	error: string;
 }
 
-export enum Permission {
-	ALL = 1,
-	COMMENT = 2,
-	POST = 4,
-}
-
 type Checkable = (input: unknown) => CheckResult<any>;
 type Guard =
 	| { optional: true; value: Checkable }
@@ -140,7 +134,7 @@ export namespace Checkables {
 export async function getUserFromAuth(
 	req: Request,
 	res: Response,
-	permission = Permission.ALL
+	permission = DatabaseTypes.Permission.ALL
 ) {
 	const token = req.headers.authorization;
 	if (!token) {
@@ -157,7 +151,7 @@ export async function getUserFromAuth(
 		if (
 			!(
 				e.permission &&
-				(e.permission === Permission.ALL ||
+				(e.permission === DatabaseTypes.Permission.ALL ||
 					permission & e.permission)
 			)
 		) {

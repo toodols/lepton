@@ -1,6 +1,6 @@
 # Lepton
-best thing in the world
 
+Built using next.js, mongodb, socket.io, redis
 
 # How to run your own lepton
 ```
@@ -11,7 +11,8 @@ echo > .env.local
 In .env.local put in
 ```
 MONGODB_URI = mongodb:// url here
-JWT_SECRET = <i think you can just put anything secret here>
+JWT_SECRET = just put something random here
+REDIS_URI = redis:// url here
 ```
 
 then run

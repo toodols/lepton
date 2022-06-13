@@ -5,7 +5,9 @@
   "type": "module",
   "repository": "https://github.com/toodols/lepton.git",
   "scripts": {
-    "dev": "tsc --project ./lepton-client/tsconfig.json && tsc --project ./tsconfig.server.json && node --inspect --experimental-specifier-resolution=node ./out/server-entry.js",
+    "compile": "tsc --project ./lepton-client/tsconfig.json && tsc --project ./tsconfig.server.json",
+    "dev": "npm run compile && node --inspect --experimental-specifier-resolution=node ./out/server-entry.js",
+    "test-multiple": "npm run compile && node --inspect --experimental-specifier-resolution=node ./out/server-entry.js --port 5001 & node --inspect --experimental-specifier-resolution=node ./out/server-entry.js --port 5002",
     "dropcollections": "tsc --project ./tsconfig.server.json && node --experimental-specifier-resolution=node ./out/dropall.js",
     "build": "next build",
     "start": "next start",
@@ -17,6 +19,8 @@
     "@fortawesome/free-solid-svg-icons": "^6.1.1",
     "@fortawesome/react-fontawesome": "^0.1.18",
     "@reduxjs/toolkit": "^1.8.2",
+    "@socket.io/admin-ui": "^0.3.0",
+    "@socket.io/redis-adapter": "^7.2.0",
     "body-parser": "^1.20.0",
     "dotenv-flow": "^3.2.0",
     "express": "^4.18.1",
@@ -34,7 +38,8 @@
     "react-select": "^5.3.2",
     "redis": "^4.1.0",
     "sass": "^1.52.1",
-    "socket.io": "^4.5.1"
+    "socket.io": "^4.5.1",
+    "yargs": "^17.5.1"
   },
   "devDependencies": {
     "@types/dotenv-flow": "^3.2.0",
@@ -44,6 +49,7 @@
     "@types/react": "18.0.9",
     "@types/react-dom": "18.0.5",
     "@types/react-modal": "^3.13.1",
+    "@types/yargs": "^17.0.10",
     "eslint": "8.16.0",
     "eslint-config-next": "12.1.6",
     "ts-node": "^10.8.0",

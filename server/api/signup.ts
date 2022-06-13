@@ -4,7 +4,7 @@ import { Timestamp } from "mongodb";
 import { jwt_secret } from "../env";
 import { auth, users, DatabaseTypes } from "../database";
 import { hash, salt } from "../util";
-import { Checkables, createGuard, Error, Permission} from "./util";
+import { Checkables, createGuard, Error} from "./util";
 
 interface Data {
 	token: string;
@@ -82,10 +82,10 @@ export default async function handler(req: Request, res: Response<Error | Data>)
 		hashed_password,
 		salt: password_salt,
 		user: user.insertedId,
-		permission: Permission.ALL,
+		permission: DatabaseTypes.Permission.ALL,
 	})
 	
-	const token = jwt.sign({user: user.insertedId, permission: Permission.ALL}, jwt_secret);
+	const token = jwt.sign({user: user.insertedId, permission: DatabaseTypes.Permission.ALL}, jwt_secret);
 
 	res.status(200).json({token});
 

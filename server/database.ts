@@ -1,6 +1,5 @@
 import { Settings } from 'lepton-client';
 import { MongoClient, Collection, Document, ObjectId, Timestamp, Db } from 'mongodb';
-import { Permission } from './api/util';
 import { MongoDB_URI } from "./env";
 
 export namespace DatabaseTypes {
@@ -8,7 +7,14 @@ export namespace DatabaseTypes {
 		createdAt: Timestamp;
 		updatedAt: Timestamp;
 	}
-	
+
+	export enum Permission {
+		ALL = 1,
+		COMMENT = 2,
+		POST = 4,
+		GROUP_EVENTS = 8,
+	}
+
 	export interface PasswordAuth extends DatedDocument {
 		username: string;
 		hashed_password: string;

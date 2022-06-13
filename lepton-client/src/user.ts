@@ -72,6 +72,7 @@ export class User<Opts extends Options> {
 		this.username = data.username;		
 		this.avatar = data.avatar;
 		if (isFull(data)) {
+			this.money = data.money;
 			this.description = data.description;
 		}
 	}

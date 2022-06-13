@@ -4,7 +4,7 @@ import { Comment, CommentData } from "./comment";
 import { Group, GroupDataFull } from "./group";
 import { EventEmitter } from "events";
 import { fetch } from "cross-fetch";
-import { io } from "socket.io-client";
+import { io, Socket } from "socket.io-client";
 import { CREATE_POST_URL, GET_COMMENTS_URL, GET_POSTS_URL, GET_SELF_URL, GET_USER_URL, SIGN_IN_URL, SIGN_UP_URL, CREATE_GROUP_URL, UPDATE_SETTINGS_URL, SEARCH_GROUPS_URL, GET_GROUP_URL } from "./constants";
 import { Settings } from "./types";
 import { ClientInfo, ClientInfoData } from "./clientinfo";
@@ -53,6 +53,7 @@ export class Client<Opts extends Options = {partial: false}> extends EventEmitte
 	clientUser?: User<Opts>;
 	clientInfo?: ClientInfo<Opts>;
 	options: Opts;
+	socketio: Socket;
 
 	async getPosts(props?: { before?: number, group?: string}) {
 		const url = new URLSearchParams();
@@ -145,6 +146,19 @@ export class Client<Opts extends Options = {partial: false}> extends EventEmitte
 			throw new Error(result.error);
 		}
 		return result.groups.map((group: any) => Group.from(this, group));	
+	}
+
+	watchingGroups = new Set<string>();
+	async setWatchingGroups(groups: string[]){
+		// compare if groups is equal to watchingGroups
+		if (groups.length === this.watchingGroups.size && groups.every((group) => this.watchingGroups.has(group))) {
+			return;
+		}
+		this.watchingGroups = new Set(groups);
+		this.updateWatchingGroups();
+	}
+	async updateWatchingGroups(){
+		this.socketio.emit("watchingGroups", Array.from(this.watchingGroups));
 	}
 
 	@signedIn()
@@ -259,7 +273,7 @@ export class Client<Opts extends Options = {partial: false}> extends EventEmitte
 		// @ts-ignore
 		this.options = options || {partial: true};
 
-		const socketio = io();
+		const socketio = this.socketio = io();
 		socketio.on("post", ({ post, author }: { post: PostData; author: UserDataFull }) => {
 			User.from(this, author);
 
