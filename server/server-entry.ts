@@ -40,7 +40,7 @@ instrument(io, {
 	auth: false
 });
 
-const redisClient = createClient({
+export const redisClient = createClient({
 	url: REDIS_URI
 });
 

@@ -1,5 +1,12 @@
-import { Settings } from 'lepton-client';
-import { MongoClient, Collection, Document, ObjectId, Timestamp, Db } from 'mongodb';
+import { Settings } from "lepton-client";
+import {
+	MongoClient,
+	Collection,
+	Document,
+	ObjectId,
+	Timestamp,
+	Db,
+} from "mongodb";
 import { MongoDB_URI } from "./env";
 
 export namespace DatabaseTypes {
@@ -36,12 +43,14 @@ export namespace DatabaseTypes {
 	export interface User extends DatedDocument {
 		groups: ObjectId[];
 		username: string;
-		settings: Settings, //may make own type instead of referencing Settings
-		inventory: {item: ObjectId, count: number}[];
+		settings: Settings; //may make own type instead of referencing Settings
+		inventory: { item: ObjectId; count: number }[];
 		money: number;
 		flags: Flags;
 		followers: number;
 		following: number;
+		friends: ObjectId[];
+		blocked: ObjectId[];
 	}
 
 	export interface Comment extends DatedDocument {
@@ -82,7 +91,13 @@ export namespace DatabaseTypes {
 		user: ObjectId;
 		value: -1 | 0 | 1;
 	}
-	
+
+	export interface FriendRequest extends Document {
+		from: ObjectId;
+		to: ObjectId;
+		// accepted: boolean;
+	}
+
 	export interface Item extends DatedDocument {
 		name: string;
 	}
@@ -96,15 +111,24 @@ export namespace DatabaseTypes {
 		groupUsers: Collection<GroupUser>;
 		follows: Collection<Follow>;
 		votes: Collection<Vote>;
-		database: Db
+		friendRequests: Collection<FriendRequest>;
+		database: Db;
 	}
 }
 
 export const {
-	users, posts, comments, groups, groupUsers, follows, votes, database, auth
+	users,
+	posts,
+	comments,
+	groups,
+	groupUsers,
+	follows,
+	votes,
+	database,
+	auth,
 } = await new Promise<DatabaseTypes.Response>((resolve, reject) => {
 	const client = new MongoClient(MongoDB_URI);
-	client.connect(async err => {
+	client.connect(async (err) => {
 		const database = client.db("database");
 		const collections: DatabaseTypes.Response = {
 			auth: database.collection("auth"),
@@ -115,44 +139,49 @@ export const {
 			follows: database.collection("follows"),
 			votes: database.collection("votes"),
 			groupUsers: database.collection("groupUsers"),
+			friendRequests: database.collection("friendRequests"),
 			database,
 		};
 		// indexes
-		
+
 		// find groupusers by their group and user
-		await collections.groupUsers.createIndex(["group", "user"], { unique: true });
+		await collections.groupUsers.createIndex(["group", "user"], {
+			unique: true,
+		});
 
 		// find members of a group
 		await collections.groupUsers.createIndex(["group", "isInGroup"]);
 
 		// find posts in any group by newest
 		// editing a post should bring it back to the top, which is why updatedAt is used
-		await collections.posts.createIndex({group: 1, updatedAt: -1});
-		
+		await collections.posts.createIndex({ group: 1, updatedAt: -1 });
+
 		// find posts for an author by newest
-		await collections.posts.createIndex({author: 1, createdAt: -1});
-				
+		await collections.posts.createIndex({ author: 1, createdAt: -1 });
+
 		// find comments for a author by newest
-		await collections.comments.createIndex({author: 1, createdAt: -1});
-		
+		await collections.comments.createIndex({ author: 1, createdAt: -1 });
+
 		// find comments for a post by newest
-		await collections.comments.createIndex({post: 1, createdAt: -1});
+		await collections.comments.createIndex({ post: 1, createdAt: -1 });
 
 		// find votes for a post;
-		await collections.votes.createIndex({post: 1});
+		await collections.votes.createIndex({ post: 1 });
 
 		// find user's vote for a post
 		await collections.votes.createIndex(["user", "post"], { unique: true });
 
 		// find following for a user
-		await collections.follows.createIndex({follower: 1});
+		await collections.follows.createIndex({ follower: 1 });
 
 		// find followers for a user
-		await collections.follows.createIndex({user: 1});
+		await collections.follows.createIndex({ user: 1 });
 
 		// find if user has followed another user
-		await collections.follows.createIndex(["user", "follower"], { unique: true });
-		
+		await collections.follows.createIndex(["user", "follower"], {
+			unique: true,
+		});
+
 		resolve(collections);
 	});
-})
+});

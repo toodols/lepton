@@ -5,7 +5,19 @@ import { Group, GroupDataFull } from "./group";
 import { EventEmitter } from "events";
 import { fetch } from "cross-fetch";
 import { io, Socket } from "socket.io-client";
-import { CREATE_POST_URL, GET_COMMENTS_URL, GET_POSTS_URL, GET_SELF_URL, GET_USER_URL, SIGN_IN_URL, SIGN_UP_URL, CREATE_GROUP_URL, UPDATE_SETTINGS_URL, SEARCH_GROUPS_URL, GET_GROUP_URL } from "./constants";
+import {
+	CREATE_POST_URL,
+	GET_COMMENTS_URL,
+	GET_POSTS_URL,
+	GET_SELF_URL,
+	GET_USER_URL,
+	SIGN_IN_URL,
+	SIGN_UP_URL,
+	CREATE_GROUP_URL,
+	UPDATE_SETTINGS_URL,
+	SEARCH_GROUPS_URL,
+	GET_GROUP_URL,
+} from "./constants";
 import { Settings } from "./types";
 import { ClientInfo, ClientInfoData } from "./clientinfo";
 
@@ -20,9 +32,16 @@ export interface Options {
 }
 
 export function signedIn(isSignedIn = true) {
-	return (target: any, propertyKey: string, descriptor: PropertyDescriptor) => {
+	return (
+		target: any,
+		propertyKey: string,
+		descriptor: PropertyDescriptor
+	) => {
 		const originalMethod = descriptor.value;
-		descriptor.value = function (this: Client | { client: Client }, ...args: any[]): any {
+		descriptor.value = function (
+			this: Client | { client: Client },
+			...args: any[]
+		): any {
 			let client: Client;
 			if ("client" in this) {
 				client = this.client;
@@ -31,7 +50,9 @@ export function signedIn(isSignedIn = true) {
 			}
 			if (isSignedIn) {
 				if (!client.clientUser) {
-					throw new Error("You must be signed in to use this function");
+					throw new Error(
+						"You must be signed in to use this function"
+					);
 				}
 			} else if (!isSignedIn) {
 				if (client.clientUser) {
@@ -43,13 +64,16 @@ export function signedIn(isSignedIn = true) {
 	};
 }
 
-export type DefaultOpts = {partial: false};
+export type DefaultOpts = { partial: false };
 
 export interface Client<Opts> {
 	on(event: "postAdded", listener: (post: Post<Opts>) => void): this;
 	on(event: "postDeleted", listener: (post: Post<Opts>) => void): this;
 	on(event: "commentAdded", listener: (comment: Comment<Opts>) => void): this;
-	on(event: "commentDeleted", listener: (comment: Comment<Opts>) => void): this;
+	on(
+		event: "commentDeleted",
+		listener: (comment: Comment<Opts>) => void
+	): this;
 	on(event: "clientUserChanged", listener: () => void): this;
 }
 
@@ -65,7 +89,7 @@ export class Client<Opts extends Options = DefaultOpts> extends EventEmitter {
 	options: Opts;
 	socketio: Socket;
 
-	async getPosts(props?: { before?: number, group?: string}) {
+	async getPosts(props?: { before?: number; group?: string }) {
 		const url = new URLSearchParams();
 		if (props?.before) {
 			url.set("before", props.before.toString());
@@ -74,7 +98,17 @@ export class Client<Opts extends Options = DefaultOpts> extends EventEmitter {
 			url.set("group", props.group);
 		}
 
-		const { posts, users, comments, hasMore }: { hasMore: boolean, posts: PostData[]; users: UserDataFull[], comments: CommentData[] } = await fetch(
+		const {
+			posts,
+			users,
+			comments,
+			hasMore,
+		}: {
+			hasMore: boolean;
+			posts: PostData[];
+			users: UserDataFull[];
+			comments: CommentData[];
+		} = await fetch(
 			GET_POSTS_URL + (url.toString() ? `?${url.toString()}` : "")
 		).then((e) => e.json());
 
@@ -85,7 +119,7 @@ export class Client<Opts extends Options = DefaultOpts> extends EventEmitter {
 		let createdPosts: Post<Opts>[] = [];
 
 		for (const postData of posts) {
-			let post = Post.from(this, postData)
+			let post = Post.from(this, postData);
 			createdPosts.push(post);
 		}
 
@@ -94,12 +128,25 @@ export class Client<Opts extends Options = DefaultOpts> extends EventEmitter {
 			c.post.lastComment = c;
 		}
 
-		return {posts: createdPosts, hasMore};
+		return { posts: createdPosts, hasMore };
 	}
 
-	async getComments(props: {post: string, before?: number}): Promise<{comments: Comment<Opts>[], hasMore: boolean}> {
-		const {comments, users, hasMore}: {comments: CommentData[], users: UserDataFull[], hasMore: boolean} = await fetch(
-			GET_COMMENTS_URL + `?post=${props.post}` + (props.before ? `&before=${props.before}` : "")
+	async getComments(props: {
+		post: string;
+		before?: number;
+	}): Promise<{ comments: Comment<Opts>[]; hasMore: boolean }> {
+		const {
+			comments,
+			users,
+			hasMore,
+		}: {
+			comments: CommentData[];
+			users: UserDataFull[];
+			hasMore: boolean;
+		} = await fetch(
+			GET_COMMENTS_URL +
+				`?post=${props.post}` +
+				(props.before ? `&before=${props.before}` : "")
 		).then((e) => e.json());
 
 		for (const userid in users) {
@@ -110,11 +157,11 @@ export class Client<Opts extends Options = DefaultOpts> extends EventEmitter {
 		for (const comment of comments) {
 			createdComments.push(Comment.from(this, comment));
 		}
-		return {comments: createdComments, hasMore};
+		return { comments: createdComments, hasMore };
 	}
 
 	@signedIn()
-	async createPost(props: { content: string, group?: string }) {
+	async createPost(props: { content: string; group?: string }) {
 		const post = await fetch(CREATE_POST_URL, {
 			method: "POST",
 			body: JSON.stringify(props),
@@ -125,7 +172,13 @@ export class Client<Opts extends Options = DefaultOpts> extends EventEmitter {
 		});
 	}
 
-	async getSelfInfo(token: string): Promise<{user: UserDataFull, info: ClientInfoData, groups: Record<string, GroupDataFull>}> {
+	async getSelfInfo(
+		token: string
+	): Promise<{
+		user: UserDataFull;
+		info: ClientInfoData;
+		groups: Record<string, GroupDataFull>;
+	}> {
 		const result = await fetch(GET_SELF_URL, {
 			headers: {
 				Authorization: `Bearer ${token}`,
@@ -151,28 +204,38 @@ export class Client<Opts extends Options = DefaultOpts> extends EventEmitter {
 	}
 
 	async searchGroups(name: string): Promise<Group<Opts>[]> {
-		const result = await fetch(`${SEARCH_GROUPS_URL}?name=${name}`, {}).then((e) => e.json());
+		const result = await fetch(
+			`${SEARCH_GROUPS_URL}?name=${name}`,
+			{}
+		).then((e) => e.json());
 		if (result.error) {
 			throw new Error(result.error);
 		}
-		return result.groups.map((group: any) => Group.from(this, group));	
+		return result.groups.map((group: any) => Group.from(this, group));
 	}
 
 	watchingGroups = new Set<string>();
-	async setWatchingGroups(groups: string[]){
+	async setWatchingGroups(groups: string[]) {
 		// compare if groups is equal to watchingGroups
-		if (groups.length === this.watchingGroups.size && groups.every((group) => this.watchingGroups.has(group))) {
+		if (
+			groups.length === this.watchingGroups.size &&
+			groups.every((group) => this.watchingGroups.has(group))
+		) {
 			return;
 		}
 		this.watchingGroups = new Set(groups);
 		this.updateWatchingGroups();
 	}
-	async updateWatchingGroups(){
+	async updateWatchingGroups() {
 		this.socketio.emit("watchingGroups", Array.from(this.watchingGroups));
 	}
 
 	@signedIn()
-	async createGroup(props: {name: string, isPublic: boolean, description: string}){
+	async createGroup(props: {
+		name: string;
+		isPublic: boolean;
+		description: string;
+	}) {
 		const result = await fetch(CREATE_GROUP_URL, {
 			method: "POST",
 			body: JSON.stringify(props),
@@ -220,14 +283,14 @@ export class Client<Opts extends Options = DefaultOpts> extends EventEmitter {
 	}
 
 	@signedIn(true)
-	signOut(){
+	signOut() {
 		this.clientUser = undefined;
 		this.token = undefined;
 		this.emit("clientUserChanged");
 	}
 
 	@signedIn(true)
-	async updateSettings(settings: Settings){
+	async updateSettings(settings: Settings) {
 		const result = await fetch(UPDATE_SETTINGS_URL, {
 			method: "POST",
 			headers: {
@@ -235,14 +298,14 @@ export class Client<Opts extends Options = DefaultOpts> extends EventEmitter {
 				Authorization: `Bearer ${this.token!}`,
 			},
 			body: JSON.stringify(settings),
-		}).then(e=>e.json())
+		}).then((e) => e.json());
 		if (result.error) {
 			throw new Error(result.error);
 		}
 		return result.settings;
 	}
 
-	async getToken(username: string, password: string){
+	async getToken(username: string, password: string) {
 		const result = await fetch(SIGN_IN_URL, {
 			method: "POST",
 			headers: {
@@ -264,14 +327,14 @@ export class Client<Opts extends Options = DefaultOpts> extends EventEmitter {
 		const token = await this.getToken(username, password);
 		this.useToken(token);
 	}
-	
+
 	async findUser(userid: string): Promise<User<Opts>> {
-		const response = await fetch(GET_USER_URL+userid, {
+		const response = await fetch(GET_USER_URL + userid, {
 			method: "GET",
 			headers: {
 				["Content-Type"]: "application/json",
 			},
-		}).then(e=>e.json());
+		}).then((e) => e.json());
 		if (response.error) {
 			throw new Error(response.error);
 		}
@@ -281,25 +344,38 @@ export class Client<Opts extends Options = DefaultOpts> extends EventEmitter {
 	constructor(options?: Opts) {
 		super();
 		// @ts-ignore
-		this.options = options || {partial: true};
+		this.options = options || { partial: true };
 
-		const socketio = this.socketio = typeof window === "undefined" ? io("http://localhost:3000") : io();
-		socketio.on("post", ({ post, author }: { post: PostData; author: UserDataFull }) => {
-			User.from(this, author);
+		const socketio = (this.socketio =
+			typeof window === "undefined" ? io("http://localhost:3000") : io());
+		socketio.on(
+			"post",
+			({ post, author }: { post: PostData; author: UserDataFull }) => {
+				User.from(this, author);
 
-			// there is no need to call afterinit on post because there are no comments
-			const p = Post.from(this, post);
-			this.emit("postAdded", p);
-		});
-		socketio.on("comment", ({comment, author}: { author: UserDataFull, comment: CommentData})=>{
-			User.from(this, author);
-			const post = this.postsCache.get(comment.post)
-			if (post) {
-				const c = Comment.from(this, comment);
-				post.onNewComment(comment.id);
-				this.emit("commentAdded", c);
+				// there is no need to call afterinit on post because there are no comments
+				const p = Post.from(this, post);
+				this.emit("postAdded", p);
 			}
-		})
+		);
+		socketio.on(
+			"comment",
+			({
+				comment,
+				author,
+			}: {
+				author: UserDataFull;
+				comment: CommentData;
+			}) => {
+				User.from(this, author);
+				const post = this.postsCache.get(comment.post);
+				if (post) {
+					const c = Comment.from(this, comment);
+					post.onNewComment(comment.id);
+					this.emit("commentAdded", c);
+				}
+			}
+		);
 		socketio.on("postDeleted", (id) => {
 			if (this.postsCache.has(id)) {
 				this.emit("postDeleted", this.postsCache.get(id));
@@ -312,10 +388,14 @@ export class Client<Opts extends Options = DefaultOpts> extends EventEmitter {
 				this.emit("commentDeleted", this.commentsCache.get(id));
 				const comment = this.commentsCache.get(id)!;
 				const post = comment.post;
-				const loader: CommentsLoader<Opts> | undefined = comment.post._commentsLoader;
+				const loader: CommentsLoader<Opts> | undefined =
+					comment.post._commentsLoader;
 				if (post.lastComment === comment) {
-					const newId = loader ? loader.loaded.filter(e=>e!==id)[loader.loaded.length-1] : undefined;
-					post.lastComment = newId ? this.commentsCache.get(newId) : undefined;
+					post.lastComment = loader
+						? loader.loaded.filter((e) => e !== id)[
+								loader.loaded.length - 1
+						  ]
+						: undefined;
 				}
 				comment.emit("deleted");
 				if (loader) {
@@ -324,6 +404,6 @@ export class Client<Opts extends Options = DefaultOpts> extends EventEmitter {
 				}
 				this.commentsCache.delete(id);
 			}
-		})
+		});
 	}
 }

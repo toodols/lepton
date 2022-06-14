@@ -2,6 +2,7 @@ import { createHash } from "crypto";
 import type { PostData, UserDataPartial, CommentData, UserDataFull, GroupData, ClientInfoData } from "lepton-client";
 import { ObjectId, WithId } from "mongodb";
 import { DatabaseTypes } from "./database";
+import { redisClient } from "./server-entry";
 
 function hex(n: number){
 	let s = "";
@@ -19,6 +20,10 @@ export function hash(password: string, salt: string) {
 	return createHash("sha256").update(password).update(salt).digest("hex");
 }
 
+function getVotes(){
+	// redisClient.HSET()
+}
+
 export namespace Converter {
 	export function toPostData(post: WithId<DatabaseTypes.Post>): PostData {
 		return {
@@ -28,6 +33,8 @@ export namespace Converter {
 			content: post.content,
 			author: post.author.toString(),
 			group: post.group?.toString(),
+			// commentCount: getCommentCount(post),
+			// votes: getVotes(post),
 		}
 	}
 	export function toGroupDataFull(group: WithId<DatabaseTypes.Group>): GroupData {

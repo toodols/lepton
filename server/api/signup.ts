@@ -72,6 +72,8 @@ export default async function handler(req: Request, res: Response<Error | Data>)
 		updatedAt: Timestamp.fromNumber(Date.now()),
 		flags: DatabaseTypes.Flags.None,
 		money: 0,
+		friends: [],
+		blocked: [],
 	});
 	if (!user.acknowledged) return res.status(500).json({error: "Error creating user"});
 

@@ -2,24 +2,26 @@ import { faComment, faTrash } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Avatar } from "../util/avatar";
 import { Input } from "../util/input";
-import { client, Post, Comment } from "lib/client";
+import { client, Post, Comment } from "../../lib/client";
 import { useUpdatable } from "../../lib/useUpdatable";
 import { useEffect, useMemo, useRef, useState } from "react";
 import Styles from "./posts.module.sass";
 import { useSelector } from "react-redux";
-import { RootState } from "lib/store";
+import { RootState } from "../../lib/store";
 import InfiniteScroll from "react-infinite-scroll-component";
 
 // assuming post will never change
 export function Comments({ post }: { post: Post }) {
 	const loader = post.commentsLoader;
 	useUpdatable(loader);
-	const userid = useSelector((state: RootState) => state.client.userId);
+	const [userid, isSignedIn] = useSelector((state: RootState) => [
+		state.client.userId,
+		state.client.isSignedIn,
+	]);
 
 	let last: Comment | undefined;
 	const hasMore = loader.hasMore;
-	const elements = loader.loaded.map((commentid) => {
-		const comment = client.commentsCache.get(commentid)!;
+	const elements = loader.loaded.map((comment) => {
 		const res = (
 			<div className={Styles.box} key={comment.id}>
 				{comment.author !== last?.author ? (
@@ -50,27 +52,33 @@ export function Comments({ post }: { post: Post }) {
 		return res;
 	});
 	const inputRef = useRef<HTMLInputElement>(null);
+	// Thank you https://github.com/ankeetmaini/react-infinite-scroll-component/issues/322
 	return (
 		<div className={Styles.comments}>
 			<h2>{post.author.username}</h2>
 			<div id="comments" className={Styles.commentsContainer}>
 				<InfiniteScroll
-					scrollableTarget="comments"
-					inverse
-					dataLength={loader.loaded.length}
-					hasMore={hasMore}
+					dataLength={elements.length}
 					next={() => {
-						console.log("next");
-						loader.loadUp();
+						loader.loadBefore();
 					}}
-					loader={<div>Ghost</div>}
+					style={{ display: "flex", flexDirection: "column-reverse" }} //To put endMessage and loader to the top.
+					inverse={true} //
+					hasMore={hasMore}
+					loader={<h4>Loading...</h4>}
+					scrollableTarget="comments"
 				>
-					{elements}
+					{elements.reverse()}
 				</InfiniteScroll>
 			</div>
 
 			<Input
-				name="Enter comment message here"
+				disabled={!isSignedIn}
+				name={
+					isSignedIn
+						? "Enter comment message here"
+						: "Sign in to comment"
+				}
 				ref={inputRef}
 				onSubmit={() => {
 					post.comment(inputRef.current!.value);

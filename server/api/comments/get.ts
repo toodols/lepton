@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { CommentData, UserDataPartial } from "lepton-client";
-import { ObjectId } from "mongodb";
+import { ObjectId, Timestamp } from "mongodb";
 import { comments, users } from "../../database";
 import { Converter } from "../../util";
 import { Checkables, createGuard, Error } from "../util";
@@ -25,12 +25,12 @@ export default async function handler(req: Request, res: Response<Data | Error>)
 		post: value.post,
 	}
 	if (value.before) {
-		query.createdAt = {$lt: value.before};
+		query.createdAt = {$lt: Timestamp.fromNumber(value.before)};
 	};
-	const amountToLoad = 10;
+	const amountToLoad = 30;
 	const findResult = await comments.find(query, {sort: {createdAt: -1}}).limit(amountToLoad+1).toArray();
+	const hasMore = findResult.length > amountToLoad;
 	const actualFindResult = findResult.slice(0, amountToLoad);
-	const hasMore = actualFindResult.length > amountToLoad;
 	const usersRecognized: Record<string, boolean> = {};
 	const arr: Promise<UserDataPartial>[] = [];
 	for (const comment of actualFindResult) {

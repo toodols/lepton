@@ -22,19 +22,29 @@ export interface PostData {
 export class CommentsLoader<Opts extends Options = DefaultOpts> extends EventEmitter {
 	client: Client<Opts>;
 	isLoading = false;
-	loaded: string[] = [];
+	loaded: Comment<Opts>[] = [];
 	hasMore = true;
-	loadUp(){
-		
+	loadBefore(){
+		if(this.isLoading) return;
+		this.isLoading = true;
+		this.client.getComments({post: this.post.id, before: this.loaded[0].createdAt}).then(({comments, hasMore}) => {
+			this.isLoading = false;
+			this.loaded = [...this.loaded, ...comments];
+			this.loaded = this.loaded.sort((a,b)=>{
+				return a.createdAt - b.createdAt;
+			});
+			this.hasMore = hasMore;
+			this.emit("update");
+		});
 	}
 	load(){
 		if(this.isLoading) return;
 		this.isLoading = true;
 		this.client.getComments({post: this.post.id}).then(({comments, hasMore}) => {
 			this.isLoading = false;
-			this.loaded = comments.map(e=>e.id);
+			this.loaded = comments;
 			this.loaded = this.loaded.sort((a,b)=>{
-				return this.client.commentsCache.get(a)!.createdAt - this.client.commentsCache.get(b)!.createdAt;
+				return a.createdAt - b.createdAt;
 			});
 			this.hasMore = hasMore;
 			this.emit("update");
@@ -109,7 +119,7 @@ export class Post<Opts extends Options> extends EventEmitter {
 
 	onNewComment(id: string){
 		const comment = this.client.commentsCache.get(id)!;
-		this._commentsLoader?.loaded.push(id);
+		this._commentsLoader?.loaded.push(comment);
 		this._commentsLoader?.emit("update");
 		this.lastComment = comment;
 		this.emit("comment", comment);
