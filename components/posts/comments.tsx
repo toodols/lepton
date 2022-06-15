@@ -1,4 +1,4 @@
-import { faComment, faTrash } from "@fortawesome/free-solid-svg-icons";
+import { faComment, faReply, faTrash } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Avatar } from "../util/avatar";
 import { Input } from "../util/input";
@@ -18,11 +18,13 @@ export function Comments({ post }: { post: Post }) {
 		state.client.userId,
 		state.client.isSignedIn,
 	]);
+	const [replyTo, setReplyTo] = useState<Comment | null>(null);
 
 	let last: Comment | undefined;
 	const hasMore = loader.hasMore;
-	const elements = loader.loaded.map((comment) => {
-		const res = (
+	const elements: JSX.Element[] = [];
+	for (const comment of [...loader.loaded].reverse()) {
+		 elements.push(
 			<div className={Styles.box} key={comment.id}>
 				{comment.author !== last?.author ? (
 					<div className={Styles.author}>
@@ -32,8 +34,15 @@ export function Comments({ post }: { post: Post }) {
 				) : (
 					<></>
 				)}
+				{comment.replyTo?<div>Reply to {comment.replyTo.author.username}</div>:<></>}
 				<div className={Styles.content}>{comment.content}</div>
 				<div className={Styles.actions}>
+					{isSignedIn?
+					<button onClick={()=>{
+						setReplyTo(comment);
+					}}>
+						<FontAwesomeIcon icon={faReply}/>
+					</button>:<></>}
 					{comment.author.id === userid ? (
 						<button
 							onClick={() => {
@@ -49,8 +58,8 @@ export function Comments({ post }: { post: Post }) {
 			</div>
 		);
 		last = comment;
-		return res;
-	});
+	}
+
 	const inputRef = useRef<HTMLInputElement>(null);
 	// Thank you https://github.com/ankeetmaini/react-infinite-scroll-component/issues/322
 	return (
@@ -71,7 +80,9 @@ export function Comments({ post }: { post: Post }) {
 					{elements.reverse()}
 				</InfiniteScroll>
 			</div>
-
+			{replyTo?<div>
+				Replying to {replyTo.author.username}
+			</div>:<></>}
 			<Input
 				disabled={!isSignedIn}
 				name={
@@ -81,7 +92,10 @@ export function Comments({ post }: { post: Post }) {
 				}
 				ref={inputRef}
 				onSubmit={() => {
-					post.comment(inputRef.current!.value);
+					if (replyTo) {
+						setReplyTo(null);
+					}
+					post.comment(inputRef.current!.value, replyTo?.id);
 					inputRef.current!.value = "";
 				}}
 			></Input>

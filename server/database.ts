@@ -57,6 +57,7 @@ export namespace DatabaseTypes {
 		content: string;
 		author: ObjectId;
 		post: ObjectId;
+		replyTo?: ObjectId;
 	}
 
 	export interface Post extends DatedDocument {

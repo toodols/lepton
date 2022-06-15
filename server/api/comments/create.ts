@@ -9,7 +9,8 @@ interface Data {}
 
 const createCommentGuard = createGuard({
 	content: Checkables.string,
-	post: Checkables.objectId
+	post: Checkables.objectId,
+	replyTo: Checkables.objectId,
 });
 
 export default async function handler(
@@ -27,12 +28,19 @@ export default async function handler(
 	const post = await posts.findOne({ _id: new ObjectId(result.value.post) });
 
 	if (post) {
+		if (result.value.replyTo) {
+			const replyTo = await comments.findOne({ _id: new ObjectId(result.value.replyTo) });
+			if (!replyTo) return res.status(400).json({ error: "Reply to comment not found" });
+			console.log(replyTo, post);
+			if (!replyTo.post.equals(post._id)) return res.status(400).json({error: "Reply's post doesn't match post"})
+		}
 		const comment = await comments.insertOne({
 			content: result.value.content,
 			author: user._id,
 			post: post._id,
 			createdAt: Timestamp.fromNumber(Date.now()),
 			updatedAt: Timestamp.fromNumber(Date.now()),
+			...(result.value.replyTo ? {replyTo: result.value.replyTo} : {}),
 		});
 		
 		if (comment.acknowledged) {

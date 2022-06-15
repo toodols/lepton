@@ -187,6 +187,16 @@ export function Settings() {
 									);
 								}}
 							></textarea>
+							<h3>Region</h3>
+							<SettingsSelect onChange={()=>{
+								
+							}} value={"i have rights you know"} options={[{
+								label: "American 🇺🇸 ",
+								value: "american",
+							}, {
+								label: "Non American 🤢 ",
+								value: "non-american"
+							}]}/>
 						</Section>
 						<Section title="Privacy">
 							<h3>Privacy</h3>

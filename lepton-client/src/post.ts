@@ -27,11 +27,12 @@ export class CommentsLoader<Opts extends Options = DefaultOpts> extends EventEmi
 	loadBefore(){
 		if(this.isLoading) return;
 		this.isLoading = true;
-		this.client.getComments({post: this.post.id, before: this.loaded[0].createdAt}).then(({comments, hasMore}) => {
+		console.log(this.loaded.map(e=>e.content))
+		this.client.getComments({post: this.post.id, before: this.loaded[this.loaded.length-1].createdAt}).then(({comments, hasMore}) => {
 			this.isLoading = false;
 			this.loaded = [...this.loaded, ...comments];
 			this.loaded = this.loaded.sort((a,b)=>{
-				return a.createdAt - b.createdAt;
+				return b.createdAt - a.createdAt;
 			});
 			this.hasMore = hasMore;
 			this.emit("update");
@@ -44,7 +45,7 @@ export class CommentsLoader<Opts extends Options = DefaultOpts> extends EventEmi
 			this.isLoading = false;
 			this.loaded = comments;
 			this.loaded = this.loaded.sort((a,b)=>{
-				return a.createdAt - b.createdAt;
+				return b.createdAt - a.createdAt;
 			});
 			this.hasMore = hasMore;
 			this.emit("update");
@@ -127,7 +128,11 @@ export class Post<Opts extends Options> extends EventEmitter {
 	}
 
 	@signedIn()
-	async comment(content: string){
+	/**
+	 * @param content Content of the comment
+	 * @param replyTo The ID of the comment to reply to. Use comment.reply(content) instead.
+	 */
+	async comment(content: string, replyTo?: string){
 		const result = await fetch(CREATE_COMMENT_URL, {
 			method: "POST",
 			headers: {
@@ -137,6 +142,7 @@ export class Post<Opts extends Options> extends EventEmitter {
 			body: JSON.stringify({
 				post: this.id,
 				content: content,
+				...(replyTo ? {replyTo} : {}),
 			}),
 		}).then(e=>e.json());
 		if (result.error) {

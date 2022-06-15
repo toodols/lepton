@@ -84,6 +84,7 @@ export namespace Converter {
 			content: comment.content,
 			author: comment.author.toString(),
 			post: comment.post.toString(),
+			replyTo: comment.replyTo?.toString(),
 		}
 	}
 }
