@@ -1,5 +1,6 @@
 import { Client, DefaultOpts, Options, signedIn } from "./client";
 import { FOLLOW_USER_URL, UNFOLLOW_USER_URL } from "./constants";
+import { InventoryItem, Item } from "./item";
 
 export enum Flags {
 	None = 0,
@@ -19,11 +20,21 @@ export interface UserDataPartial {
 export interface UserDataFull extends UserDataPartial {
 	description: string;
 	money: number;
+	inventory: {
+		item: string;
+		count: number;
+	}[]
 }
 type UserData = UserDataFull | UserDataPartial;
 type Maybe<T, Opts extends Options> = Opts["partial"] extends true ? T | undefined : T
 function isFull(v: UserData): v is UserDataFull {
 	return "description" in v
+}
+
+enum Privacy {
+	Public = "public",
+	Private = "private",
+	Followers = "followers",
 }
 
 export class User<Opts extends Options = DefaultOpts> {
@@ -77,10 +88,12 @@ export class User<Opts extends Options = DefaultOpts> {
 		}
 	}
 
+	privacy: Privacy = Privacy.Public;
 	id: string;
 	username: string;
 	avatar: string;
 	full: Opts["partial"] extends true ? boolean : true;
+	inventory?: InventoryItem<Opts>[];
 	//@ts-ignore
 	description: Maybe<string, Opts>;
 	//@ts-ignore
@@ -96,6 +109,7 @@ export class User<Opts extends Options = DefaultOpts> {
 		if (isFull(from)) {
 			this.money = from.money;
 			this.description = from.description;
+			this.inventory = from.inventory.map(i=>new InventoryItem(this.client, i));
 		}
 		this.client.usersCache.set(this.id, this);
 	}

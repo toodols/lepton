@@ -20,6 +20,7 @@ import {
 } from "./constants";
 import { Settings } from "./types";
 import { ClientInfo, ClientInfoData } from "./clientinfo";
+import { Item } from "./item";
 
 // const SOCKET_URL = process.env.NODE_ENV === "development" ? "/api/socket" : "wss://idk lmao";
 
@@ -82,6 +83,7 @@ export class Client<Opts extends Options = DefaultOpts> extends EventEmitter {
 	postsCache = new Map<string, Post<Opts>>();
 	usersCache = new Map<string, User<Opts>>();
 	groupsCache = new Map<string, Group<Opts>>();
+	itemsCache = new Map<string, Item<Opts>>();
 
 	token?: string;
 	clientUser?: User<Opts>;
@@ -158,6 +160,16 @@ export class Client<Opts extends Options = DefaultOpts> extends EventEmitter {
 			createdComments.push(Comment.from(this, comment));
 		}
 		return { comments: createdComments, hasMore };
+	}
+
+	getItemPromises: Record<string, Promise<Item<Opts>>> = {};
+	async getItem(props: {
+		item: string;
+	}) {
+		if (!!this.getItemPromises[props.item]) {
+			return this.getItemPromises[props.item];
+		}
+		// todo
 	}
 
 	@signedIn()

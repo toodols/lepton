@@ -1,6 +1,6 @@
 import { createSlice, CreateSliceOptions, PayloadAction, SliceCaseReducers } from "@reduxjs/toolkit";
 import { client } from "../client";
-
+import jwt from "jsonwebtoken";
 export const clientSlice = createSlice({
 	name: "Client",
 	initialState: {
@@ -12,7 +12,7 @@ export const clientSlice = createSlice({
 	},
 	reducers: {
 		addAccount(state, action: PayloadAction<string>) {
-			state.accounts = [...state.accounts, action.payload].filter((e, i, a) => a.indexOf(e) === i);
+			state.accounts = [...state.accounts, action.payload].map(e=>[jwt.decode(e, {json: true})?.user, e]).filter((e, i, a)=>a.findIndex(ee=>ee[0]===e[0])===i).map(e=>e[1]);
 			localStorage.setItem("accounts", JSON.stringify(state.accounts));
 		},
 		removeAccount(state, action: PayloadAction<string>) {

@@ -19,7 +19,7 @@ export default async function handler(
 	const {value, post: postid} = result.value; 
 
 	if (value !== -1 && value !== 1 && value !== 0) {
-		return res.status(400).json({ error: "Must be -1, 1, or 0" });
+		return res.status(400).json({ error: "Value must be -1, 1, or 0" });
 	}
 
 	const user = await getUserFromAuth(req, res);

@@ -66,13 +66,18 @@ io.on('connection', (socket: socketio.Socket) => {
 		joinedGroups = newJoined;
 		watchingGroups = newWatching;
 	}
+	let currentUserId: string; 
 	socket.on("auth", async (token: string)=>{
 		const inner = token.replace(/^Bearer\s+/, "");
 		const e = jwt.verify(inner, jwt_secret);
+
 		
 		if (typeof e === "string") {
 			return {error: "token doesn't work"};
 		} else {
+			socket.leave(`user:${currentUserId}`);
+			currentUserId = e.user;
+			socket.join(`user:${currentUserId}`);
 			if (
 				!(
 					e.permission &&

@@ -40,11 +40,12 @@ export namespace DatabaseTypes {
 		Developer = 2,
 		Moderator = 4,
 	}
+	
 	export interface User extends DatedDocument {
 		groups: ObjectId[];
 		username: string;
 		settings: Settings; //may make own type instead of referencing Settings
-		inventory: { item: ObjectId; count: number }[];
+		inventory: Item[];
 		money: number;
 		flags: Flags;
 		followers: number;
@@ -99,8 +100,16 @@ export namespace DatabaseTypes {
 		// accepted: boolean;
 	}
 
+	export type InventoryItem = {item: ObjectId, count: number, name?: string, description?: string, details?: any};
+
 	export interface Item extends DatedDocument {
 		name: string;
+		/**
+		 * Item is non-stackable
+		 */
+		unique: boolean;
+		icon: string;
+		description: string;
 	}
 
 	export interface Response {
@@ -113,6 +122,7 @@ export namespace DatabaseTypes {
 		follows: Collection<Follow>;
 		votes: Collection<Vote>;
 		friendRequests: Collection<FriendRequest>;
+		items: Collection<Item>;
 		database: Db;
 	}
 }
@@ -127,6 +137,7 @@ export const {
 	votes,
 	database,
 	auth,
+	items,
 } = await new Promise<DatabaseTypes.Response>((resolve, reject) => {
 	const client = new MongoClient(MongoDB_URI);
 	client.connect(async (err) => {
@@ -141,6 +152,7 @@ export const {
 			votes: database.collection("votes"),
 			groupUsers: database.collection("groupUsers"),
 			friendRequests: database.collection("friendRequests"),
+			items: database.collection("items"),
 			database,
 		};
 		// indexes

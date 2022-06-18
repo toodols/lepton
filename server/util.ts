@@ -4,7 +4,7 @@ import { ObjectId, WithId } from "mongodb";
 import { DatabaseTypes } from "./database";
 import { redisClient } from "./server-entry";
 
-function hex(n: number){
+export function hex(n: number){
 	let s = "";
 	for (let i = 0; i < n; i++) {
 		s+=Math.floor(Math.random()*16).toString(16);
@@ -63,14 +63,20 @@ export namespace Converter {
 		}
 	}
 	export function toUserDataFull(user: WithId<DatabaseTypes.User>): UserDataFull {
+		console.log(user)
 		return {
 			...toUserDataPartial(user),
 			money: user.money,
 			description: user.settings.description,
+			inventory: user.inventory.map(i=>({
+				item: i.item.toString(),
+				count: i.count,
+			}))
 		}
 	}
 	export function toClientInfoData(user: WithId<DatabaseTypes.User>): ClientInfoData {
 		return {
+			blocked: user.blocked.map(b=>b.toString()),
 			groups: user.groups.map(g => g.toString()),
 			settings: user.settings,
 		}

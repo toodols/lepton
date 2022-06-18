@@ -53,7 +53,10 @@ export function Topbar() {
 				{router.pathname === "/" ||
 				router.pathname === "/groups/[groupid]" ? (
 					<>
-						<button>
+						<button onClick={()=>{
+							const group = client.groupsCache.get(router.query.groupid as string)!;
+							
+						}}>
 							<FontAwesomeIcon icon={faPeopleGroup}/>
 							Join Group
 						</button>

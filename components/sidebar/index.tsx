@@ -37,6 +37,15 @@ export function Sidebar() {
 							}}>Profile</button>
 						</Link>
 					): <></>}
+					<Link href="/inventory" passHref>
+						<button
+							onClick={() => {
+								dispatch(setSidebarOpen(false));
+							}}
+						>
+							Inventory
+						</button>
+					</Link>
 					<Link href="/backrooms" passHref>
 						<button
 							onClick={() => {

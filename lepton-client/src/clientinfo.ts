@@ -7,6 +7,7 @@ import { User, UserDataFull } from "./user";
 export interface ClientInfoData {
 	groups: string[];
 	settings: Settings,
+	blocked: string[];
 }
 
 /**

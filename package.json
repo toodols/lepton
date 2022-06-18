@@ -9,6 +9,7 @@
     "dev": "npm run compile && node --inspect --experimental-specifier-resolution=node ./out/server-entry.js",
     "test-multiple": "npm run compile && node --inspect --experimental-specifier-resolution=node ./out/server-entry.js --port 5001 & node --inspect --experimental-specifier-resolution=node ./out/server-entry.js --port 5002",
     "dropcollections": "tsc --project ./tsconfig.server.json && node --experimental-specifier-resolution=node ./out/dropall.js",
+    "test": "tsc --project ./tsconfig.server.json && node --experimental-specifier-resolution=node ./out/test.js",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
