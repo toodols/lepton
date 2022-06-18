@@ -3,17 +3,20 @@ import { UserDataFull } from "lepton-client";
 import { ObjectId } from "mongodb";
 import { users } from "../../database";
 import { Converter } from "../../util";
-import { Error } from "../util";
+import { Checkables, createGuard, Error } from "../util";
 
 interface Data {
 	user: UserDataFull
 }
+const lookupUserGuard = createGuard({
+	userid: Checkables.objectId
+})
 
 export default async function handler(req: Request, res: Response<Data | Error>) {
-	const {userid} = req.params;
-	if (!userid) return res.status(400).json({error: "Missing userid"});
+	const result = lookupUserGuard(req.params as any);
+	if ("error" in result) return res.json(result);
 
-	const user = await users.findOne({_id: new ObjectId(userid)});
+	const user = await users.findOne({_id: new ObjectId(result.value.userid)});
 	if (user) {
 		res.json({user: Converter.toUserDataFull(user)});
 	} else {

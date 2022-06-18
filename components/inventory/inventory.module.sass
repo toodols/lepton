@@ -1,0 +1,19 @@
+@import "../../styles/mixins"
+.container
+	display: flex
+	flex-wrap: wrap
+	padding: 10px
+	.item
+		min-width: 100px
+		min-height: 100px
+		position: relative
+		@include border
+		.name
+			background: white
+			position: absolute
+			left: 5px
+			bottom: 5px
+		.count
+			position: absolute
+			right: 5px
+			bottom: 5px

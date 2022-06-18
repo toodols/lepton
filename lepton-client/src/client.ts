@@ -17,6 +17,7 @@ import {
 	UPDATE_SETTINGS_URL,
 	SEARCH_GROUPS_URL,
 	GET_GROUP_URL,
+	LOOKUP_ITEM_URL,
 } from "./constants";
 import { Settings } from "./types";
 import { ClientInfo, ClientInfoData } from "./clientinfo";
@@ -169,7 +170,15 @@ export class Client<Opts extends Options = DefaultOpts> extends EventEmitter {
 		if (!!this.getItemPromises[props.item]) {
 			return this.getItemPromises[props.item];
 		}
-		// todo
+		this.getItemPromises[props.item] = fetch(
+			LOOKUP_ITEM_URL + `${props.item}`
+		).then((e) => e.json()).then((e)=>{
+			if (e.error) {
+				throw new Error(e.error);
+			}
+			return Item.from(this, e.item);
+		});
+		return this.getItemPromises[props.item];
 	}
 
 	@signedIn()

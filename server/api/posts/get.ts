@@ -19,7 +19,7 @@ const getPostsGuard = createGuard({
 
 export default async function handler(req: Request, res: Response<Data | Error>) {
 	const result = getPostsGuard(req.query as any);
-	if ("error" in result) return res.status(400).json({error: result.error});
+	if ("error" in result) return res.status(400).json(result);
 	const {before, group} = result.value;
 	const query: Filter<DatabaseTypes.Post> = {};
 	if (before) query.createdAt = {$lt: Timestamp.fromNumber(before)};

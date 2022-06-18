@@ -1,5 +1,5 @@
 import { createHash } from "crypto";
-import type { PostData, UserDataPartial, CommentData, UserDataFull, GroupData, ClientInfoData } from "lepton-client";
+import type { PostData, UserDataPartial, CommentData, UserDataFull, GroupData, ClientInfoData, ItemData } from "lepton-client";
 import { ObjectId, WithId } from "mongodb";
 import { DatabaseTypes } from "./database";
 import { redisClient } from "./server-entry";
@@ -63,7 +63,6 @@ export namespace Converter {
 		}
 	}
 	export function toUserDataFull(user: WithId<DatabaseTypes.User>): UserDataFull {
-		console.log(user)
 		return {
 			...toUserDataPartial(user),
 			money: user.money,
@@ -91,6 +90,16 @@ export namespace Converter {
 			author: comment.author.toString(),
 			post: comment.post.toString(),
 			replyTo: comment.replyTo?.toString(),
+		}
+	}
+
+	export function toItemData(item: WithId<DatabaseTypes.Item>): ItemData {
+		return {
+			id: item._id.toString(),
+			name: item.name,
+			description: item.description,
+			icon: item.icon,
+			unique: item.unique,
 		}
 	}
 }

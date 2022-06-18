@@ -17,11 +17,11 @@ function MyApp({ Component, pageProps }: AppProps) {
 	useEffect(()=>{
 		console.log(
 			`
-			%cLepton
-			%c
-			Made by Ethan.
-			Inspect element doesn't make you a hacker and this project is open source anyways.
-			Please contribute: https://github.com/toodols/lepton
+%cLepton
+%c
+Made by Ethan.
+Inspect element doesn't make you a hacker and this project is open source anyways.
+Please contribute: https://github.com/toodols/lepton
 			`.trim(),
 				"font-style: italic; font-size: 40px",
 				"font-size: unset",

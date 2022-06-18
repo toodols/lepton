@@ -14,7 +14,7 @@ export default async function handler(
 	res: Response<Data | Error>
 ) {
 	const result = getGroupGuard(req.params as any);
-	if ("error" in result) return res.status(400).json({error: result.error});
+	if ("error" in result) return res.status(400).json(result);
 	
 	const group = await groups.findOne({_id: result.value.groupid});
 	if (!group) {

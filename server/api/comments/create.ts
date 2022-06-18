@@ -31,7 +31,6 @@ export default async function handler(
 		if (result.value.replyTo) {
 			const replyTo = await comments.findOne({ _id: new ObjectId(result.value.replyTo) });
 			if (!replyTo) return res.status(400).json({ error: "Reply to comment not found" });
-			console.log(replyTo, post);
 			if (!replyTo.post.equals(post._id)) return res.status(400).json({error: "Reply's post doesn't match post"})
 		}
 		const comment = await comments.insertOne({

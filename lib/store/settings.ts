@@ -57,7 +57,6 @@ export const settingsSlice = createSlice({
 		editSettings: (state, action: PayloadAction<Partial<typeof initialState["settings"]>>)=>{
 			state.settings = {...state.settings, ...action.payload};
 			// compare if state.settings and state.originalSettings are the same
-			console.log(JSON.stringify(state.settings), JSON.stringify(state.originalSettings));
 			if (JSON.stringify(state.settings)!==JSON.stringify(state.originalSettings)) {
 				state.isEditing = true;
 			} else {

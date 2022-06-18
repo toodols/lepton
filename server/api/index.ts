@@ -24,6 +24,7 @@ import editCommentHandler from "./comments/edit";
 import votePostHandler from "./posts/vote";
 import deleteAccountHandler from "./deleteaccount";
 import lookupGroupHandler from "./groups/lookup";
+import lookupItemHandler from "./items/lookup";
 
 export function apiRouter(app: Application) {
 	app.post("/api/signin", signInHandler)
@@ -51,4 +52,6 @@ export function apiRouter(app: Application) {
 	app.post("/api/groups/edit", editGroupHandler)
 	app.get("/api/groups/search", searchGroupsHandler)
 	app.get("/api/groups/lookup/:groupid", lookupGroupHandler)
+
+	app.get("/api/items/lookup/:itemid", lookupItemHandler)
 }

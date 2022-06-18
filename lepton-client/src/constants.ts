@@ -22,3 +22,4 @@ export const DELETE_GROUP_URL=  FETCH_BASE_URL +"/api/groups/delete";
 export const EDIT_GROUP_URL = FETCH_BASE_URL + "/api/groups/edit";
 export const SEARCH_GROUPS_URL = FETCH_BASE_URL + "/api/groups/search";
 export const GET_GROUP_URL = FETCH_BASE_URL + "/api/groups/lookup/";
+export const LOOKUP_ITEM_URL = FETCH_BASE_URL + "/api/items/lookup/";

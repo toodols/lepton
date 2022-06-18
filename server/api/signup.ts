@@ -44,7 +44,7 @@ const signUpGuard = createGuard({
 
 export default async function handler(req: Request, res: Response<Error | Data>) {
 	const result = signUpGuard(req.body);
-	if ("error" in result) return res.status(400).json({error: result.error});
+	if ("error" in result) return res.status(400).json(result);
 
 
 	const { username, password } = result.value;

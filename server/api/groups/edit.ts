@@ -15,7 +15,7 @@ export default async function handler(
 	res: Response<Data | Error>
 ) {
 	const result = editGroupGuard(req.body);
-	if ("error" in result) return res.status(400).json({error: result.error});
+	if ("error" in result) return res.status(400).json(result);
 
 	//todo
 }

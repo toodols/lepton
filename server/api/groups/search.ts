@@ -17,9 +17,8 @@ export default async function handler(
 	res: Response<Data | Error>
 ) {
 	const result = createGroupGuard(req.query as any);
-	if ("error" in result) return res.status(400).json({error: result.error});
+	if ("error" in result) return res.status(400).json(result);
 	const {name} = result.value;
-	console.log(name);
 	const fresult = await groups.find({name: {$regex: name, $options: "i"}, isPublic: true}).limit(10).toArray();
 	res.json({
 		groups: fresult.map(Converter.toGroupDataPartial),
