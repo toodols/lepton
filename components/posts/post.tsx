@@ -3,7 +3,7 @@ import { Post as PostObject } from "../../lib/client";
 import Styles from "./posts.module.sass";
 import { useUpdatable } from "../../lib/useUpdatable";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faArrowUp, faComment, faTrash } from "@fortawesome/free-solid-svg-icons";
+import { faArrowDown, faArrowUp, faComment, faTrash } from "@fortawesome/free-solid-svg-icons";
 import { useSelector } from "react-redux";
 import { RootState } from "../../lib/store";
 import { useContext, useState } from "react";
@@ -53,6 +53,12 @@ export function Post({ post, setCurrent, current }: { current: string | null, se
 							post.vote(1);
 						}}>
 							<FontAwesomeIcon icon={faArrowUp}/>
+						</button>
+						{post.votes}
+						<button onClick={()=>{
+							post.vote(-1);
+						}}>
+							<FontAwesomeIcon icon={faArrowDown}/>
 						</button>
 					</>:<></>}
 					{post.author.id.toString() === userid ? (

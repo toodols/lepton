@@ -14,6 +14,7 @@ export interface PostData {
 	// commentCount: number;
 	createdAt: number;
 	updatedAt: number;
+	votes: number;
 }
 
 // keeping track of a post's comments is too expensive
@@ -84,6 +85,7 @@ export class Post<Opts extends Options> extends EventEmitter {
 	author: User<Opts>;
 	group?: Group<Opts>;
 	createdAt: number;
+	votes: number;
 
 	/**
 	 * @private
@@ -177,5 +179,6 @@ export class Post<Opts extends Options> extends EventEmitter {
 		this.content = from.content;
 		this.client.postsCache.set(this.id, this);
 		this.createdAt = from.createdAt;
+		this.votes = from.votes;
 	}
 }

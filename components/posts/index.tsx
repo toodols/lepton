@@ -13,7 +13,6 @@ export const PostElementsContext = createContext<{
 export function Posts({groupid}: {groupid?: string}) {
 	const [posts, setPosts] = useState<PostObj[]>([]);
 	const [hasMore, setHasMore] = useState(true);
-	const dispatch = useDispatch();
 	useEffect(() => {
 		setPosts([]);
 		async function sub() {

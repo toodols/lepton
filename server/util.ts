@@ -1,8 +1,9 @@
 import { createHash } from "crypto";
 import type { PostData, UserDataPartial, CommentData, UserDataFull, GroupData, ClientInfoData, ItemData } from "lepton-client";
 import { ObjectId, WithId } from "mongodb";
-import { DatabaseTypes } from "./database";
-import { redisClient } from "./server-entry";
+import { Socket } from "socket.io";
+import { DatabaseTypes, posts, votes } from "./database";
+import { io, redisClient } from "./server-entry";
 
 export function hex(n: number){
 	let s = "";
@@ -20,12 +21,30 @@ export function hash(password: string, salt: string) {
 	return createHash("sha256").update(password).update(salt).digest("hex");
 }
 
-function getVotes(){
-	// redisClient.HSET()
+async function getVotes(id: ObjectId): Promise<number> {
+	const result = await redisClient.hGet("post:"+id, "votes")
+	if (result) {
+		return parseInt(result)
+	}
+	const p = await votes.aggregate([
+			{$match: {post: id}},
+			{$group: {_id: null, sum: {$sum: "$value"}}}
+		]
+	).toArray().then(e=>e[0].sum);
+	redisClient.hSet("post:"+id, "votes", p);
+	return p;
+}
+
+export function toGroup(group: ObjectId | undefined | null){
+	if (group) {
+		return io.to("group:"+group)
+	} else {
+		return io
+	}
 }
 
 export namespace Converter {
-	export function toPostData(post: WithId<DatabaseTypes.Post>): PostData {
+	export async function toPostData(post: WithId<DatabaseTypes.Post>): Promise<PostData> {
 		return {
 			createdAt: post.createdAt.toNumber(),
 			updatedAt: post.updatedAt.toNumber(),
@@ -34,7 +53,7 @@ export namespace Converter {
 			author: post.author.toString(),
 			group: post.group?.toString(),
 			// commentCount: getCommentCount(post),
-			// votes: getVotes(post),
+			votes: await getVotes(post._id)
 		}
 	}
 	export function toGroupDataFull(group: WithId<DatabaseTypes.Group>): GroupData {

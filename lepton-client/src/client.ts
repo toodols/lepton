@@ -404,6 +404,12 @@ export class Client<Opts extends Options = DefaultOpts> extends EventEmitter {
 				this.postsCache.delete(id);
 			}
 		});
+		socketio.on("votesChanged", (id, change) => {
+			if (this.postsCache.has(id)) {
+				this.postsCache.get(id)!.votes += change;
+				this.postsCache.get(id)!.emit("update");
+			}
+		})
 		socketio.on("commentDeleted", (id) => {
 			if (this.commentsCache.has(id)) {
 				this.emit("commentDeleted", this.commentsCache.get(id));

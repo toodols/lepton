@@ -7,6 +7,7 @@ export enum Flags {
 	Owner = 1,
 	Developer = 2,
 	Moderator = 4,
+	Tester = 8,
 }
 
 export interface UserDataPartial {

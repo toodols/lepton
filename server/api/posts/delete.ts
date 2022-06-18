@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { ObjectId } from "mongodb";
 import { posts } from "../../database";
-import { io } from "../../server-entry";
+import { io, redisClient } from "../../server-entry";
 import { Checkables, createGuard, Error, getUserFromAuth } from "../util";
 
 interface Data {
@@ -24,6 +24,7 @@ export default async function handler(req: Request, res: Response<Data | Error>)
 		if (post.author.equals(user._id)) {
 			const deleteRes = await posts.deleteOne({_id: post._id});
 			if (deleteRes.acknowledged) {
+				redisClient.del(`post:${post._id}`);
 				io.emit("postDeleted", post._id) // its automatically casted to a string just so i dont get confused
 				res.status(200).json({})
 			} else {

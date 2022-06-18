@@ -65,7 +65,7 @@ export default async function handler(req: Request, res: Response<Data | Error>)
 	res.json({
 		hasMore,
 		users: dataMap,
-		posts: actualPostsResult.map(Converter.toPostData),
+		posts: await Promise.all(actualPostsResult.map(Converter.toPostData)),
 		comments: commentResults.map(Converter.toCommentData),
 	}).status(200);
 }
