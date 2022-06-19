@@ -1,4 +1,4 @@
-import { faComment, faReply, faTrash } from "@fortawesome/free-solid-svg-icons";
+import { faCancel, faComment, faReply, faTrash } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Avatar } from "../util/avatar";
 import { Input } from "../util/input";
@@ -26,6 +26,7 @@ export function Comments({ post }: { post: Post }) {
 	for (const comment of [...loader.loaded].reverse()) {
 		 elements.push(
 			<div className={Styles.box} key={comment.id}>
+				{comment.replyTo?<div>Reply to {comment.replyTo.author.username}</div>:<></>}
 				{comment.author !== last?.author ? (
 					<div className={Styles.author}>
 						<Avatar size={30} src={comment.author.avatar} />
@@ -34,7 +35,6 @@ export function Comments({ post }: { post: Post }) {
 				) : (
 					<></>
 				)}
-				{comment.replyTo?<div>Reply to {comment.replyTo.author.username}</div>:<></>}
 				<div className={Styles.content}>{comment.content}</div>
 				<div className={Styles.actions}>
 					{isSignedIn?
@@ -82,6 +82,11 @@ export function Comments({ post }: { post: Post }) {
 			</div>
 			{replyTo?<div>
 				Replying to {replyTo.author.username}
+				<button onClick={()=>{
+					setReplyTo(null);
+				}} className={Styles.cancelReplyButton}>
+					<FontAwesomeIcon icon={faCancel}/>
+				</button>
 			</div>:<></>}
 			<Input
 				disabled={!isSignedIn}

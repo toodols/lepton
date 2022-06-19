@@ -416,6 +416,7 @@ export class Client<Opts extends Options = DefaultOpts> extends EventEmitter {
 				const comment = this.commentsCache.get(id)!;
 				const post = comment.post;
 				const loader: CommentsLoader<Opts> | undefined =
+				//@ts-ignore
 					comment.post._commentsLoader;
 				if (post.lastComment === comment) {
 					post.lastComment = loader
@@ -426,7 +427,7 @@ export class Client<Opts extends Options = DefaultOpts> extends EventEmitter {
 				}
 				comment.emit("deleted");
 				if (loader) {
-					loader.loaded = loader.loaded.filter((e) => e !== id);
+					loader.loaded = loader.loaded.filter((e) => e.id !== id);
 					loader.emit("update");
 				}
 				this.commentsCache.delete(id);

@@ -10,7 +10,7 @@ interface Data {}
 const createCommentGuard = createGuard({
 	content: Checkables.string,
 	post: Checkables.objectId,
-	replyTo: Checkables.objectId,
+	replyTo: Checkables.optional(Checkables.objectId),
 });
 
 export default async function handler(

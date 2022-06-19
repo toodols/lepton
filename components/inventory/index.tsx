@@ -32,13 +32,16 @@ export function InventoryItemComponent({ item }: { item: InventoryItem }) {
 }
 export function Inventory({ user }: { user: User }) {
 	return (
-		<div>
+		<div className={Styles.inventory}>
 			<h1>
 				{user.username}
 				{"'"}s Inventory
 			</h1>
 			<div className={Styles.container}>
-				{user.inventory ? (
+				{user.inventory ? user.inventory.length===0 ? <div>
+					<b>Empty.</b>
+					<div>You are as broken in Lepton as you are in real life.</div>
+				</div> : (
 					user.inventory.map((item, i) => (
 						<InventoryItemComponent key={i} item={item} />
 					))

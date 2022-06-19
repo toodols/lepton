@@ -87,11 +87,7 @@ export class Post<Opts extends Options> extends EventEmitter {
 	createdAt: number;
 	votes: number;
 
-	/**
-	 * @private
-	 * Use .commentsLoader to get loader
-	 */
-	_commentsLoader?: CommentsLoader<Opts>;
+	private _commentsLoader?: CommentsLoader<Opts>;
 
 	get commentsLoader(): CommentsLoader<Opts> {
 		if (!this._commentsLoader){
@@ -122,7 +118,7 @@ export class Post<Opts extends Options> extends EventEmitter {
 
 	onNewComment(id: string){
 		const comment = this.client.commentsCache.get(id)!;
-		this._commentsLoader?.loaded.push(comment);
+		this._commentsLoader?.loaded.unshift(comment);
 		this._commentsLoader?.emit("update");
 		this.lastComment = comment;
 		this.emit("comment", comment);
