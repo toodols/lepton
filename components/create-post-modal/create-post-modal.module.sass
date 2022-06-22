@@ -1,9 +1,29 @@
+@import "../../styles/mixins"
 .createPostModal
 	width: 500px
 	height: 350px
-	header
-		margin-bottom: 10px
+		
+	.content
+		padding: 10px
+
+	.buttons
+		button
+			background: none
+			&[data-selected=true]
+				@include border
+		margin-bottom: 5px
+	
+	.preview
+		height: 200px
+		width: 100%
+		padding: 5px
+
 	textarea
+		@include border
+		padding: 5px
+		outline: none
+		color: var(--color-text)
+		background: none
 		resize: none
 		width: 100%
 		height: 200px

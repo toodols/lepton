@@ -12,6 +12,7 @@ import { Avatar } from "../util/avatar";
 import { useTruncate } from "lib/truncate";
 import Link from "next/link";
 import { Flags } from "lepton-client";
+import { MarkupRendered } from "components/markup/rendered";
 
 function Roles({flags}: {flags: Flags}){
 	if (flags & Flags.Developer) return <span className={Styles.role}>Developer</span>;
@@ -83,7 +84,7 @@ export function Post({ post, setCurrent, current }: { current: string | null, se
 				</div>
 			</div>
 			<div ref={contentRef} className={Styles.content}>
-				{post.content}
+				<MarkupRendered value={post.content}/>
 				<div className={Styles.overflowGradient}></div>
 			</div>
 			<button className={Styles.showMore} onClick={()=>{

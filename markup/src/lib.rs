@@ -1,9 +1,10 @@
-#[macro_use]
 use pest_derive::Parser;
 use pest::{Parser, iterators::Pairs};
-
+use wasm_bindgen::prelude::*;
+use serde::{Serialize, Deserialize};
 
 #[derive(Debug)]
+#[derive(Serialize)]
 pub enum BlockContent {
 	Text(String),
 	CodeInline(String),
@@ -18,6 +19,7 @@ pub enum BlockContent {
 }
 
 #[derive(Debug)]
+#[derive(Serialize)]
 pub struct Block {
 	content: BlockContent,
 	raw: String,
@@ -26,15 +28,18 @@ pub struct Block {
 }
 
 #[derive(Debug)]
+#[derive(Serialize)]
 pub struct Mention {
 	id: String,
 }
 
 #[derive(Parser)]
 #[grammar = "lang.pest"]
+#[derive(Serialize)]
 struct PestParser;
 
 #[derive(Debug)]
+#[derive(Serialize)]
 pub struct PlainMention {
 	text: String,
 }
@@ -114,8 +119,17 @@ fn to_tree(pairs: Pairs<Rule>) -> Vec<Block> {
 					}),
 				})
 			},
+			Rule::spoiler => {
+				to_push = Some(Block {
+					raw: pair.as_str().to_owned(),
+					start: pair.as_span().start(),
+					end: pair.as_span().end(),
+					content: BlockContent::Spoiler(to_tree(pair.into_inner())),
+				})
+			},
 			Rule::any => {
 				text.push_str(&pair.as_str());
+				position = pair.as_span().end();
 			}
 			_=>panic!("e")
 		}
@@ -123,9 +137,9 @@ fn to_tree(pairs: Pairs<Rule>) -> Vec<Block> {
 			if text.len() > 0 {
 				blocks.push(Block {
 					content: BlockContent::Text(text.clone()),
-					end: position + text.len(),
+					start: position - text.len(),
+					end: position,
 					raw: text,
-					start: position
 				});
 				text = String::new();
 			}
@@ -135,35 +149,30 @@ fn to_tree(pairs: Pairs<Rule>) -> Vec<Block> {
 	if text.len() > 0 {
 		blocks.push(Block {
 			content: BlockContent::Text(text.clone()),
-			end: position + text.len(),
+			start: position - text.len(),
+			end: position,
 			raw: text,
-			start: position,
 		});
 	}
 	return blocks;
 }
 
-pub fn parse(input: &str) -> Vec<Block> {
+
+fn parse(input: &str) -> Vec<Block> {
 	let pairs = PestParser::parse(Rule::blocks, input).unwrap();
 	return to_tree(pairs);
 }
 
+#[wasm_bindgen]
+pub fn parse_with_serialize(input: &str) -> String {
+	serde_json::to_string(&parse(input)).unwrap()
+}
+
 #[test]
 fn test(){
-	println!("{}",blocks_to_html(parse(r"
-		normal text
-		*italic*
-		**bold**
-		in
-		__underline__
-		between
-		~~strikethrough~~
-		`code inline`
-		```code block```
-		~~***___ALL YOUR `POWERS` COMBINED___***~~
-		@toodols
-		<@123abc>
-	")));
+	println!("{:#?}",parse(r"
+		you *are*
+	"));
 }
 
 fn blocks_to_html(blocks: Vec<Block>) -> String {

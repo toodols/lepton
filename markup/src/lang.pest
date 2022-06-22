@@ -1,10 +1,11 @@
 blocks = _{ block+}
-block = _{ bold | underline | italic | strikethrough | code_inline | code_block | mention | plain_mention | any }
+block = _{ spoiler | bold | underline | italic | strikethrough | code_inline | code_block | mention | plain_mention | any }
 hex = {('0'..'9' | 'a'..'f')+}
 space = { " " | "\n" | "\t" }
 any = { ANY }
 italic = {("*" ~ ((!"*" ~ block)+ ) ~ "*" ) | ("_" ~  ((!"_" ~ block)+ ) ~ "_")}
 bold = {"**" ~ ((!"**" ~ block)+ ) ~ "**"}
+spoiler = {"||" ~ ((!"||" ~ block)+ ) ~ "||"}
 underline = {"__" ~ ((!"__" ~ block)+ ) ~ "__"}
 strikethrough = {"~~" ~ ((!"~~" ~ block)+ ) ~ "~~"}
 ci = {((!"`" ~ ANY)+ )}

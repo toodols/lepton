@@ -10,7 +10,14 @@ const config = {
 		domains: ["cdn.discordapp.com"],
 	},
 	webpack: (config) => {
-		config.experiments = { topLevelAwait: true, layers: true };
+		config.experiments = {
+			asyncWebAssembly: true,
+			topLevelAwait: true, layers: true,
+		};
+		config.module.rules.push = {
+			test: /\.wasm$/,
+			type: "asset/inline",
+		};
 		return config;
 	},
 };

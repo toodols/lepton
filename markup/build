@@ -1,0 +1,2 @@
+cargo build --target wasm32-unknown-unknown --release --manifest-path markup/cargo.toml
+cp ./markup/target/wasm32-unknown-unknown/release/lepton_markup.wasm ./markup/lepton_markup.wasm
