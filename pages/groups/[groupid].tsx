@@ -42,7 +42,7 @@ export default function GroupHandler() {
 					<br />
 					Description: {group.description}
 				</div>
-				<Posts groupid={group.id} />
+				<Posts group={group.id} />
 				<CreatePostModal />
 				<CreateGroupModal/>
 			</>

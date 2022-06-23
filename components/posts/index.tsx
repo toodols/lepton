@@ -10,22 +10,24 @@ export const PostElementsContext = createContext<{
 	posts: Record<string, HTMLDivElement>;
 }>({ posts: {} });
 
-export function Posts({groupid}: {groupid?: string}) {
+export function Posts({group, user}: {group?: string, user?: string}) {
 	const [posts, setPosts] = useState<PostObj[]>([]);
 	const [hasMore, setHasMore] = useState(true);
 	useEffect(() => {
 		setPosts([]);
 		async function sub() {
-			const res = await client.getPosts({group: groupid});
+			const res = await client.getPosts({group, user});
 			setHasMore(res.hasMore);
 			setPosts(res.posts);
 		}
 		sub();
 	// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [groupid]);
+	}, [group, user]);
 	useEffect(()=>{
 		const handler = (post: PostObj)=>{
-			setPosts((posts)=>[post, ...posts]);
+			if (!user || post.author.id === user) {
+				setPosts((posts)=>[post, ...posts]);
+			}
 		}
 		client.on("postAdded", handler)
 		const deleteHandler = (post: PostObj)=>{
@@ -36,7 +38,7 @@ export function Posts({groupid}: {groupid?: string}) {
 			client.removeListener("postAdded", handler)
 			client.removeListener("postDeleted", deleteHandler)
 		};
-	}, [])
+	}, [user])
 	const [autoCurrentId, setAutoCurrentId] = useState<string | null>(null);
 	const [forceCurrentId, setForceCurrentId] = useState<string | null>(null);
 	const currentPost = (forceCurrentId &&
@@ -86,8 +88,8 @@ export function Posts({groupid}: {groupid?: string}) {
 											)
 												return;
 											const query: {before?: number, group?: string} = {};
-											if (groupid)
-												query.group = groupid;
+											if (group)
+												query.group = group;
 											let mostRecent = posts[posts.length-1];
 											if (mostRecent) {
 												query.before = mostRecent.createdAt;

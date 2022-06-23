@@ -168,7 +168,7 @@ export async function withGroupUser(
 	const userid: ObjectId = user instanceof ObjectId ? user : user._id;
 	const groupid: ObjectId = group instanceof ObjectId ? group : group._id;
 
-	const guser = await groupUsers.findOne({ userid, groupid });
+	const guser = await groupUsers.findOne({ user: userid, group: groupid });
 	if (!guser) {
 		const insertResult = await groupUsers.insertOne({
 			user: userid,

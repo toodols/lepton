@@ -30,7 +30,7 @@ async function getVotes(id: ObjectId): Promise<number> {
 			{$match: {post: id}},
 			{$group: {_id: null, sum: {$sum: "$value"}}}
 		]
-	).toArray().then(e=>e[0].sum);
+	).toArray().then(e=>e[0]?e[0].sum:0);
 	redisClient.hSet("post:"+id, "votes", p);
 	return p;
 }

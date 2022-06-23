@@ -9,6 +9,7 @@ import Styles from "./posts.module.sass";
 import { useSelector } from "react-redux";
 import { RootState } from "../../lib/store";
 import InfiniteScroll from "react-infinite-scroll-component";
+import Link from "next/link";
 
 // assuming post will never change
 export function Comments({ post }: { post: Post }) {
@@ -30,7 +31,7 @@ export function Comments({ post }: { post: Post }) {
 				{comment.author !== last?.author ? (
 					<div className={Styles.author}>
 						<Avatar size={30} src={comment.author.avatar} />
-						<div>{comment.author.username}</div>
+						<Link href={`/users/${comment.author.id}`}>{comment.author.username}</Link>
 					</div>
 				) : (
 					<></>

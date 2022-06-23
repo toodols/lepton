@@ -92,13 +92,18 @@ export class Client<Opts extends Options = DefaultOpts> extends EventEmitter {
 	options: Opts;
 	socketio: Socket;
 
-	async getPosts(props?: { before?: number; group?: string }) {
+	async getPosts(props?: { before?: number; group?: string, user?: string }) {
 		const url = new URLSearchParams();
-		if (props?.before) {
-			url.set("before", props.before.toString());
-		}
-		if (props?.group) {
-			url.set("group", props.group);
+		if (props) {
+			if (props.before) {
+				url.set("before", props.before.toString());
+			}
+			if (props.group) {
+				url.set("group", props.group);
+			}
+			if (props.user) {
+				url.set("user", props.user);
+			}
 		}
 
 		const {

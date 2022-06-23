@@ -1,4 +1,5 @@
-import { Layout } from "components/layout";
+import { Layout } from "../../components/layout";
+import { Posts } from "../../components/posts";
 import { client, User } from "lib/client";
 import { setTitle } from "lib/store";
 import { useRouter } from "next/router"
@@ -26,6 +27,7 @@ export default function ProfileHandler() {
 		{user ? <div>
 			<h1>{user.username}</h1>
 			<p>{user.description}</p>
+			<Posts user={user.id}/>
 		</div> : <div>Loading...</div>}
 	</div>
 }

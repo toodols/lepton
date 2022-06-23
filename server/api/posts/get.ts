@@ -14,15 +14,19 @@ interface Data {
 
 const getPostsGuard = createGuard({
 	before: Checkables.optional(Checkables.integer),
-	group: Checkables.optional(Checkables.objectId)
+	group: Checkables.optional(Checkables.objectId),
+	user: Checkables.optional(Checkables.objectId),
 })
 
 export default async function handler(req: Request, res: Response<Data | Error>) {
 	const result = getPostsGuard(req.query as any);
 	if ("error" in result) return res.status(400).json(result);
-	const {before, group} = result.value;
+	const {before, group, user} = result.value;
 	const query: Filter<DatabaseTypes.Post> = {};
 	if (before) query.createdAt = {$lt: Timestamp.fromNumber(before)};
+	if (user) {
+		query.author = user;
+	}
 	if (group) {
 		query.group = group
 	} else {
