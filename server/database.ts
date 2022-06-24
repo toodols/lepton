@@ -138,6 +138,7 @@ export const {
 	database,
 	auth,
 	items,
+	friendRequests,
 } = await new Promise<DatabaseTypes.Response>((resolve, reject) => {
 	const client = new MongoClient(MongoDB_URI);
 	client.connect(async (err) => {

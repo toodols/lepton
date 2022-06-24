@@ -1,15 +1,16 @@
 import { Layout } from "../../components/layout";
 import { Posts } from "../../components/posts";
 import { client, User } from "lib/client";
-import { setTitle } from "lib/store";
+import { RootState, setTitle } from "lib/store";
 import { useRouter } from "next/router"
 import { ReactNode, useEffect, useState } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 
 export default function ProfileHandler() {
 	const router = useRouter();
 	const userid = router.query.userid;
 	const [user, setUser] = useState<User| null>(null);
+	const _ = useSelector((state: RootState) => state.client.userId);
 	const dispatch = useDispatch();
 	
 	useEffect(()=>{
@@ -27,6 +28,15 @@ export default function ProfileHandler() {
 		{user ? <div>
 			<h1>{user.username}</h1>
 			<p>{user.description}</p>
+			{client.clientUser?client.clientUser.id===userid?<></>:(client.clientUser.friendIds?.includes(user.id) ? <button onClick={()=>{
+				user.unfriend().then(e=>()=>{
+					// idk
+				});
+			}}>Unfriend</button> : <button onClick={()=>{
+				user.friend().then(e=>()=>{
+					// idk
+				});
+			}}>Add Friend</button>):null}
 			<Posts user={user.id}/>
 		</div> : <div>Loading...</div>}
 	</div>

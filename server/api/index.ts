@@ -25,6 +25,8 @@ import votePostHandler from "./posts/vote";
 import deleteAccountHandler from "./deleteaccount";
 import lookupGroupHandler from "./groups/lookup";
 import lookupItemHandler from "./items/lookup";
+import friendUserHandler from "./users/friend";
+import unfriendUserHandler from "./users/unfriend";
 
 export function apiRouter(app: Application) {
 	app.post("/api/signin", signInHandler)
@@ -46,6 +48,8 @@ export function apiRouter(app: Application) {
 	app.get("/api/users/lookup/@me", lookupMeHandler)
 	app.get("/api/users/lookup/:userid", lookupUserHandler)
 	app.get("/api/searchusers", searchUsersHandler)
+	app.post("/api/users/friend", friendUserHandler)
+	app.post("/api/users/unfriend", unfriendUserHandler)
 
 	app.post("/api/groups/create", createGroupHandler)
 	app.post("/api/groups/delete", deleteGroupHandler)

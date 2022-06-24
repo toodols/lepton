@@ -1,5 +1,5 @@
 import { Client, DefaultOpts, Options, signedIn } from "./client";
-import { FOLLOW_USER_URL, UNFOLLOW_USER_URL } from "./constants";
+import { FOLLOW_USER_URL, FRIEND_USER_URL, UNFOLLOW_USER_URL, UNFRIEND_USER_URL } from "./constants";
 import { InventoryItem, Item } from "./item";
 
 export enum Flags {
@@ -24,7 +24,8 @@ export interface UserDataFull extends UserDataPartial {
 	inventory: {
 		item: string;
 		count: number;
-	}[]
+	}[],
+	friends: string[];
 }
 type UserData = UserDataFull | UserDataPartial;
 type Maybe<T, Opts extends Options> = Opts["partial"] extends true ? T | undefined : T
@@ -66,6 +67,50 @@ export class User<Opts extends Options = DefaultOpts> {
 	}
 
 	@signedIn()
+	async friend(){
+		const result = await fetch(FRIEND_USER_URL, {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+				"Authorization": `Bearer ${this.client.token!}`,
+			},
+			body: JSON.stringify({
+				user: this.id,
+			}),
+		}).then(e=>e.json());
+		if (result.error) {
+			throw new Error(result.error);
+		}
+		if (result.accepted) {
+			this.client.clientUser!.friendIds!.push(this.id);
+		} else {
+			this.client.clientInfo!.outgoingFriendRequestIds.push(this.id);
+		}
+		return result;
+	}
+
+	/**
+	 * Unfriends a user. Errors if the user is not a friend of the client.
+	 */
+	@signedIn()
+	async unfriend(){
+		const result = await fetch(UNFRIEND_USER_URL, {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+				"Authorization": `Bearer ${this.client.token!}`,
+			},
+			body: JSON.stringify({
+				user: this.id,
+			}),
+		}).then(e=>e.json());
+		if (result.error) {
+			throw new Error(result.error);
+		}
+		return result;
+	}
+
+	@signedIn()
 	async unfollow(){
 		const result = await fetch(UNFOLLOW_USER_URL, {
 			method: "POST",
@@ -99,7 +144,9 @@ export class User<Opts extends Options = DefaultOpts> {
 	description: Maybe<string, Opts>;
 	//@ts-ignore
 	money: Maybe<number, Opts>;
-	
+	friendIds?: string[] = [];
+	friends: User<Opts>[] = [];
+
 	constructor(public client: Client<Opts>, from: UserDataFull | UserDataPartial) {
 		//@ts-ignore
 		this.full = isFull(from);
@@ -111,6 +158,7 @@ export class User<Opts extends Options = DefaultOpts> {
 			this.money = from.money;
 			this.description = from.description;
 			this.inventory = from.inventory.map(i=>new InventoryItem(this.client, i));
+			this.friendIds = from.friends;
 		}
 		this.client.usersCache.set(this.id, this);
 	}

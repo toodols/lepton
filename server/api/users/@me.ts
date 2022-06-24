@@ -28,7 +28,7 @@ export default async function handler(
 
 	res.json({
 		user: Converter.toUserDataFull(user),
-		info: Converter.toClientInfoData(user),
+		info: await Converter.toClientInfoData(user),
 		groups: foundGroups.reduce<Record<string, GroupDataFull>>((acc, group) => {
 			if (group) {
 				acc[group._id.toString()] = Converter.toGroupDataFull(group);

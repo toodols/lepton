@@ -2,7 +2,7 @@ import { createHash } from "crypto";
 import type { PostData, UserDataPartial, CommentData, UserDataFull, GroupData, ClientInfoData, ItemData } from "lepton-client";
 import { ObjectId, WithId } from "mongodb";
 import { Socket } from "socket.io";
-import { DatabaseTypes, posts, votes } from "./database";
+import { DatabaseTypes, friendRequests, posts, votes } from "./database";
 import { io, redisClient } from "./server-entry";
 
 export function hex(n: number){
@@ -89,14 +89,21 @@ export namespace Converter {
 			inventory: user.inventory.map(i=>({
 				item: i.item.toString(),
 				count: i.count,
-			}))
+			})),
+			friends: user.friends.map(f=>f.toString()),
 		}
 	}
-	export function toClientInfoData(user: WithId<DatabaseTypes.User>): ClientInfoData {
+	export async function toClientInfoData(user: WithId<DatabaseTypes.User>): Promise<ClientInfoData> {
 		return {
 			blocked: user.blocked.map(b=>b.toString()),
 			groups: user.groups.map(g => g.toString()),
 			settings: user.settings,
+			outgoingFriendRequests: await friendRequests.find({
+				from: user._id,
+			}).toArray().then(e=>e.map(r=>r.toString())),
+			incomingFriendRequests: await friendRequests.find({
+				to: user._id,
+			}).toArray().then(e=>e.map(r=>r.toString())),
 		}
 	}
 

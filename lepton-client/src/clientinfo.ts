@@ -8,6 +8,8 @@ export interface ClientInfoData {
 	groups: string[];
 	settings: Settings,
 	blocked: string[];
+	outgoingFriendRequests: string[];
+	incomingFriendRequests: string[];
 }
 
 /**
@@ -16,7 +18,11 @@ export interface ClientInfoData {
  */
 export class ClientInfo<Opts extends Options = DefaultOpts> {
 	groups: Group<Opts>[]
+	outgoingFriendRequestIds: string[]
+	incomingFriendRequestIds: string[]
 	constructor(public client: Client<Opts>, from: ClientInfoData, /** The user this class is referencing. */ public user: User<Opts>) {
 		this.groups = from.groups.map((groupId) => this.client.groupsCache.get(groupId)!);
+		this.outgoingFriendRequestIds = from.outgoingFriendRequests;
+		this.incomingFriendRequestIds = from.incomingFriendRequests;
 	}
 }
