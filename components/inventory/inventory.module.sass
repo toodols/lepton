@@ -4,16 +4,20 @@
 .container
 	display: flex
 	flex-wrap: wrap
+	overflow: hidden
+
 .item
-	min-width: 100px
-	min-height: 100px
+	width: 100px
+	// height: 100px
+
 	position: relative
 	@include border
 .name
+	color: black
 	background: white
-	position: absolute
-	left: 5px
-	bottom: 5px
+	// position: absolute
+	// left: 5px
+	// bottom: 5px
 .count
 	position: absolute
 	right: 5px

@@ -45,7 +45,7 @@ export namespace DatabaseTypes {
 		groups: ObjectId[];
 		username: string;
 		settings: Settings; //may make own type instead of referencing Settings
-		inventory: Item[];
+		inventory: InventoryItem[];
 		money: number;
 		flags: Flags;
 		followers: number;
@@ -112,6 +112,14 @@ export namespace DatabaseTypes {
 		description: string;
 	}
 
+	export interface Notification extends DatedDocument {
+		user: ObjectId;
+		type: string;
+		title: string;
+		description: string;
+		icon: string;
+	}
+
 	export interface Response {
 		auth: Collection<Auth>;
 		users: Collection<User>;
@@ -123,6 +131,7 @@ export namespace DatabaseTypes {
 		votes: Collection<Vote>;
 		friendRequests: Collection<FriendRequest>;
 		items: Collection<Item>;
+		notifications: Collection<Notification>;
 		database: Db;
 	}
 }
@@ -139,6 +148,7 @@ export const {
 	auth,
 	items,
 	friendRequests,
+	notifications
 } = await new Promise<DatabaseTypes.Response>((resolve, reject) => {
 	const client = new MongoClient(MongoDB_URI);
 	client.connect(async (err) => {
@@ -154,6 +164,7 @@ export const {
 			groupUsers: database.collection("groupUsers"),
 			friendRequests: database.collection("friendRequests"),
 			items: database.collection("items"),
+			notifications: database.collection("notifications"),
 			database,
 		};
 		// indexes

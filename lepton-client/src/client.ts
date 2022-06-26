@@ -21,7 +21,7 @@ import {
 } from "./constants";
 import { Settings } from "./types";
 import { ClientInfo, ClientInfoData } from "./clientinfo";
-import { Item } from "./item";
+import { Item, ItemData } from "./item";
 
 // const SOCKET_URL = process.env.NODE_ENV === "development" ? "/api/socket" : "wss://idk lmao";
 
@@ -204,6 +204,7 @@ export class Client<Opts extends Options = DefaultOpts> extends EventEmitter {
 		user: UserDataFull;
 		info: ClientInfoData;
 		groups: Record<string, GroupDataFull>;
+		items: Record<string, ItemData>
 	}> {
 		const result = await fetch(GET_SELF_URL, {
 			headers: {
@@ -280,6 +281,9 @@ export class Client<Opts extends Options = DefaultOpts> extends EventEmitter {
 		const info = await this.getSelfInfo(token);
 		for (const groupid in info.groups) {
 			Group.from(this, info.groups[groupid]);
+		}
+		for (const itemid in info.items) {
+			Item.from(this, info.items[itemid]);
 		}
 		this.clientUser = User.from(this, info.user);
 		this.clientInfo = new ClientInfo(this, info.info, this.clientUser);

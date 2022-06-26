@@ -1,5 +1,6 @@
 import {
 	faBars,
+	faBell,
 	faCoins,
 	faEye,
 	faGear,
@@ -89,6 +90,7 @@ export function Topbar() {
 							<></>
 						)}
 						<button><FontAwesomeIcon icon={faCoins}/>Money: {client.clientUser!.money}</button>
+						<button><FontAwesomeIcon icon={faBell}/>Notifications</button>
 						<AccountSelection />
 					</>
 				) : (

@@ -16,7 +16,9 @@ export function InventoryItemComponent({ item }: { item: InventoryItem }) {
 		<div className={Styles.item}>
 			{itemType ? (
 				<>
+				<div style={{position: "relative", width: 100, height: 100}}>
 					<Image src={itemType.icon} layout="fill" alt={"Icon"} />
+				</div>
 					<div className={Styles.name}>{itemType.name}</div>
 				</>
 			) : (
@@ -40,13 +42,13 @@ export function Inventory({ user }: { user: User }) {
 			<div className={Styles.container}>
 				{user.inventory ? user.inventory.length===0 ? <div>
 					<b>Empty.</b>
-					<div>You are as broken in Lepton as you are in real life.</div>
+					<div>You are as broke in Lepton as you are in real life.</div>
 				</div> : (
 					user.inventory.map((item, i) => (
 						<InventoryItemComponent key={i} item={item} />
 					))
 				) : (
-					<></>
+					<>Loading...</>
 				)}
 			</div>
 		</div>

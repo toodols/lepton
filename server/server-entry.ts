@@ -12,6 +12,7 @@ import {createClient} from "redis";
 import { jwt_secret, REDIS_URI } from "./env";
 import { createAdapter } from "@socket.io/redis-adapter";
 import { DatabaseTypes, users } from "./database";
+import "./generated-items"
 import { ObjectId } from "mongodb";
 import {instrument} from "@socket.io/admin-ui";
 import path from "path";
