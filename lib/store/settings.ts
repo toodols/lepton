@@ -1,12 +1,8 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { client } from "lib/client";
+import { Settings } from "lepton-client/src";
 
 export type Theme = "light" | "dark" | "default"
-
-type Settings = {
-	theme: string,
-	description: string,
-};
 
 //@ts-ignore
 const initialState: { isEditing: boolean, settings: Settings, originalSettings: Settings} = {
@@ -14,6 +10,9 @@ const initialState: { isEditing: boolean, settings: Settings, originalSettings: 
 	settings: {
 		theme: "default",
 		description: "",
+		avatar: "",
+		banner: "",
+		accentColor: "green",
 	}
 };
 

@@ -9,6 +9,11 @@ interface Data {}
 
 const createPostGuard = createGuard({
 	content: Checkables.string,
+	attachments: Checkables.array(Checkables.or([
+		createGuard({
+			type: Checkables.enums<"image" | "poll">(["image", "poll"]),
+		})
+	])),
 	group: Checkables.optional(Checkables.objectId)
 });
 

@@ -2,6 +2,7 @@
 const config = {
 	reactStrictMode: true,
 	experimental: {
+		reactRoot: true,
 		images: {
 			layoutRaw: true,
 		},

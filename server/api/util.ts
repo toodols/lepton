@@ -9,7 +9,35 @@ export interface Error {
 	error: string;
 }
 
-type Checkable = (input: unknown) => CheckResult<any>;
+function checkObject (obj: any, t: any): CheckResult<any> {
+	let result = {} as any;
+	for (const prop in obj as any) {
+		let v;
+		if (t[prop]==undefined) {
+			if (!obj[prop].optional) {
+				return { error: `Missing ${prop}` };
+			}
+			continue;
+		}
+		if (typeof obj[prop] === "function") {
+			v = obj[prop](t[prop]);
+		} else if (typeof obj[prop] === "object") {
+			if (obj[prop].optional === true) {
+				v = obj[prop].value(t[prop]);
+			} else {
+				v = checkObject(obj[prop], t[prop]);
+			}
+		}
+		if ("error" in v) {
+			return v;
+		} else {
+			result[prop] = v.value;
+		}
+	}
+	return { value: result };
+};
+
+type Checkable<T=any> = (input: T) => CheckResult<T>;
 type Guard =
 	| { optional: true; value: Checkable }
 	| Checkable
@@ -29,33 +57,7 @@ type Input<T extends Guard> = T extends { [key: string]: Checkable | Guard }
 export function createGuard<T extends Guard>(
 	obj: T
 ): (t: Input<T>) => CheckResult<Result<T>> {
-	const checkObject = (obj: any, t: any): CheckResult<any> => {
-		let result = {} as any;
-		for (const prop in obj as any) {
-			let v;
-			if (t[prop]==undefined) {
-				if (!obj[prop].optional) {
-					return { error: `Missing ${prop}` };
-				}
-				continue;
-			}
-			if (typeof obj[prop] === "function") {
-				v = obj[prop](t[prop]);
-			} else if (typeof obj[prop] === "object") {
-				if (obj[prop].optional === true) {
-					v = obj[prop].value(t[prop]);
-				} else {
-					v = checkObject(obj[prop], t[prop]);
-				}
-			}
-			if ("error" in v) {
-				return v;
-			} else {
-				result[prop] = v.value;
-			}
-		}
-		return { value: result };
-	};
+
 	return (t: unknown) => {
 		if (typeof obj === "object") {
 			if ("optional" in obj && obj.optional === true) {
@@ -92,6 +94,29 @@ export namespace Checkables {
 			return { error: "Not a string" };
 		}
 	}
+
+	export function array<T>(guard: Checkable<T>) {
+		return (input: unknown) => {
+			if (Array.isArray(input)) {
+				let l = [];
+				for (const e of input.map(guard)) {
+					if ("error" in e) {
+						return {error: "Failed to map array"};
+					} else {
+						l.push(e.value);
+					}
+				};
+				return { value: l };
+			} else {
+				return { error: "Not an array" };
+			}
+		};
+	}
+
+	export function obj<T extends Record<string, Guard>>(input: T) {
+		return createGuard(input);
+	}
+
 	export function boolean(input: unknown): CheckResult<boolean> {
 		if (input === true || input === "true") {
 			return { value: true };
@@ -106,7 +131,22 @@ export namespace Checkables {
 	): { optional: true; value: T } {
 		return { optional: true, value };
 	}
-	export function either<T extends string>(
+
+	export function or<T>(options: Checkable<T>[]){
+		return (input: T) => {
+			for (const option of options) {
+				const result = option(input);
+				if ("error" in result) {
+					continue;
+				} else {
+					return result;
+				}
+			}
+			return { error: "No match" };
+		}
+	}
+
+	export function enums<T extends string>(
 		options: T[]
 	): (input: unknown) => CheckResult<T> {
 		return (input: unknown) => {

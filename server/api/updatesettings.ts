@@ -14,6 +14,8 @@ const updateSettingsGuard = createGuard({
 	description: Checkables.optional(Checkables.string),
 	// there's no point in constraining it to light or dark, if the client passes in the wrong one, it's their problem
 	theme: Checkables.optional(Checkables.string),
+	banner: Checkables.optional(Checkables.string),
+	accentColor: Checkables.optional(Checkables.string),
 });
 
 export default async function handler(
@@ -33,6 +35,9 @@ export default async function handler(
 	if (value.avatar) {
 		// todo: check if it's a valid url
 		toUpdate["settings.avatar"] = value.avatar;
+	}
+	if (value.banner) {
+		toUpdate["settings.banner"] = value.banner;
 	}
 	if (value.description) {
 		// todo: check if its length is valid

@@ -11,9 +11,11 @@ import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../lib/store";
 import Styles from "./settings-modal.module.sass";
 import { createContext, useContext, useEffect, useRef } from "react";
+import { Appearance } from "./appearance";
+import { Account } from "./account";
 const SettingsSectionsContext = createContext<Record<string, HTMLElement>>({});
 
-function Section(props: { title: string; children: React.ReactNode }) {
+export function Section(props: { title: string; children: React.ReactNode }) {
 	const ctx = useContext(SettingsSectionsContext);
 	const ref = useRef<HTMLElement>(null);
 	useEffect(() => {
@@ -31,7 +33,7 @@ function Section(props: { title: string; children: React.ReactNode }) {
 	);
 }
 
-function CustomOption(
+export function CustomOption(
 	props: OptionProps<{ label: string; value: string; description?: string }>
 ) {
 	return (
@@ -52,7 +54,7 @@ function CustomOption(
 	);
 }
 
-function SettingsSelect(props: {
+export function SettingsSelect(props: {
 	value: string;
 	onChange: (newValue: string)=>void,
 	options: { value: string; label: string; description?: string }[];
@@ -117,8 +119,6 @@ export function Settings() {
 									"Account",
 									"Privacy",
 									"Language",
-									"Section 1",
-									"Section 2",
 								].map((e) => {
 									return (
 										<button
@@ -138,105 +138,13 @@ export function Settings() {
 						)}
 					</SettingsSectionsContext.Consumer>
 					<main ref={mainRef}>
-						<Section title="Appearance">
-							<h3>Theme</h3>
-							<SettingsSelect
-								value={settingValues.theme}
-								onChange={(value)=>{
-									dispatch(
-										editSettings({
-											theme: value
-										})
-									);
-								}}
-								options={[
-									{
-										label: "Light",
-										value: "light",
-									},
-									{
-										label: "Dark",
-										value: "dark",
-									},
-									{
-										label: "Default",
-										value: "default",
-										description:
-											"Theme is determined by system's user preferences",
-									},
-								]}
-							/>
-						</Section>
-						<Section title="Account">
-							<h3>Username</h3>
-							{username}
-							<h3>Password</h3>
-							Password
-							<h3>Avatar</h3>
-							Avatar
-							<h3>Bio</h3>
-							<textarea
-								onChange={() => {
-									dispatch(
-										editSettings({
-											description:
-												document.querySelector(
-													"textarea"
-												)?.value,
-										})
-									);
-								}}
-							></textarea>
-							<h3>Region</h3>
-							<SettingsSelect onChange={()=>{
-								
-							}} value={"i have rights you know"} options={[{
-								label: "American 🇺🇸 ",
-								value: "american",
-							}, {
-								label: "Non American 🤢 ",
-								value: "non-american"
-							}]}/>
-						</Section>
+						<Appearance/>
+						<Account/>
 						<Section title="Privacy">
 							<h3>Privacy</h3>
 							<p>Something about blocking people goes here.</p>
 						</Section>
 						<Section title="Language">Language here</Section>
-						<Section title="Section 1">
-							Lorem ipsum, dolor sit amet consectetur adipisicing
-							elit. Nulla quibusdam natus, numquam nam tempora
-							architecto modi voluptatem dicta neque consequatur
-							praesentium nesciunt cum ex incidunt quam ut veniam
-							officia blanditiis. Corporis autem optio soluta modi
-							perferendis, quasi eveniet cumque accusantium vitae
-							quaerat placeat molestias tempore dolor obcaecati
-							praesentium officia sed explicabo? Repudiandae
-							inventore totam molestias veritatis, accusantium
-							odit maxime iusto? Voluptatum temporibus nobis dicta
-							consectetur facilis. Magni eum tenetur voluptatum ab
-							laboriosam harum, quo saepe nulla veritatis
-							doloremque repellendus dignissimos, corrupti
-							consequuntur obcaecati temporibus. Quidem, ad
-							assumenda. Dolorum, veritatis voluptas!
-						</Section>
-						<Section title="Section 2">
-							Lorem ipsum dolor sit, amet consectetur adipisicing
-							elit. Eligendi dolore nihil totam deleniti quae
-							libero incidunt, vero assumenda sunt repellendus
-							ullam non possimus dolor facilis eos, dignissimos
-							expedita veniam odio? Deserunt dolor velit
-							voluptatem mollitia omnis incidunt. Omnis
-							dignissimos quidem voluptas voluptate corrupti?
-							Incidunt quis, nisi asperiores mollitia accusamus
-							dolorum voluptatibus esse ipsum corporis perferendis
-							doloribus neque aut dolor id! Esse quidem expedita
-							nisi unde, reprehenderit alias consectetur quo
-							mollitia pariatur fuga sunt architecto. Deleniti
-							temporibus distinctio hic modi, cupiditate ut
-							deserunt assumenda, repudiandae magni suscipit saepe
-							alias et soluta!
-						</Section>
 					</main>
 				</SettingsSectionsContext.Provider>
 			</div>
