@@ -10,7 +10,7 @@ import {
 import { MongoDB_URI } from "./env";
 
 export namespace DatabaseTypes {
-	interface DatedDocument extends Document {
+	interface DatedDocument {
 		createdAt: Timestamp;
 		updatedAt: Timestamp;
 	}
@@ -83,18 +83,18 @@ export namespace DatabaseTypes {
 		user: ObjectId;
 		isInGroup: boolean;
 	}
-	export interface Follow extends Document {
+	export interface Follow {
 		user: ObjectId;
 		follower: ObjectId;
 	}
 
-	export interface Vote extends Document {
+	export interface Vote {
 		post: ObjectId;
 		user: ObjectId;
 		value: -1 | 0 | 1;
 	}
 
-	export interface FriendRequest extends Document {
+	export interface FriendRequest {
 		from: ObjectId;
 		to: ObjectId;
 		// accepted: boolean;
@@ -120,6 +120,11 @@ export namespace DatabaseTypes {
 		icon: string;
 	}
 
+	export interface Poll {
+		question: string;
+		options: string[];
+	}
+
 	export interface Response {
 		auth: Collection<Auth>;
 		users: Collection<User>;
@@ -132,6 +137,7 @@ export namespace DatabaseTypes {
 		friendRequests: Collection<FriendRequest>;
 		items: Collection<Item>;
 		notifications: Collection<Notification>;
+		polls: Collection<Poll>;
 		database: Db;
 	}
 }
@@ -148,7 +154,8 @@ export const {
 	auth,
 	items,
 	friendRequests,
-	notifications
+	notifications,
+	polls,
 } = await new Promise<DatabaseTypes.Response>((resolve, reject) => {
 	const client = new MongoClient(MongoDB_URI);
 	client.connect(async (err) => {
@@ -165,6 +172,7 @@ export const {
 			friendRequests: database.collection("friendRequests"),
 			items: database.collection("items"),
 			notifications: database.collection("notifications"),
+			polls: database.collection("polls"),
 			database,
 		};
 		// indexes

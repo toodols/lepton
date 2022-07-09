@@ -2,14 +2,12 @@ import {
 	faBars,
 	faBell,
 	faCoins,
-	faEye,
 	faGear,
 	faPeopleGroup,
 	faPlus,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useRouter } from "next/router";
-import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { client } from "../../lib/client";
 import {
@@ -17,7 +15,6 @@ import {
 	RootState,
 	setSidebarOpen,
 	setCreatePostModalOpen,
-	setTitle,
 	setSettingsModalOpen,
 } from "../../lib/store";
 import { AccountSelection } from "./account-selection";

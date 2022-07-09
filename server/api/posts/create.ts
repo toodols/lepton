@@ -1,19 +1,63 @@
 import { Request, Response } from "express";
-import { Timestamp, WithId } from "mongodb";
-import { DatabaseTypes, groups, posts } from "../../database";
+import { ObjectId, Timestamp, WithId } from "mongodb";
+import { DatabaseTypes, groups, groupUsers, polls, posts } from "../../database";
 import { io, redisClient } from "../../server-entry";
 import { Converter, toGroup } from "../../util";
-import { Checkables, createGuard, Error, getUserFromAuth } from "../util";
+import { Checkable, Checkables, createGuard, Error, getUserFromAuth } from "../util";
 
 interface Data {}
 
 const createPostGuard = createGuard({
 	content: Checkables.string,
-	attachments: Checkables.array(Checkables.or([
-		createGuard({
-			type: Checkables.enums<"image" | "poll">(["image", "poll"]),
-		})
-	])),
+	attachments: Checkables.optional(Checkables.array<{type: "image", url: string} | {type: "poll", options: string[], question: string}>((input: unknown) =>{
+		if (input===null || typeof input !== "object") return {error: "Attachments must be an array of objects"};
+		if ("type" in input) {
+			const t = (input as {type: string}).type;
+			if (t === "image") {
+				//@ts-ignore;
+				const url = input.url;
+				if (typeof url !== "string") {
+					return {error: "Image attachments must have a url property"};
+				}
+				const parsed = new URL(url);
+				if (parsed.hostname !== "cdn.discordapp.com") {
+					return {error: "Bad host"};
+				};
+
+				return {
+					value: {
+					type: "image",
+					url: parsed.href,
+				}}
+			} else if (t === "poll") {
+				//@ts-ignore;
+				const options = input.options;
+				if (!Array.isArray(options)) {
+					return {error: "Poll attachments must have an options property"};
+				}
+				//@ts-ignore;
+				if (typeof input.question !== "string") {
+					return {error: "Poll attachments must have a questions property"};
+				}
+				const opts: string[] = [];
+				for (const opt of options) {
+					if (typeof opt !== "string") {
+						return {error: "Poll option is not a string"};
+					}
+					opts.push(opt);
+				}
+				return {value: {
+					type: "poll",
+					options: opts,
+					question: (input as {question: string}).question,
+				}}
+			} else {
+				return {error: "Unknown attachment type"};
+			}
+		} else {
+			return {error: "Missing type field in attachment"};
+		}
+	})),
 	group: Checkables.optional(Checkables.objectId)
 });
 
@@ -30,11 +74,41 @@ export default async function handler(
 	// check if group exists
 	if (result.value.group) {
 		const group = await groups.findOne({ _id: result.value.group });
-		// if group is private and user is not in group, return error
-		if (!group || (!group.isPublic && !group.members.includes(user._id))) {
-			return res.status(400).json({ error: "Group not found" }); //403?
+		if (group) {
+			if (!group.isPublic) { 
+				const member = await groupUsers.findOne({
+					group: result.value.group,
+					user: user._id
+				})
+				if (!member) {
+					return res.status(400).json({ error: "Group does not exist" });
+				}
+			}
+		} else {
+			return res.status(400).json({ error: "Group does not exist" });
 		}
 	}
+	const attachments: ({
+		type: "image",
+		url: string
+	} | {
+		type: "poll",
+		id: ObjectId,
+	})[] = [];
+	for (const attachment of result.value.attachments || []) {
+		if (attachment.type === "image") {
+			attachments.push({
+				type: "image",
+				url: attachment.url,
+			});
+		} else if (attachment.type === "poll") {
+			const poll = await polls.insertOne({
+				options: attachment.options,
+				question: attachment.question,
+			})
+		}
+	};
+	
 	
 	const post = await posts.insertOne({
 		content: result.value.content,

@@ -30,7 +30,7 @@ export default async function handler(req: Request, res: Response<Data | Error>)
 	if (group) {
 		query.group = group
 	} else {
-		// group is null
+		//@ts-ignore
 		query.group = {$eq: null}
 	};
 	const amountToLoad = 10;

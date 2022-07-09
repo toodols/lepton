@@ -37,7 +37,7 @@ function checkObject (obj: any, t: any): CheckResult<any> {
 	return { value: result };
 };
 
-type Checkable<T=any> = (input: T) => CheckResult<T>;
+export type Checkable<T=any> = (input: T) => CheckResult<T>;
 type Guard =
 	| { optional: true; value: Checkable }
 	| Checkable
@@ -202,8 +202,8 @@ export async function getUserFromAuth(
 }
 
 export async function withGroupUser(
-	user: ObjectId | DatabaseTypes.User,
-	group: ObjectId | DatabaseTypes.Group
+	user: ObjectId | WithId<DatabaseTypes.User>,
+	group: ObjectId | WithId<DatabaseTypes.Group>
 ) {
 	const userid: ObjectId = user instanceof ObjectId ? user : user._id;
 	const groupid: ObjectId = group instanceof ObjectId ? group : group._id;

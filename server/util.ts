@@ -2,7 +2,7 @@ import { createHash } from "crypto";
 import type { PostData, UserDataPartial, CommentData, UserDataFull, GroupData, ClientInfoData, ItemData } from "lepton-client";
 import { ObjectId, WithId } from "mongodb";
 import { Socket } from "socket.io";
-import { DatabaseTypes, friendRequests, posts, votes } from "./database";
+import { DatabaseTypes, follows, friendRequests, posts, votes } from "./database";
 import { io, redisClient } from "./server-entry";
 
 export function hex(n: number){
@@ -32,6 +32,20 @@ async function getVotes(id: ObjectId): Promise<number> {
 		]
 	).toArray().then(e=>e[0]?e[0].sum:0);
 	redisClient.hSet("post:"+id, "votes", p);
+	return p;
+}
+
+async function getFollowerCount(id: ObjectId): Promise<number> {
+	const result = await redisClient.hGet("user:"+id, "followers")
+	if (result) {
+		return parseInt(result)
+	}
+	const p = await follows.aggregate([
+			{$match: {following: id}},
+			{$group: {_id: null, sum: {$sum: 1}}}
+		]
+	).toArray().then(e=>e[0]?e[0].sum:0);
+	redisClient.hSet("user:"+id, "followers", p);
 	return p;
 }
 
@@ -81,7 +95,9 @@ export namespace Converter {
 			flags: user.flags as number,
 		}
 	}
-	export function toUserDataFull(user: WithId<DatabaseTypes.User>): UserDataFull {
+	export async function toUserDataFull(user: WithId<DatabaseTypes.User>): Promise<UserDataFull> {
+		const following = await follows.find({follower: user._id}).toArray();
+		const followerCount = await getFollowerCount(user._id);
 		return {
 			...toUserDataPartial(user),
 			money: user.money,
@@ -91,6 +107,8 @@ export namespace Converter {
 				count: i.count,
 			})),
 			friends: user.friends.map(f=>f.toString()),
+			following: following.map(f=>f.user.toString()),
+			followerCount,
 		}
 	}
 	export async function toClientInfoData(user: WithId<DatabaseTypes.User>): Promise<ClientInfoData> {

@@ -21,6 +21,7 @@ async function createItem(id: string, item: {name: string, description: string, 
 	else {
 		const result = await items.insertOne({
 			...item,
+			//@ts-ignore
 			generatedId: id,
 			createdAt: Timestamp.fromNumber(Date.now()),
 			updatedAt: Timestamp.fromNumber(Date.now()),

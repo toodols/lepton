@@ -25,6 +25,8 @@ export interface UserDataFull extends UserDataPartial {
 		item: string;
 		count: number;
 	}[],
+	following: string[];
+	followerCount: number;
 	friends: string[];
 }
 type UserData = UserDataFull | UserDataPartial;
@@ -40,7 +42,9 @@ enum Privacy {
 }
 
 export class User<Opts extends Options = DefaultOpts> {
-	flags: Flags;
+	get followingCount(){
+		return this.followingIds?.length;
+	}
 	
 	static from<T extends Options>(client: Client<T>, post: UserData){
 		if (client.usersCache.has(post.id)){
@@ -65,6 +69,8 @@ export class User<Opts extends Options = DefaultOpts> {
 		}
 		return result.alreadyFollowed
 	}
+
+	followingIds?: string[];
 
 	@signedIn()
 	async friend(){
@@ -107,7 +113,8 @@ export class User<Opts extends Options = DefaultOpts> {
 		if (result.error) {
 			throw new Error(result.error);
 		}
-		return result;
+		this.client.clientUser?.friendIds?.splice(this.client.clientUser.friendIds.indexOf(this.id), 1);
+		return result.alreadyUnfriended;
 	}
 
 	@signedIn()
@@ -122,6 +129,7 @@ export class User<Opts extends Options = DefaultOpts> {
 		if (result.error) {
 			throw new Error(result.error);
 		}
+		this.client.clientUser?.followingIds?.splice(this.client.clientUser.followingIds.indexOf(this.id), 1);
 		return result.alreadyUnfollowed
 	}
 
@@ -134,6 +142,26 @@ export class User<Opts extends Options = DefaultOpts> {
 		}
 	}
 
+	/**
+	 * @returns undefined if user does not exist or the users following are unknown
+	 */
+	get clientIsFollowing(): boolean | undefined {
+		if (!this.client.clientUser || !this.client.clientUser.followingIds) {
+			return undefined;
+		}
+		return this.client.clientUser.followingIds.includes(this.id);
+	}
+
+	/**
+	 * @returns undefined if user does not exist or the users following are unknown
+	 */
+	get clientIsFriend(): boolean | undefined {
+		if (!this.client.clientUser || !this.client.clientUser.friendIds) {
+			return undefined;
+		}
+		return this.client.clientUser.friendIds.includes(this.id);
+	}
+
 	privacy: Privacy = Privacy.Public;
 	id: string;
 	username: string;
@@ -144,8 +172,9 @@ export class User<Opts extends Options = DefaultOpts> {
 	description: Maybe<string, Opts>;
 	//@ts-ignore
 	money: Maybe<number, Opts>;
-	friendIds?: string[] = [];
-	friends: User<Opts>[] = [];
+	friendIds?: string[];
+	flags: Flags;
+	followerCount?: number;
 
 	constructor(public client: Client<Opts>, from: UserDataFull | UserDataPartial) {
 		//@ts-ignore
@@ -159,6 +188,8 @@ export class User<Opts extends Options = DefaultOpts> {
 			this.description = from.description;
 			this.inventory = from.inventory.map(i=>new InventoryItem(this.client, i));
 			this.friendIds = from.friends;
+			this.followingIds = from.following;
+			this.followerCount = from.followerCount;
 		}
 		this.client.usersCache.set(this.id, this);
 	}
