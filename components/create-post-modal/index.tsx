@@ -65,7 +65,7 @@ export function CreatePostModal() {
 							content: ref.current!.value,
 							group,
 						});
-						// dispatch(setCreatePostModalOpen(false));
+						dispatch(setCreatePostModalOpen(false));
 					}}
 				>
 					Create Post

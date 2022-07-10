@@ -62,3 +62,14 @@ button[disabled]
 *
 	box-sizing: border-box
 	transition: background-color 0.5s
+
+.contextMenu
+	display: flex
+	flex-direction: column
+	width: 100px
+	background-color: var(--color-context-menu)
+	> button
+		&:hover
+			background-color: var(--color-context-menu-button-hover)
+		height: 20px
+		margin: 2px

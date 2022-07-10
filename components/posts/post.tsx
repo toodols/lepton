@@ -3,7 +3,7 @@ import { Post as PostObject } from "../../lib/client";
 import Styles from "./posts.module.sass";
 import { useUpdatable } from "../../lib/useUpdatable";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faArrowDown, faArrowUp, faComment, faTrash } from "@fortawesome/free-solid-svg-icons";
+import { faArrowDown, faArrowUp, faComment, faCopy, faTrash } from "@fortawesome/free-solid-svg-icons";
 import { useSelector } from "react-redux";
 import { RootState } from "../../lib/store";
 import { useContext, useState } from "react";
@@ -36,11 +36,19 @@ export function Post({ post, setCurrent, current }: { current: string | null, se
 
 	return (
 		<div onContextMenu={()=>{
-			contextMenu.open(<>
+			contextMenu.open(<div className="contextMenu">
 				<button onClick={()=>{
+					// copy post.id to clipboard
+					navigator.clipboard.writeText(post.id);
+				}}>
+					Copy Id
+					<FontAwesomeIcon icon={faCopy}/>
+				</button>
+				<button onClick={()=>{
+					setIsBeingDeleted(true);
 					post.delete();
-				}}>Delete</button>
-			</>);
+				}}>Delete<FontAwesomeIcon icon={faTrash}/></button>
+			</div>);
 		}} ref={(div)=>{
 			if (div) {
 				ctx.posts[post.id] = div;

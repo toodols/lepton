@@ -2,11 +2,11 @@ import { Settings } from "../settings-modal";
 import { Sidebar } from "../sidebar";
 import { Signin } from "../sign-in-modal";
 import { Topbar } from "../topbar";
-import { RootState } from "lib/store";
+import { RootState } from "../../lib/store";
 import { Component, createContext, PropsWithChildren, ReactElement, useCallback, useContext, useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import Head from "next/head";
-import { client } from "lib/client";
+import { client } from "../../lib/client";
 import { useRouter } from "next/router";
 
 export const ContextMenu = createContext<{
