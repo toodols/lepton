@@ -12,12 +12,9 @@ const config = {
 	},
 	webpack: (config) => {
 		config.experiments = {
+			...config.experiments,
 			asyncWebAssembly: true,
-			topLevelAwait: true, layers: true,
-		};
-		config.module.rules.push = {
-			test: /\.wasm$/,
-			type: "asset/inline",
+			topLevelAwait: true,
 		};
 		return config;
 	},

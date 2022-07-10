@@ -1,5 +1,17 @@
-import init, {parse_with_serialize} from "../../markup/pkg";
+let isResolved = false;
 
+let parse_with_serialize: (value: string)=>any;
+
+// prevent next.js from trying to do things that make my project not work
+// this could actually become a problem in the future if i want to pre-render posts with markup
+if (typeof window !== "undefined") {
+	import("../../markup/pkg").then((value)=>{
+		value.default().then(()=>{
+			isResolved = true;
+			parse_with_serialize = value.parse_with_serialize;
+		})
+	});
+}
 interface Block {
 	content: any,
 	start: number
@@ -7,11 +19,6 @@ interface Block {
 	raw: string,
 }
 
-let isResolved = false;
-init().then(function() {
-  isResolved = true;
-
-});
 function blocksToJSX(blocks: any[]) {
 	return blocks.map((block: any) => {
 			if (block.content.Text) {
@@ -32,8 +39,11 @@ function blocksToJSX(blocks: any[]) {
 			} else if (block.content.Spoiler) {
 				let rendered = blocksToJSX(block.content.Spoiler);
 				return <span className="spoiler">{rendered}</span>;
+			} else if (block.content.Code) {
+				let rendered = blocksToJSX(block.content.Code);
+				return <code>{rendered}</code>;
 			} else {
-				return <span style={{ color: "red" }}>{block.raw}</span>;
+				return <span style={{ color: "red" }}>{block}</span>;
 			}
 		})
 }

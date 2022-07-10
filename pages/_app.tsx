@@ -27,6 +27,13 @@ Please contribute: https://github.com/toodols/lepton
 				"font-size: unset",
 			);
 	}, [])
+	if (typeof window !== "undefined") {
+		window.onbeforeunload = ()=>{
+			if (store.getState().main.createPostModalOpen) {
+				return "no."
+			}
+		};
+	}
 	return (
 		<I18nextProvider i18n={i18n}>
 			<Provider store={store}>

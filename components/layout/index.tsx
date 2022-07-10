@@ -14,6 +14,7 @@ export const ContextMenu = createContext<{
 }>({
 	open: ()=>{},
 });
+ContextMenu.displayName = "ContextMenu";
 
 function ContextMenuRenderer(){
 	const ctx = useContext(ContextMenu);
