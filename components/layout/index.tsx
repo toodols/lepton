@@ -3,24 +3,22 @@ import { Sidebar } from "../sidebar";
 import { Signin } from "../sign-in-modal";
 import { Topbar } from "../topbar";
 import { RootState } from "lib/store";
-import { PropsWithChildren, useCallback, useEffect, useState } from "react";
+import { Component, createContext, PropsWithChildren, ReactElement, useCallback, useContext, useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import Head from "next/head";
 import { client } from "lib/client";
 import { useRouter } from "next/router";
 
-// Thank you https://github.com/vercel/next.js/tree/canary/examples/layout-component
-export function Layout({
-	children,
-	topbarItems = { left: [], right: [] },
-}: PropsWithChildren<{
-	topbarItems?: {
-		left: React.ReactNode;
-		right: React.ReactNode;
-	};
-}>) {
-	const settings = useSelector((state: RootState) => state.settings.settings);
-	const title = useSelector((state: RootState) => state.main.title);
+export const ContextMenu = createContext<{
+	open: (el: ReactElement)=>void,
+}>({
+	open: ()=>{},
+});
+
+function ContextMenuRenderer(){
+	const ctx = useContext(ContextMenu);
+	const [element, setElement] = useState<ReactElement|null>(null);
+	const [isOpen, setIsOpen] = useState(false);
 
 	// Thank you https://blog.logrocket.com/creating-context-menu-react/
 	const [anchorPoint, setAnchorPoint] = useState({ x: 0, y: 0 });
@@ -34,8 +32,39 @@ export function Layout({
 		[setAnchorPoint, setShow]
 	);
 	useEffect(() => {
+		document.addEventListener("click", ()=>{
+			setIsOpen(false);
+		})
 		document.addEventListener("contextmenu", cb);
 	}, [cb]);
+
+	ctx.open = (el)=>{
+		setElement(el);
+		setIsOpen(true);
+	}
+	if (isOpen) {
+		return (
+			<div style={{position: "absolute", zIndex: 999, left: anchorPoint.x, top: anchorPoint.y}}>
+				{element}
+			</div>
+		);
+	} else {
+		return <></>;
+	}
+}
+
+// Thank you https://github.com/vercel/next.js/tree/canary/examples/layout-component
+export function Layout({
+	children,
+	topbarItems = { left: [], right: [] },
+}: PropsWithChildren<{
+	topbarItems?: {
+		left: React.ReactNode;
+		right: React.ReactNode;
+	};
+}>) {
+	const settings = useSelector((state: RootState) => state.settings.settings);
+	const title = useSelector((state: RootState) => state.main.title);
 
 	useEffect(() => {
 		if (typeof document !== "undefined") {
@@ -55,6 +84,7 @@ export function Layout({
 			<Head>
 				<title>{title} - Lepton</title>
 			</Head>
+			
 			<noscript>
 				<div
 					style={{
@@ -70,7 +100,10 @@ export function Layout({
 				</div>
 			</noscript>
 			<Topbar />
+			<ContextMenu.Provider value={{open: ()=>{}}}>
+			<ContextMenuRenderer/>
 			{children}
+			</ContextMenu.Provider>
 			<Signin />
 			<Settings />
 			<Sidebar />

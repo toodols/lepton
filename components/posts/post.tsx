@@ -9,10 +9,11 @@ import { RootState } from "../../lib/store";
 import { useContext, useState } from "react";
 import {PostElementsContext} from ".";
 import { Avatar } from "../util/avatar";
-import { useTruncate } from "lib/truncate";
+import { useTruncate } from "../../lib/truncate";
 import Link from "next/link";
 import { Flags } from "lepton-client";
-import { MarkupRendered } from "components/markup/rendered";
+import { MarkupRendered } from "../../components/markup/rendered";
+import { ContextMenu } from "../../components/layout";
 
 function Roles({flags}: {flags: Flags}){
 	if (flags & Flags.Developer) return <span className={Styles.role}>Developer</span>;
@@ -31,9 +32,16 @@ export function Post({ post, setCurrent, current }: { current: string | null, se
 	const [isBeingDeleted, setIsBeingDeleted] = useState(false);
 	const [isExpanded, setIsExpanded] = useState(false);
 	const ctx = useContext(PostElementsContext);
+	const contextMenu = useContext(ContextMenu);
 
 	return (
-		<div ref={(div)=>{
+		<div onContextMenu={()=>{
+			contextMenu.open(<>
+				<button onClick={()=>{
+					post.delete();
+				}}>Delete</button>
+			</>);
+		}} ref={(div)=>{
 			if (div) {
 				ctx.posts[post.id] = div;
 			} else {
