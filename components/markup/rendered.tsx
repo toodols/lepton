@@ -39,15 +39,16 @@ function blocksToJSX(blocks: any[]) {
 			} else if (block.content.Spoiler) {
 				let rendered = blocksToJSX(block.content.Spoiler);
 				return <span className="spoiler">{rendered}</span>;
-			} else if (block.content.Code) {
-				let rendered = blocksToJSX(block.content.Code);
-				return <code>{rendered}</code>;
+			// code inline cannot have i tags and stuff inside
+			} else if (block.content.CodeInline) {
+				return <code>{block.content.CodeInline}</code>;
 			} else {
 				return <span style={{ color: "red" }}>{block}</span>;
 			}
 		})
 }
 export function MarkupRendered(props: {value: string}) {
+	console.log(JSON.parse(parse_with_serialize(props.value)))
 	return <div>
 		{isResolved ? blocksToJSX(JSON.parse(parse_with_serialize(props.value))) : <span>Loading...</span>}
 	</div>

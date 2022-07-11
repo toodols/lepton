@@ -45,8 +45,10 @@ export function CreatePostModal() {
 					<button
 						data-selected={mode === "preview"}
 						onClick={() => {
-							setMode("preview");
-							setCurrentValue(ref.current!.value);
+							if (mode !== "preview") {
+								setMode("preview");
+								setCurrentValue(ref.current!.value);
+							}
 						}}
 					>
 						Preview
@@ -62,7 +64,7 @@ export function CreatePostModal() {
 				<button
 					onClick={() => {
 						client.createPost({
-							content: ref.current!.value,
+							content: currentValue,
 							group,
 						});
 						dispatch(setCreatePostModalOpen(false));
