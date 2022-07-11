@@ -16,25 +16,26 @@ type InventoryItemData = {
 	description?: string;
 }
 
-export class InventoryItem<Opts extends Options = DefaultOpts> {
-	count: number;
-	item?: Item<Opts>;
-	private itemId: string;
-	async loadType(): Promise<Item<Opts>> {
-		if (this.item) {
-			return this.item;
-		}
-		return this.client.getItem({item: this.itemId}).then(item => {
-			this.item = item;
-			return item;
-		});
-	}
-	constructor(public client: Client<Opts>, public data: InventoryItemData) {
-		this.count = data.count;
-		this.item = this.client.itemsCache.get(data.item);
-		this.itemId = data.item;
-	}
-}
+// export class InventoryItem<Opts extends Options = DefaultOpts> {
+// 	count: number;
+// 	item?: Item<Opts>;
+// 	private itemId: string;
+// 	async loadType(): Promise<Item<Opts>> {
+// 		if (this.item) {
+// 			return this.item;
+// 		}
+// 		return this.client.getItem({item: this.itemId}).then(item => {
+// 			this.item = item;
+// 			return item;
+// 		});
+// 	}
+	
+// 	constructor(public client: Client<Opts>, public data: InventoryItemData) {
+// 		this.count = data.count;
+// 		this.item = this.client.itemsCache.get(data.item);
+// 		this.itemId = data.item;
+// 	}
+// }
 
 
 export class Item<Opts extends Options = DefaultOpts, Details=any> {

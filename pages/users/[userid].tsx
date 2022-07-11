@@ -5,6 +5,8 @@ import { RootState, setTitle } from "lib/store";
 import { useRouter } from "next/router"
 import { ReactNode, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import Styles from "../../styles/profile.module.sass";
+import Image from "next/image";
 
 export default function ProfileHandler() {
 	const router = useRouter();
@@ -23,11 +25,23 @@ export default function ProfileHandler() {
 				console.log(e)
 			});
 		}
-	})
+	}, [dispatch, userid])
 	return <div>
 		{user ? <div>
-			<h1>{user.username}</h1>
-			<p>{user.description}</p>
+			<div className={Styles.bannerContainer}>
+				<Image src={user.banner!} objectFit="cover" layout="fill" alt="banner"></Image>
+				<div className={Styles.bannerGradient}></div>
+				<div className={Styles.details}>
+					<Image src={user.avatar} width={80} height={80} style={{borderRadius: "50%"}} alt="avatar"></Image>
+					<div>
+						<h1>{user.username}</h1>
+						<span>{user.description}</span>
+					</div>
+				</div>
+				<div className={Styles.detailsRight}>
+					<button>Follow</button>
+				</div>
+			</div>
 			{client.clientUser?client.clientUser.id===userid?<></>:(client.clientUser.friendIds?.includes(user.id) ? <button onClick={()=>{
 				user.unfriend().then(e=>()=>{
 					// idk

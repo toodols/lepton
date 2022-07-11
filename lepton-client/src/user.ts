@@ -1,6 +1,6 @@
 import { Client, DefaultOpts, Options, signedIn } from "./client";
 import { FOLLOW_USER_URL, FRIEND_USER_URL, UNFOLLOW_USER_URL, UNFRIEND_USER_URL } from "./constants";
-import { InventoryItem, Item } from "./item";
+import { Item } from "./item";
 
 export enum Flags {
 	None = 0,
@@ -25,6 +25,7 @@ export interface UserDataFull extends UserDataPartial {
 		item: string;
 		count: number;
 	}[],
+	banner: string;
 	following: string[];
 	followerCount: number;
 	friends: string[];
@@ -136,9 +137,18 @@ export class User<Opts extends Options = DefaultOpts> {
 	update(data: UserData){
 		this.username = data.username;		
 		this.avatar = data.avatar;
+		this.id = data.id;
+		this.username = data.username;		
+		this.avatar = data.avatar;
+		this.flags = data.flags;
 		if (isFull(data)) {
+			this.banner = data.banner;
 			this.money = data.money;
 			this.description = data.description;
+			this.inventory = data.inventory.map(item=>({item: this.client.itemsCache.get(item.item)!, count: item.count})),
+			this.friendIds = data.friends;
+			this.followingIds = data.following;
+			this.followerCount = data.followerCount;
 		}
 	}
 
@@ -167,7 +177,9 @@ export class User<Opts extends Options = DefaultOpts> {
 	username: string;
 	avatar: string;
 	full: Opts["partial"] extends true ? boolean : true;
-	inventory?: InventoryItem<Opts>[];
+	inventory?: {item: Item<Opts>, count: number}[];
+	//@ts-ignore
+	banner: Maybe<string, Opts>;
 	//@ts-ignore
 	description: Maybe<string, Opts>;
 	//@ts-ignore
@@ -184,9 +196,10 @@ export class User<Opts extends Options = DefaultOpts> {
 		this.avatar = from.avatar;
 		this.flags = from.flags;
 		if (isFull(from)) {
+			this.banner = from.banner;
 			this.money = from.money;
 			this.description = from.description;
-			this.inventory = from.inventory.map(i=>new InventoryItem(this.client, i));
+			this.inventory = from.inventory.map(item=>({item: this.client.itemsCache.get(item.item)!, count: item.count})),
 			this.friendIds = from.friends;
 			this.followingIds = from.following;
 			this.followerCount = from.followerCount;

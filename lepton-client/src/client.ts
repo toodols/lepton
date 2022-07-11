@@ -358,6 +358,9 @@ export class Client<Opts extends Options = DefaultOpts> extends EventEmitter {
 		this.useToken(token);
 	}
 
+	/**
+	 * Looks up a full version of a user, and returns it.
+	 */
 	async findUser(userid: string): Promise<User<Opts>> {
 		const response = await fetch(GET_USER_URL + userid, {
 			method: "GET",

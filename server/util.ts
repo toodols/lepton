@@ -106,6 +106,7 @@ export namespace Converter {
 				item: i.item.toString(),
 				count: i.count,
 			})),
+			banner: user.settings.banner,
 			friends: user.friends.map(f=>f.toString()),
 			following: following.map(f=>f.user.toString()),
 			followerCount,
