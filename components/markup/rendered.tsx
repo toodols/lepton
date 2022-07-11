@@ -48,7 +48,6 @@ function blocksToJSX(blocks: any[]) {
 		})
 }
 export function MarkupRendered(props: {value: string}) {
-	console.log(JSON.parse(parse_with_serialize(props.value)))
 	return <div>
 		{isResolved ? blocksToJSX(JSON.parse(parse_with_serialize(props.value))) : <span>Loading...</span>}
 	</div>

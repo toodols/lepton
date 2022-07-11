@@ -64,7 +64,7 @@ export function CreatePostModal() {
 				<button
 					onClick={() => {
 						client.createPost({
-							content: currentValue,
+							content: ref.current?ref.current.value:currentValue,
 							group,
 						});
 						dispatch(setCreatePostModalOpen(false));

@@ -29,7 +29,7 @@ export default function ProfileHandler() {
 	return <div>
 		{user ? <div>
 			<div className={Styles.bannerContainer}>
-				<Image src={user.banner!} objectFit="cover" layout="fill" alt="banner"></Image>
+				{user.banner?<Image src={user.banner} objectFit="cover" layout="fill" alt="banner"></Image>:<></>}
 				<div className={Styles.bannerGradient}></div>
 				<div className={Styles.details}>
 					<Image src={user.avatar} width={80} height={80} style={{borderRadius: "50%"}} alt="avatar"></Image>

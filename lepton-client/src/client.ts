@@ -95,6 +95,7 @@ export class Client<Opts extends Options = DefaultOpts> extends EventEmitter {
 	async getPosts(props?: { before?: number; group?: string, user?: string }) {
 		const url = new URLSearchParams();
 		if (props) {
+			url.set("t", Date.now().toString())
 			if (props.before) {
 				url.set("before", props.before.toString());
 			}
