@@ -45,12 +45,14 @@ export function Post({ post, setCurrent, current }: { current: string | null, se
 							navigator.clipboard.writeText(post.id);
 						}
 					},
-					{
+					//@ts-ignore
+					...(event.clickOnProfile?
+					[{
 						text: "Copy Author Id",
 						onClick: ()=>{
 							navigator.clipboard.writeText(post.author.id);
 						}
-					},
+					}]:[]),
 					{
 						text: "Copy Content",
 						onClick: ()=>{
@@ -75,7 +77,11 @@ export function Post({ post, setCurrent, current }: { current: string | null, se
 		}} data-deleting={isBeingDeleted} data-expanded={isExpanded} className={Styles.post}>
 			<div className={Styles.postTopbar}>
 				<Avatar src={post.author.avatar}/>
-				<Link href={`/users/${post.author.id}`}>{post.author.username}</Link> <Roles flags={post.author.flags}/>
+				<Link href={`/users/${post.author.id}`}><a onContextMenu={(event)=>{
+					console.log(event);
+					//@ts-ignore
+					event.clickOnProfile = true
+				}}>{post.author.username}</a></Link> <Roles flags={post.author.flags}/>
 				<div className={Styles.actionBar}>
 					<button onClick={()=>{
 							setCurrent(post.id)
