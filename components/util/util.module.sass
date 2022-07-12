@@ -1,11 +1,12 @@
+@import "../../styles/mixins"
+
 .input
 	display: block
 	width: 100%
 	height: 35px
 	padding: 0 15px
 	outline: none
-	transition: border .1s
-	border: solid 0.5px
+	@include border
 
 @mixin avatar()
 	.avatar

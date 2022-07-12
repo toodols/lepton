@@ -14,7 +14,7 @@ import Link from "next/link";
 import { Flags } from "lepton-client";
 import { MarkupRendered } from "../../components/markup/rendered";
 import { PopupContext } from "../../components/layout";
-import { ContextMenu } from "components/context-menu";
+import { ContextMenu } from "../../components/context-menu";
 
 function Roles({flags}: {flags: Flags}){
 	if (flags & Flags.Developer) return <span className={Styles.role}>Developer</span>;

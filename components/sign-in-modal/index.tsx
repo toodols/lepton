@@ -33,25 +33,27 @@ export function Signin() {
 	}}>
 		<div key="signin" className={Styles.page} data-shown={menuType==="signin"}>
 			<header>Sign In to Lepton</header>
-			<Input disabled={isLoading} name="Username" ref={signInUsernameRef}/>
-			<Input disabled={isLoading} name="Password" type="password" ref={signInPasswordRef}/>
-			<div>
-				<button className={Styles.signUp} disabled={isLoading} onClick={()=>{
-					setIsLoading(true);
-					client.getToken(signInUsernameRef.current!.value, signInPasswordRef.current!.value).then((tok)=>{
-						client.useToken(tok);
-						dispatch(addAccount(tok))
-						dispatch(setSignInModalOpen(false));
-						
-					}).catch((err)=>{
-						setError(err.message);
-					}).finally(()=>{
-						setIsLoading(false);
-					});
-				}}>Sign In</button>
-				<button disabled={isLoading} onClick={()=>{
-					dispatch(setSigninMenuType("signup"));
-				}}>Sign Up</button>
+			<div className={Styles.body}>
+				<Input disabled={isLoading} name="Username" ref={signInUsernameRef}/>
+				<Input disabled={isLoading} name="Password" type="password" ref={signInPasswordRef}/>
+				<div>
+					<button className={Styles.signUp} disabled={isLoading} onClick={()=>{
+						setIsLoading(true);
+						client.getToken(signInUsernameRef.current!.value, signInPasswordRef.current!.value).then((tok)=>{
+							client.useToken(tok);
+							dispatch(addAccount(tok))
+							dispatch(setSignInModalOpen(false));
+							
+						}).catch((err)=>{
+							setError(err.message);
+						}).finally(()=>{
+							setIsLoading(false);
+						});
+					}}>Sign In</button>
+					<button disabled={isLoading} onClick={()=>{
+						dispatch(setSigninMenuType("signup"));
+					}}>Sign Up</button>
+				</div>
 			</div>
 		</div>
 		<div key="signup" className={Styles.page} data-shown={menuType==="signup"}>

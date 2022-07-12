@@ -1,7 +1,11 @@
 import { client } from "lib/client";
 import Link from "next/link";
 import { useDispatch, useSelector } from "react-redux";
-import { RootState, setSettingsModalOpen, setSidebarOpen } from "../../lib/store";
+import {
+	RootState,
+	setSettingsModalOpen,
+	setSidebarOpen,
+} from "../../lib/store";
 import Styles from "./sidebar.module.sass";
 
 export function Sidebar() {
@@ -31,22 +35,31 @@ export function Sidebar() {
 						</button>
 					</Link>
 					{userid ? (
-						<Link href={`/users/${userid}`}>
-							<button onClick={()=>{
-								dispatch(setSidebarOpen(false));
-							}}>Profile</button>
-						</Link>
-					): <></>}
-					<Link href="/inventory" passHref>
-						<button
-							onClick={() => {
-								dispatch(setSidebarOpen(false));
-							}}
-						>
-							Inventory
-						</button>
-					</Link>
-					<Link href="/backrooms" passHref>
+						<>
+							<Link href={`/users/${userid}`}>
+								<button
+									onClick={() => {
+										dispatch(setSidebarOpen(false));
+									}}
+								>
+									Profile
+								</button>
+							</Link>
+							<Link href="/inventory" passHref>
+								<button
+									onClick={() => {
+										dispatch(setSidebarOpen(false));
+									}}
+								>
+									Inventory
+								</button>
+							</Link>
+						</>
+					) : (
+						<>you need sign in to cool stuff</>
+					)}
+
+					{/* <Link href="/backrooms" passHref>
 						<button
 							onClick={() => {
 								dispatch(setSidebarOpen(false));
@@ -54,7 +67,7 @@ export function Sidebar() {
 						>
 							Backrooms
 						</button>
-					</Link>
+					</Link> */}
 				</aside>
 			</div>
 		</>

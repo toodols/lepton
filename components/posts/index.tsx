@@ -13,6 +13,20 @@ export const PostElementsContext = createContext<{
 export function Posts({group, user}: {group?: string, user?: string}) {
 	const [posts, setPosts] = useState<PostObj[]>([]);
 	const [hasMore, setHasMore] = useState(true);
+
+	// don't like autoCurrentId, might remove
+	const [autoCurrentId, setAutoCurrentId] = useState<string | null>(null);
+	const [forceCurrentId, setForceCurrentId] = useState<string | null>(null);
+
+	const currentPost = (forceCurrentId &&
+		client.postsCache.get(
+			forceCurrentId
+		)) ||
+	(autoCurrentId &&
+		client.postsCache.get(
+			autoCurrentId
+		)) ||
+	null
 	useEffect(() => {
 		setPosts([]);
 		async function sub() {
@@ -31,6 +45,18 @@ export function Posts({group, user}: {group?: string, user?: string}) {
 		}
 		client.on("postAdded", handler)
 		const deleteHandler = (post: PostObj)=>{
+			setAutoCurrentId((v)=>{
+				if (v === post.id) {
+					return null;
+				}
+				return v;
+			})
+			setForceCurrentId((v)=>{
+				if (v === post.id) {
+					return null;
+				}
+				return v;
+			})
 			setPosts((posts)=>posts.filter(e=>e!==post));
 		}
 		client.on("postDeleted", deleteHandler)
@@ -39,17 +65,6 @@ export function Posts({group, user}: {group?: string, user?: string}) {
 			client.removeListener("postDeleted", deleteHandler)
 		};
 	}, [user])
-	const [autoCurrentId, setAutoCurrentId] = useState<string | null>(null);
-	const [forceCurrentId, setForceCurrentId] = useState<string | null>(null);
-	const currentPost = (forceCurrentId &&
-		client.postsCache.get(
-			forceCurrentId
-		)) ||
-	(autoCurrentId &&
-		client.postsCache.get(
-			autoCurrentId
-		)) ||
-	null
 	return (
 		<>
 			<div className={Styles.container}>
