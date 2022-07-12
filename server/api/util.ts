@@ -171,6 +171,10 @@ export namespace Checkables {
 	}
 }
 
+/**
+ * Tries to get the user from the authorization header inside the request.
+ * If the user is not found, response will have appropriate status and error messages.
+ */
 export async function getUserFromAuth(
 	req: Request,
 	res: Response,

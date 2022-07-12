@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import { PollData } from "lepton-client";
 import { ObjectId, Timestamp, WithId } from "mongodb";
 import { DatabaseTypes, groups, groupUsers, polls, posts } from "../../database";
 import { io, redisClient } from "../../server-entry";
@@ -106,6 +107,14 @@ export default async function handler(
 				options: attachment.options,
 				question: attachment.question,
 			})
+			if (!poll.acknowledged) {
+				return res.status(500).json({ error: "Failed to create poll" });
+			}
+			// redis poll cache here
+			attachments.push({
+				type: "poll",
+				id: poll.insertedId,
+			});
 		}
 	};
 	
@@ -117,13 +126,25 @@ export default async function handler(
 		votes: 0,
 		createdAt: Timestamp.fromNumber(Date.now()),
 		updatedAt: Timestamp.fromNumber(Date.now()),
+		attachments,
 	});
 
 	if (post.acknowledged) {
 		redisClient.multi().hSet("post:"+post.insertedId, "votes", 0).expire("post:"+post.insertedId, 60).exec();
 		const data = await posts.findOne({ _id: post.insertedId });
+		const pollAttachments = attachments.filter(a => a.type === "poll") as {type: "poll", id: ObjectId}[];
+		const pollsMap: Record<string, PollData> = {};
+		for (const p of await Promise.all(pollAttachments.map(poll=>{
+			return polls.findOne({ _id: poll.id });
+		}))) {
+			if (!p) {
+				return res.status(500).json({ error: "Failed to find poll" });
+			}
+			pollsMap[p._id.toString()] = Converter.toPollData(p);
+		};
 		toGroup(result.value.group).emit("post", {
 				post: await Converter.toPostData(data!),
+				polls: pollsMap,
 				author: Converter.toUserDataPartial(user),
 		});
 		

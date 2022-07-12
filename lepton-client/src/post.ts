@@ -15,6 +15,13 @@ export interface PostData {
 	createdAt: number;
 	updatedAt: number;
 	votes: number;
+	attachments: ({
+		type: "image";
+		url: string;
+	} | {
+		type: "poll";
+		id: string;
+	})[];
 }
 
 // keeping track of a post's comments is too expensive

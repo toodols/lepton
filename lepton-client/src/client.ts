@@ -22,6 +22,7 @@ import {
 import { Settings } from "./types";
 import { ClientInfo, ClientInfoData } from "./clientinfo";
 import { Item, ItemData } from "./item";
+import { Poll } from "./poll";
 
 // const SOCKET_URL = process.env.NODE_ENV === "development" ? "/api/socket" : "wss://idk lmao";
 
@@ -85,6 +86,7 @@ export class Client<Opts extends Options = DefaultOpts> extends EventEmitter {
 	usersCache = new Map<string, User<Opts>>();
 	groupsCache = new Map<string, Group<Opts>>();
 	itemsCache = new Map<string, Item<Opts>>();
+	pollsCache = new Map<string, Poll<Opts>>();
 
 	token?: string;
 	clientUser?: User<Opts>;

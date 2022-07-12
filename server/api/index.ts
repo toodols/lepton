@@ -27,6 +27,8 @@ import lookupGroupHandler from "./groups/lookup";
 import lookupItemHandler from "./items/lookup";
 import friendUserHandler from "./users/friend";
 import unfriendUserHandler from "./users/unfriend";
+import pollSubmitHandler from "./polls/submit";
+import pollResultsHandler from "./polls/results";
 
 export function apiRouter(app: Application) {
 	app.post("/api/signin", signInHandler)
@@ -58,4 +60,7 @@ export function apiRouter(app: Application) {
 	app.get("/api/groups/lookup/:groupid", lookupGroupHandler)
 
 	app.get("/api/items/lookup/:itemid", lookupItemHandler)
+
+	app.post("/api/polls/submit", pollSubmitHandler)
+	app.get("/api/polls/results", pollResultsHandler)
 }

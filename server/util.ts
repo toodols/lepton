@@ -1,5 +1,5 @@
 import { createHash } from "crypto";
-import type { PostData, UserDataPartial, CommentData, UserDataFull, GroupData, ClientInfoData, ItemData } from "lepton-client";
+import type { PostData, UserDataPartial, CommentData, UserDataFull, GroupData, ClientInfoData, ItemData, PollData } from "lepton-client";
 import { ObjectId, WithId } from "mongodb";
 import { Socket } from "socket.io";
 import { DatabaseTypes, follows, friendRequests, posts, votes } from "./database";
@@ -67,9 +67,26 @@ export namespace Converter {
 			author: post.author.toString(),
 			group: post.group?.toString(),
 			// commentCount: getCommentCount(post),
+			attachments: post.attachments.map(e=>{
+				return Object.fromEntries(Object.entries(e).map(([k,v])=>{
+					if (v instanceof ObjectId) {
+						return [k, v.toString()];
+					}
+					return [k, v];
+				})) as any;
+			}),
 			votes: await getVotes(post._id)
 		}
 	}
+
+	export function toPollData(post: WithId<DatabaseTypes.Poll>): PollData {
+		return {
+			id: post._id.toString(),
+			question: post.question,
+			options: post.options,
+		}
+	}
+
 	export function toGroupDataFull(group: WithId<DatabaseTypes.Group>): GroupData {
 		return {
 			id: group._id.toString(),

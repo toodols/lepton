@@ -1,5 +1,5 @@
 
-import {Client, Comment as _Comment, Post as _Post, User as _User, Group as _Group, Item as _Item, InventoryItem as _InventoryItem} from "lepton-client";
+import {Client, Comment as _Comment, Post as _Post, User as _User, Group as _Group, Item as _Item, Poll as _Poll} from "lepton-client";
 import { store } from "./store";
 import { onClientUserChanged } from "./store/clientslice";
 
@@ -9,7 +9,7 @@ export type Post = _Post<Options>;
 export type User = _User<Options>;
 export type Group = _Group<Options>;
 export type Item = _Item<Options>;
-export type InventoryItem = _InventoryItem<Options>;
+export type Poll = _Poll<Options>;
 
 export const client = new Client({partial: true});
 if (typeof window !== "undefined") {

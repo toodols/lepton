@@ -1,3 +1,6 @@
+import { useEffect, useState } from "react";
+import { EventEmitter } from "stream";
+
 let isResolved = false;
 
 let parse_with_serialize: (value: string)=>any;
@@ -9,9 +12,13 @@ if (typeof window !== "undefined") {
 		value.default().then(()=>{
 			isResolved = true;
 			parse_with_serialize = value.parse_with_serialize;
+			markupLoadedEvent.emit("markupLoaded");
 		})
 	});
 }
+
+const markupLoadedEvent = new EventEmitter();
+
 interface Block {
 	content: any,
 	start: number
@@ -48,6 +55,18 @@ function blocksToJSX(blocks: any[]) {
 		})
 }
 export function MarkupRendered(props: {value: string}) {
+	const [markupLoaded, setMarkupLoaded] = useState(isResolved);
+	useEffect(()=>{
+		if (!isResolved) {
+			const handler = ()=>{
+				setMarkupLoaded(true);
+			};
+			markupLoadedEvent.on("markupLoaded", handler);
+			return ()=>{
+				markupLoadedEvent.off("markupLoaded", handler);
+			}
+		}
+	})
 	return <div>
 		{isResolved ? blocksToJSX(JSON.parse(parse_with_serialize(props.value))) : <span>Loading...</span>}
 	</div>

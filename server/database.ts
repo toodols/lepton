@@ -10,6 +10,15 @@ import {
 import { MongoDB_URI } from "./env";
 
 export namespace DatabaseTypes {
+
+	export type Attachment = {
+		type: "image",
+		url: string,
+	} | {
+		type: "poll",
+		id: ObjectId,
+	}
+
 	interface DatedDocument {
 		createdAt: Timestamp;
 		updatedAt: Timestamp;
@@ -69,6 +78,7 @@ export namespace DatabaseTypes {
 		 * It is calculated periodically
 		 */
 		votes: number;
+		attachments: Attachment[],
 	}
 
 	export interface Group extends DatedDocument {
@@ -125,6 +135,12 @@ export namespace DatabaseTypes {
 		options: string[];
 	}
 
+	export interface PollResponse {
+		poll: ObjectId;
+		user: ObjectId;
+		option: number;
+	}
+
 	export interface Response {
 		auth: Collection<Auth>;
 		users: Collection<User>;
@@ -138,6 +154,7 @@ export namespace DatabaseTypes {
 		items: Collection<Item>;
 		notifications: Collection<Notification>;
 		polls: Collection<Poll>;
+		pollResponses: Collection<PollResponse>;
 		database: Db;
 	}
 }
@@ -156,6 +173,7 @@ export const {
 	friendRequests,
 	notifications,
 	polls,
+	pollResponses,
 } = await new Promise<DatabaseTypes.Response>((resolve, reject) => {
 	const client = new MongoClient(MongoDB_URI);
 	client.connect(async (err) => {
@@ -173,8 +191,10 @@ export const {
 			items: database.collection("items"),
 			notifications: database.collection("notifications"),
 			polls: database.collection("polls"),
+			pollResponses: database.collection("pollResponse"),
 			database,
 		};
+		
 		// indexes
 
 		// find groupusers by their group and user
@@ -213,6 +233,11 @@ export const {
 		// find if user has followed another user
 		await collections.follows.createIndex(["user", "follower"], {
 			unique: true,
+		});
+		
+		// find if a user has already voted
+		await collections.pollResponses.createIndex(["poll", "user"], {
+			unique: true
 		});
 
 		resolve(collections);
