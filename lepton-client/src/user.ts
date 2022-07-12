@@ -1,6 +1,11 @@
 import { Client, DefaultOpts, Options, signedIn } from "./client";
-import { FOLLOW_USER_URL, FRIEND_USER_URL, UNFOLLOW_USER_URL, UNFRIEND_USER_URL } from "./constants";
-import { Item } from "./item";
+import {
+	FOLLOW_USER_URL,
+	FRIEND_USER_URL,
+	UNFOLLOW_USER_URL,
+	UNFRIEND_USER_URL,
+} from "./constants";
+import { InventoryItem, InventoryItemData, Item } from "./item";
 
 export enum Flags {
 	None = 0,
@@ -21,19 +26,18 @@ export interface UserDataPartial {
 export interface UserDataFull extends UserDataPartial {
 	description: string;
 	money: number;
-	inventory: {
-		item: string;
-		count: number;
-	}[],
+	inventory: InventoryItemData[];
 	banner: string;
-	following: string[];
+	followingCount: number;
 	followerCount: number;
 	friends: string[];
 }
 type UserData = UserDataFull | UserDataPartial;
-type Maybe<T, Opts extends Options> = Opts["partial"] extends true ? T | undefined : T
+type Maybe<T, Opts extends Options> = Opts["partial"] extends true
+	? T | undefined
+	: T;
 function isFull(v: UserData): v is UserDataFull {
-	return "description" in v
+	return "description" in v;
 }
 
 enum Privacy {
@@ -43,12 +47,8 @@ enum Privacy {
 }
 
 export class User<Opts extends Options = DefaultOpts> {
-	get followingCount(){
-		return this.followingIds?.length;
-	}
-	
-	static from<T extends Options>(client: Client<T>, post: UserData){
-		if (client.usersCache.has(post.id)){
+	static from<T extends Options>(client: Client<T>, post: UserData) {
+		if (client.usersCache.has(post.id)) {
 			const val = client.usersCache.get(post.id)!;
 			val.update(post);
 			return val;
@@ -57,34 +57,33 @@ export class User<Opts extends Options = DefaultOpts> {
 	}
 
 	@signedIn()
-	async follow(){
+	async follow() {
 		const result = await fetch(FOLLOW_USER_URL, {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
-				"Authorization": `Bearer ${this.client.token!}`,
+				Authorization: `Bearer ${this.client.token!}`,
 			},
-		}).then(e=>e.json());
+		}).then((e) => e.json());
 		if (result.error) {
 			throw new Error(result.error);
 		}
-		return result.alreadyFollowed
+		return result.alreadyFollowed;
 	}
 
-	followingIds?: string[];
 
 	@signedIn()
-	async friend(){
+	async friend() {
 		const result = await fetch(FRIEND_USER_URL, {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
-				"Authorization": `Bearer ${this.client.token!}`,
+				Authorization: `Bearer ${this.client.token!}`,
 			},
 			body: JSON.stringify({
 				user: this.id,
 			}),
-		}).then(e=>e.json());
+		}).then((e) => e.json());
 		if (result.error) {
 			throw new Error(result.error);
 		}
@@ -100,54 +99,62 @@ export class User<Opts extends Options = DefaultOpts> {
 	 * Unfriends a user. Errors if the user is not a friend of the client.
 	 */
 	@signedIn()
-	async unfriend(){
+	async unfriend() {
 		const result = await fetch(UNFRIEND_USER_URL, {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
-				"Authorization": `Bearer ${this.client.token!}`,
+				Authorization: `Bearer ${this.client.token!}`,
 			},
 			body: JSON.stringify({
 				user: this.id,
 			}),
-		}).then(e=>e.json());
+		}).then((e) => e.json());
 		if (result.error) {
 			throw new Error(result.error);
 		}
-		this.client.clientUser?.friendIds?.splice(this.client.clientUser.friendIds.indexOf(this.id), 1);
+		this.client.clientUser?.friendIds?.splice(
+			this.client.clientUser.friendIds.indexOf(this.id),
+			1
+		);
 		return result.alreadyUnfriended;
 	}
 
 	@signedIn()
-	async unfollow(){
+	async unfollow() {
 		const result = await fetch(UNFOLLOW_USER_URL, {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
-				"Authorization": `Bearer ${this.client.token!}`,
+				Authorization: `Bearer ${this.client.token!}`,
 			},
-		}).then(e=>e.json());
+		}).then((e) => e.json());
 		if (result.error) {
 			throw new Error(result.error);
 		}
-		this.client.clientUser?.followingIds?.splice(this.client.clientUser.followingIds.indexOf(this.id), 1);
-		return result.alreadyUnfollowed
+		return result.alreadyUnfollowed;
 	}
 
-	update(data: UserData){
-		this.username = data.username;		
+	update(data: UserData) {
+		this.username = data.username;
 		this.avatar = data.avatar;
 		this.id = data.id;
-		this.username = data.username;		
+		this.username = data.username;
 		this.avatar = data.avatar;
 		this.flags = data.flags;
 		if (isFull(data)) {
 			this.banner = data.banner;
 			this.money = data.money;
 			this.description = data.description;
-			this.inventory = data.inventory.map(item=>({item: this.client.itemsCache.get(item.item)!, count: item.count})),
-			this.friendIds = data.friends;
-			this.followingIds = data.following;
+			(this.inventory = data.inventory.map((item) => ({
+				item: this.client.itemsCache.get(item.item)!,
+				count: item.count,
+				description: item.description,
+				name: item.name,
+				details: item.details,
+			}))),
+				(this.friendIds = data.friends);
+			this.followingCount = data.followingCount;
 			this.followerCount = data.followerCount;
 		}
 	}
@@ -156,10 +163,7 @@ export class User<Opts extends Options = DefaultOpts> {
 	 * @returns undefined if user does not exist or the users following are unknown
 	 */
 	get clientIsFollowing(): boolean | undefined {
-		if (!this.client.clientUser || !this.client.clientUser.followingIds) {
-			return undefined;
-		}
-		return this.client.clientUser.followingIds.includes(this.id);
+		throw new Error("Not implemented");
 	}
 
 	/**
@@ -177,7 +181,7 @@ export class User<Opts extends Options = DefaultOpts> {
 	username: string;
 	avatar: string;
 	full: Opts["partial"] extends true ? boolean : true;
-	inventory?: {item: Item<Opts>, count: number}[];
+	inventory?: InventoryItem<Opts>[];
 	//@ts-ignore
 	banner: Maybe<string, Opts>;
 	//@ts-ignore
@@ -187,21 +191,27 @@ export class User<Opts extends Options = DefaultOpts> {
 	friendIds?: string[];
 	flags: Flags;
 	followerCount?: number;
+	followingCount?: number;
 
-	constructor(public client: Client<Opts>, from: UserDataFull | UserDataPartial) {
+	constructor(
+		public client: Client<Opts>,
+		from: UserDataFull | UserDataPartial
+	) {
 		//@ts-ignore
 		this.full = isFull(from);
 		this.id = from.id;
-		this.username = from.username;		
+		this.username = from.username;
 		this.avatar = from.avatar;
 		this.flags = from.flags;
 		if (isFull(from)) {
 			this.banner = from.banner;
 			this.money = from.money;
 			this.description = from.description;
-			this.inventory = from.inventory.map(item=>({item: this.client.itemsCache.get(item.item)!, count: item.count})),
-			this.friendIds = from.friends;
-			this.followingIds = from.following;
+			(this.inventory = from.inventory.map((item) => ({
+				item: this.client.itemsCache.get(item.item)!,
+				count: item.count,
+			}))),
+				(this.friendIds = from.friends);
 			this.followerCount = from.followerCount;
 		}
 		this.client.usersCache.set(this.id, this);

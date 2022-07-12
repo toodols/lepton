@@ -29,6 +29,11 @@ import friendUserHandler from "./users/friend";
 import unfriendUserHandler from "./users/unfriend";
 import pollSubmitHandler from "./polls/submit";
 import pollResultsHandler from "./polls/results";
+import followersHandler from "./users/followers";
+import tradesHandler from "./trades/get";
+import createTradeHandler from "./trades/create";
+import revokeTradeHandler from "./trades/revoke";
+import acceptTradeHandler from "./trades/accept";
 
 export function apiRouter(app: Application) {
 	app.post("/api/signin", signInHandler)
@@ -52,6 +57,7 @@ export function apiRouter(app: Application) {
 	app.get("/api/searchusers", searchUsersHandler)
 	app.post("/api/users/friend", friendUserHandler)
 	app.post("/api/users/unfriend", unfriendUserHandler)
+	app.get("/api/users/followers", followersHandler)
 
 	app.post("/api/groups/create", createGroupHandler)
 	app.post("/api/groups/delete", deleteGroupHandler)
@@ -63,4 +69,9 @@ export function apiRouter(app: Application) {
 
 	app.post("/api/polls/submit", pollSubmitHandler)
 	app.get("/api/polls/results", pollResultsHandler)
+
+	app.get("/api/trades/get", tradesHandler)
+	app.post("/api/trades/create", createTradeHandler)
+	app.post("/api/trades/revoke", revokeTradeHandler)
+	app.post("/api/trades/accept", acceptTradeHandler)
 }

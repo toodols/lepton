@@ -13,7 +13,8 @@ import { useTruncate } from "../../lib/truncate";
 import Link from "next/link";
 import { Flags } from "lepton-client";
 import { MarkupRendered } from "../../components/markup/rendered";
-import { ContextMenu } from "../../components/layout";
+import { PopupContext } from "../../components/layout";
+import { ContextMenu } from "components/context-menu";
 
 function Roles({flags}: {flags: Flags}){
 	if (flags & Flags.Developer) return <span className={Styles.role}>Developer</span>;
@@ -32,23 +33,39 @@ export function Post({ post, setCurrent, current }: { current: string | null, se
 	const [isBeingDeleted, setIsBeingDeleted] = useState(false);
 	const [isExpanded, setIsExpanded] = useState(false);
 	const ctx = useContext(PostElementsContext);
-	const contextMenu = useContext(ContextMenu);
+	const popupContext = useContext(PopupContext);
 
 	return (
-		<div onContextMenu={()=>{
-			contextMenu.open(<div className="contextMenu">
-				<button onClick={()=>{
-					// copy post.id to clipboard
-					navigator.clipboard.writeText(post.id);
-				}}>
-					Copy Id
-					<FontAwesomeIcon icon={faCopy}/>
-				</button>
-				<button onClick={()=>{
-					setIsBeingDeleted(true);
-					post.delete();
-				}}>Delete<FontAwesomeIcon icon={faTrash}/></button>
-			</div>);
+		<div onContextMenu={(event)=>{
+			popupContext.open(<ContextMenu
+				items={[[
+					{
+						text: "Copy Id",
+						onClick: ()=>{
+							navigator.clipboard.writeText(post.id);
+						}
+					},
+					{
+						text: "Copy Author Id",
+						onClick: ()=>{
+							navigator.clipboard.writeText(post.author.id);
+						}
+					},
+					{
+						text: "Copy Content",
+						onClick: ()=>{
+							navigator.clipboard.writeText(post.content);
+						}
+					},
+					{
+						text: "Delete",
+						onClick: ()=>{
+							setIsBeingDeleted(true);
+							post.delete();
+						}
+					}
+				]]}
+			/> );
 		}} ref={(div)=>{
 			if (div) {
 				ctx.posts[post.id] = div;

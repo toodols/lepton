@@ -49,6 +49,18 @@ async function getFollowerCount(id: ObjectId): Promise<number> {
 	return p;
 }
 
+export async function getFollowingCount(id: ObjectId): Promise<number> {
+	const result = await redisClient.hGet("user:"+id, "following")
+	if (result) {
+		return parseInt(result)
+	}
+	return follows.aggregate([
+			{$match: {follower: id}},
+			{$group: {_id: null, sum: {$sum: 1}}}
+		]
+	).toArray().then(e=>e[0]?e[0].sum:0);
+}
+
 export function toGroup(group: ObjectId | undefined | null){
 	if (group) {
 		return io.to("group:"+group)
@@ -113,8 +125,8 @@ export namespace Converter {
 		}
 	}
 	export async function toUserDataFull(user: WithId<DatabaseTypes.User>): Promise<UserDataFull> {
-		const following = await follows.find({follower: user._id}).toArray();
 		const followerCount = await getFollowerCount(user._id);
+		const followingCount = await getFollowingCount(user._id);
 		return {
 			...toUserDataPartial(user),
 			money: user.money,
@@ -125,7 +137,7 @@ export namespace Converter {
 			})),
 			banner: user.settings.banner,
 			friends: user.friends.map(f=>f.toString()),
-			following: following.map(f=>f.user.toString()),
+			followingCount,
 			followerCount,
 		}
 	}

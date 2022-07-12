@@ -1,16 +1,10 @@
 import { useEffect, useState } from "react";
-import { client, User, InventoryItem, Item } from "../../lib/client";
+import { client, User, Item, InventoryItem } from "../../lib/client";
 import Styles from "./inventory.module.sass";
 import Image from "next/image";
 
-export function InventoryItemComponent({ item }: { item: InventoryItem }) {
-	const [itemType, setItemType] = useState<Item | null>(item.item || null);
-	useEffect(() => {
-		if (!itemType) {
-			item.loadType().then(setItemType);
-		}
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, []);
+export function InventoryItemComponent({ item }: { item: InventoryItem}) {
+	const itemType = item.item;
 
 	return (
 		<div className={Styles.item}>

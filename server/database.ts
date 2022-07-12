@@ -96,6 +96,7 @@ export namespace DatabaseTypes {
 	export interface Follow {
 		user: ObjectId;
 		follower: ObjectId;
+		createdAt: Timestamp;
 	}
 
 	export interface Vote {
@@ -141,6 +142,14 @@ export namespace DatabaseTypes {
 		option: number;
 	}
 
+	export interface Trade {
+		from: ObjectId;
+		to: ObjectId;
+		itemsOffered: InventoryItem[];
+		itemsRequested: InventoryItem[];
+		accepted: boolean;
+	}
+
 	export interface Response {
 		auth: Collection<Auth>;
 		users: Collection<User>;
@@ -155,6 +164,7 @@ export namespace DatabaseTypes {
 		notifications: Collection<Notification>;
 		polls: Collection<Poll>;
 		pollResponses: Collection<PollResponse>;
+		trades: Collection<Trade>;
 		database: Db;
 	}
 }
@@ -174,6 +184,7 @@ export const {
 	notifications,
 	polls,
 	pollResponses,
+	trades,
 } = await new Promise<DatabaseTypes.Response>((resolve, reject) => {
 	const client = new MongoClient(MongoDB_URI);
 	client.connect(async (err) => {
@@ -192,6 +203,7 @@ export const {
 			notifications: database.collection("notifications"),
 			polls: database.collection("polls"),
 			pollResponses: database.collection("pollResponse"),
+			trades: database.collection("trades"),
 			database,
 		};
 		

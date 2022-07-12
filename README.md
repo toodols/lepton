@@ -5,7 +5,9 @@ Built using next.js, mongodb, socket.io, redis
 # How to run your own lepton
 ```
 git clone https://github.com/toodols/lepton.git && cd lepton
-npm run installstuff
+npm run installstuff # Installs npm packages
+npm run build-markup # Builds rust markup. You will need to install wasm-pack and by extension rust.
+npm run compile # Compiles typescript
 echo > .env.local
 ```
 In .env.local put in

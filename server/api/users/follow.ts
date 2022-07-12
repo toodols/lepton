@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import { Timestamp } from "mongodb";
 import { follows } from "../../database";
 import { Checkables, createGuard, getUserFromAuth } from "../util";
 import { Error } from "../util";
@@ -29,6 +30,7 @@ export default async function handler(req: Request, res: Response<Data | Error>)
 		const iresult = await follows.insertOne({
 			user: user._id,
 			follower: result.value.user,
+			createdAt: Timestamp.fromNumber(Date.now()),
 		})
 		if (iresult.acknowledged) {
 			res.json({

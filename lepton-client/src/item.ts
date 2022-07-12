@@ -8,8 +8,16 @@ export interface ItemData {
 	icon: string;
 }
 
-type InventoryItemData = {
+export type InventoryItemData = {
 	item: string,
+	count: number,
+	details?: any;
+	name?: string;
+	description?: string;
+}
+
+export type InventoryItem<Opts extends Options> = {
+	item: Item<Opts>,
 	count: number,
 	details?: any;
 	name?: string;

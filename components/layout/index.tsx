@@ -3,23 +3,26 @@ import { Sidebar } from "../sidebar";
 import { Signin } from "../sign-in-modal";
 import { Topbar } from "../topbar";
 import { RootState } from "../../lib/store";
-import { Component, createContext, PropsWithChildren, ReactElement, useCallback, useContext, useEffect, useState } from "react";
+import { Component, createContext, PropsWithChildren, ReactElement, useCallback, useContext, useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import Head from "next/head";
 import { client } from "../../lib/client";
 import { useRouter } from "next/router";
 
-export const ContextMenu = createContext<{
-	open: (el: ReactElement)=>void,
+export const PopupContext = createContext<{
+	open: (el: ReactElement, at?: {x: number, y: number}, onHide?: (unmount: ()=>void)=>void)=>void,
 }>({
 	open: ()=>{},
 });
-ContextMenu.displayName = "ContextMenu";
+PopupContext.displayName = "PopupContext";
 
-function ContextMenuRenderer(){
-	const ctx = useContext(ContextMenu);
+function PopupContextRenderer(){
+	const ctx = useContext(PopupContext);
 	const [element, setElement] = useState<ReactElement|null>(null);
 	const [isOpen, setIsOpen] = useState(false);
+	const {current} = useRef<{
+		onHide: (unmount: ()=>void)=>void,
+	}>({onHide: ()=>{}})
 
 	// Thank you https://blog.logrocket.com/creating-context-menu-react/
 	const [anchorPoint, setAnchorPoint] = useState({ x: 0, y: 0 });
@@ -32,6 +35,7 @@ function ContextMenuRenderer(){
 		},
 		[setAnchorPoint, setShow]
 	);
+
 	useEffect(() => {
 		document.addEventListener("click", ()=>{
 			setIsOpen(false);
@@ -39,8 +43,11 @@ function ContextMenuRenderer(){
 		document.addEventListener("contextmenu", cb);
 	}, [cb]);
 
-	ctx.open = (el)=>{
+	ctx.open = (el,at,_onHide)=>{
 		setElement(el);
+		if (at){
+			setAnchorPoint(at);
+		}
 		setIsOpen(true);
 	}
 	if (isOpen) {
@@ -101,10 +108,10 @@ export function Layout({
 				</div>
 			</noscript>
 			<Topbar />
-			<ContextMenu.Provider value={{open: ()=>{}}}>
-			<ContextMenuRenderer/>
+			<PopupContext.Provider value={{open: ()=>{}}}>
+			<PopupContextRenderer/>
 			{children}
-			</ContextMenu.Provider>
+			</PopupContext.Provider>
 			<Signin />
 			<Settings />
 			<Sidebar />

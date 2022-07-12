@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { EventEmitter } from "stream";
+import { EventEmitter } from "events";
 
 let isResolved = false;
 

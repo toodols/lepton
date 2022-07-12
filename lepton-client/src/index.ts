@@ -6,5 +6,6 @@ export * from "./comment";
 export * from "./clientinfo"
 export * from "./item"
 export * from "./poll"
+export * from "./trade"
 import {Settings} from "./types";
 export type {Settings};
