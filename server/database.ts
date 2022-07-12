@@ -142,12 +142,20 @@ export namespace DatabaseTypes {
 		option: number;
 	}
 
+	export enum TradeStatus {
+		Pending,
+		Accepted,
+		Declined,
+		Canceled,
+		Expired,
+	}
+
 	export interface Trade {
 		from: ObjectId;
 		to: ObjectId;
 		itemsOffered: InventoryItem[];
 		itemsRequested: InventoryItem[];
-		accepted: boolean;
+		status: TradeStatus;
 	}
 
 	export interface Response {

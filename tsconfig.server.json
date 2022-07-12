@@ -9,7 +9,7 @@
         "allowSyntheticDefaultImports": true
     },
     "include": [
-        "server/**/*.ts",
+        "server/**/*.ts"
     ],
 	"exclude": [
 		"lepton-client/**/*.ts",

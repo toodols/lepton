@@ -32,7 +32,7 @@ import pollResultsHandler from "./polls/results";
 import followersHandler from "./users/followers";
 import tradesHandler from "./trades/get";
 import createTradeHandler from "./trades/create";
-import revokeTradeHandler from "./trades/revoke";
+import revokeTradeHandler from "./trades/cancel";
 import acceptTradeHandler from "./trades/accept";
 
 export function apiRouter(app: Application) {

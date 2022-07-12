@@ -16,6 +16,8 @@ import "./generated-items"
 import { ObjectId } from "mongodb";
 import {instrument} from "@socket.io/admin-ui";
 import path from "path";
+import { readFileSync } from "fs";
+
 
 const args = await yargs(process.argv).argv;
 const dev = process.env.NODE_ENV !== "production";

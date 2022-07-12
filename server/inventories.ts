@@ -47,6 +47,43 @@ export function mergeInventory(inventory: Item[], itemsToAdd: Item[], types: Rec
 	return inventory;
 }
 
+export function subtractInventory(inventory: Item[], itemsToRemove: Item[], types: Record<string, WithId<DatabaseTypes.Item> | null>) {
+	inventory = [...inventory];
+	for (const item of itemsToRemove) {
+		const itemType = types[item.item.toString()];
+		if (!itemType) {
+			throw new Error(`Item ${item.item} not found`);
+		}
+		let itemInInventory: Item | undefined;	
+		for (const i of inventory) {
+			if (equals(i, item)) {
+				itemInInventory = i;
+				break;
+			}
+		}
+		if (itemInInventory) {
+			if (itemType.unique) {
+				inventory.splice(inventory.indexOf(itemInInventory), 1);
+			} else {
+				itemInInventory.count -= item.count;
+				if (itemInInventory.count === 0) {
+					inventory.splice(inventory.indexOf(itemInInventory), 1);
+				} else if (itemInInventory.count < 0) {
+					throw new Error(`Tried to remove more items than exist`);
+				}
+			}
+		} else {
+			throw new Error(`Item ${item.item} not found`);
+		}
+	}
+	return inventory;
+}
+
+export async function subtractInventoryAsync(inventory: Item[], itemsToRemove: Item[]) {
+	const types = await getItemTypes(inventory);
+	return subtractInventory(inventory, itemsToRemove, types);
+}
+
 export async function mergeInventoryAsync(inventory: Item[], itemsToAdd: Item[]) {
 	const itemTypes = await getItemTypes(inventory);
 	return mergeInventory(inventory, itemsToAdd, itemTypes);
