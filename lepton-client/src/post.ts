@@ -71,7 +71,7 @@ export interface Post<Opts> {
 	on(event: "commentAdded", listener: (comment: Comment<Opts>) => void): this;
 }
 
-export class Post<Opts extends Options> extends EventEmitter {
+export class Post<Opts extends Options = DefaultOpts> extends EventEmitter {
 
 	static from<Opts extends Options>(client: Client<Opts>, post: PostData){
 		if (client.postsCache.has(post.id)){
@@ -128,7 +128,7 @@ export class Post<Opts extends Options> extends EventEmitter {
 		this._commentsLoader?.loaded.unshift(comment);
 		this._commentsLoader?.emit("update");
 		this.lastComment = comment;
-		this.emit("comment", comment);
+		this.emit("commentAdded", comment);
 		this.emit("update");
 	}
 

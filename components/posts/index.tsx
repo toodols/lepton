@@ -18,6 +18,13 @@ export function Posts({group, user}: {group?: string, user?: string}) {
 	const [autoCurrentId, setAutoCurrentId] = useState<string | null>(null);
 	const [forceCurrentId, setForceCurrentId] = useState<string | null>(null);
 
+	if (autoCurrentId && !posts.find((p) => p.id === autoCurrentId)) {
+		setAutoCurrentId(null);
+	}
+	if (forceCurrentId && !posts.find((p) => p.id === forceCurrentId)) {
+		setForceCurrentId(null);
+	}
+
 	const currentPost = (forceCurrentId &&
 		client.postsCache.get(
 			forceCurrentId
@@ -45,18 +52,18 @@ export function Posts({group, user}: {group?: string, user?: string}) {
 		}
 		client.on("postAdded", handler)
 		const deleteHandler = (post: PostObj)=>{
-			setAutoCurrentId((v)=>{
-				if (v === post.id) {
-					return null;
-				}
-				return v;
-			})
-			setForceCurrentId((v)=>{
-				if (v === post.id) {
-					return null;
-				}
-				return v;
-			})
+			// setAutoCurrentId((v)=>{
+			// 	if (v === post.id) {
+			// 		return null;
+			// 	}
+			// 	return v;
+			// })
+			// setForceCurrentId((v)=>{
+			// 	if (v === post.id) {
+			// 		return null;
+			// 	}
+			// 	return v;
+			// })
 			setPosts((posts)=>posts.filter(e=>e!==post));
 		}
 		client.on("postDeleted", deleteHandler)
@@ -110,7 +117,9 @@ export function Posts({group, user}: {group?: string, user?: string}) {
 												query.before = mostRecent.createdAt;
 											}
 											const res = await client.getPosts(query);
-											setPosts((posts)=>[...posts, ...res.posts]);
+											// duplicate bug appears because posts may change while still getting posts
+											// posts that start from the middle is being appended to a newer version
+											setPosts([...posts, ...res.posts]);
 										}}
 										hasMore={hasMore}
 										loader={<GhostPost/>}
