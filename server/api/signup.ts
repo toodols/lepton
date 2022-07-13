@@ -42,6 +42,7 @@ const signUpGuard = createGuard({
 	password: Checkables.string,
 });
 
+
 export default async function handler(req: Request, res: Response<Error | Data>) {
 	const result = signUpGuard(req.body);
 	if ("error" in result) return res.status(400).json(result);
@@ -49,14 +50,11 @@ export default async function handler(req: Request, res: Response<Error | Data>)
 
 	const { username, password } = result.value;
 	const msg = verifyPassword(password); if (msg) {return res.status(400).json({error: msg});}
-
-	const authDoc = await auth.findOne({ username })
-	if (authDoc) {res.status(400).json({error: "User already exists!"}); return}
+	
 	const password_salt = salt();
 	const hashed_password = hash(password, password_salt);
 
-
-	const user = await users.insertOne({
+	const uRes = await users.findOneAndUpdate({username}, {$setOnInsert: {
 		username,
 		settings: {
 			avatar: "/avatar.png",
@@ -74,20 +72,44 @@ export default async function handler(req: Request, res: Response<Error | Data>)
 		money: 0,
 		friends: [],
 		blocked: [],
-	});
-	if (!user.acknowledged) return res.status(500).json({error: "Error creating user"});
+	}}, {upsert: true, collation: {
+		locale: "en",
+		strength: 1,
+	}});
 
-	auth.insertOne({
+	if (!uRes.ok) {
+		return res.status(500).json({error: "idk"});
+	}
+	if (uRes.value) {
+		return res.status(400).json({error: "User already exists!"});
+	}
+
+	const u = await users.findOne({username});
+
+	if (!u) {
+		return res.status(500).json({error: "idk"});
+	}
+
+	// just delete all the auth docs that share username for good measure
+	const dResult = await auth.deleteMany({username});
+	if (dResult.deletedCount > 0) {
+		console.log(`Deleted ${dResult.deletedCount} auth docs for ${username} o_o`);
+	}
+	const authDoc = await auth.insertOne({
 		createdAt: Timestamp.fromNumber(Date.now()),
 		updatedAt: Timestamp.fromNumber(Date.now()),
 		username,
 		hashed_password,
 		salt: password_salt,
-		user: user.insertedId,
+		user: u._id,
 		permission: DatabaseTypes.Permission.ALL,
-	})
+	});
 	
-	const token = jwt.sign({user: user.insertedId, permission: DatabaseTypes.Permission.ALL}, jwt_secret);
+	if (!authDoc.acknowledged) {
+		return res.status(500).json({error: "idk"});
+	}
+	
+	const token = jwt.sign({user: u._id, permission: DatabaseTypes.Permission.ALL}, jwt_secret);
 
 	res.status(200).json({token});
 

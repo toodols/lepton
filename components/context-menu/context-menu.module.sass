@@ -5,6 +5,8 @@
 	background: var(--color-context-menu)
 	padding: 4px
 	border-radius: 5px
+	opacity: 1
+	transition: opacity .1s
 	button
 		text-align: left
 		height: 25px
@@ -14,3 +16,5 @@
 		&:hover
 			background: var(--color-context-menu-button-hover)
 		background: var(--color-context-menu-button)
+	&[data-is-hiding=true]
+		opacity: 0

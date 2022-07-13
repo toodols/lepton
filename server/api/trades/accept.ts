@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import { readFileSync } from "fs";
 import { ObjectId } from "mongodb";
 import { dirname, join } from "path";
-import { subtractInventoryAsync } from "server/inventories";
+import { subtractInventoryAsync } from "../../inventories";
 import { DatabaseTypes, items, trades, users } from "../../database";
 import { redisClient } from "../../server-entry";
 import { Checkables, createGuard, Error, getUserFromAuth } from "../util";

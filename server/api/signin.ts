@@ -30,7 +30,12 @@ export default async function handler(req: Request, res: Response<Data | Error>)
 	const { username, password } = result.value;
 
 	
-	const authDoc = await auth.findOne({ username })
+	const authDoc = await auth.findOne({ username }, {
+		collation: {
+			locale: "en",
+			strength: 1,
+		}
+	})
 	if (authDoc) {
 		const password_salt = authDoc.salt;
 		const hashed_password = hash(password, password_salt);

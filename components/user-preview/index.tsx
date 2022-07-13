@@ -1,7 +1,7 @@
 import { User } from "../../lib/client";
 
 export function UserPreview({user}: {user: User}) {
-	return <div style={{position: "absolute"}}>
+	return <div>
 		{user.username}
 	</div>
 }

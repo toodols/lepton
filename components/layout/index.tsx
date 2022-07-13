@@ -10,23 +10,24 @@ import { client } from "../../lib/client";
 import { useRouter } from "next/router";
 
 export const PopupContext = createContext<{
-	open: (el: ReactElement, at?: {x: number, y: number}, onHide?: (unmount: ()=>void)=>void)=>void,
+	open: (el: ReactElement | ((hiding: boolean)=>ReactElement), hideTime?: number, at?: {x: number, y: number})=>void,
+	close: ()=>void,
 }>({
 	open: ()=>{},
+	close: ()=>{},
 });
 PopupContext.displayName = "PopupContext";
 
 function PopupContextRenderer(){
 	const ctx = useContext(PopupContext);
-	const [element, setElement] = useState<ReactElement|null>(null);
-	const [isOpen, setIsOpen] = useState(false);
-	const {current} = useRef<{
-		onHide: (unmount: ()=>void)=>void,
-	}>({onHide: ()=>{}})
+	const [element, setElement] = useState<ReactElement | ((hiding: boolean)=>ReactElement) |null>(null);
 
 	// Thank you https://blog.logrocket.com/creating-context-menu-react/
 	const [anchorPoint, setAnchorPoint] = useState({ x: 0, y: 0 });
 	const [show, setShow] = useState(false);
+	const [hideTime, setHideTime] = useState(0);
+	const [isHiding, setIsHiding] = useState(false);
+
 	const cb = useCallback(
 		(event: MouseEvent) => {
 			event.preventDefault();
@@ -37,23 +38,52 @@ function PopupContextRenderer(){
 	);
 
 	useEffect(() => {
-		document.addEventListener("click", ()=>{
-			setIsOpen(false);
-		})
-		document.addEventListener("contextmenu", cb);
-	}, [cb]);
-
-	ctx.open = (el,at,_onHide)=>{
-		setElement(el);
-		if (at){
-			setAnchorPoint(at);
+		const handler = ()=>{
+			setIsHiding((isHiding)=>{
+				if (!isHiding) {
+					setTimeout(()=>{
+						setShow(false);
+						setIsHiding(false);
+					}, hideTime)
+				}
+				return true;
+			});
 		}
-		setIsOpen(true);
-	}
-	if (isOpen) {
+		document.addEventListener("click", handler)
+		document.addEventListener("contextmenu", cb);
+		return ()=>{
+			document.removeEventListener("click", handler);
+			document.removeEventListener("contextmenu", cb);
+		}
+	}, [cb, setShow, setIsHiding, hideTime]);
+
+	useEffect(() => {
+		ctx.open = (el, hideTime, at)=>{
+			setElement(()=>el);
+			setHideTime(hideTime || 0);
+			if (at){
+				setAnchorPoint(at);
+			}
+			setShow(true);
+		}
+
+		ctx.close = ()=>{
+			setIsHiding((isHiding)=>{
+				if (!isHiding) {
+					setTimeout(()=>{
+						setShow(false);
+						setIsHiding(false);
+					}, hideTime)
+				}
+				return true;
+			});
+		}
+	}, [ctx, setElement, setAnchorPoint, setIsHiding, hideTime])
+
+	if (show) {
 		return (
 			<div style={{position: "absolute", zIndex: 999, left: anchorPoint.x, top: anchorPoint.y}}>
-				{element}
+				{typeof element === "function" ? element(isHiding) : element}
 			</div>
 		);
 	} else {
@@ -108,7 +138,7 @@ export function Layout({
 				</div>
 			</noscript>
 			<Topbar />
-			<PopupContext.Provider value={{open: ()=>{}}}>
+			<PopupContext.Provider value={{open: ()=>{}, close: ()=>{}}}>
 			<PopupContextRenderer/>
 			{children}
 			</PopupContext.Provider>

@@ -4,6 +4,7 @@ import { ReactElement } from "react";
 import Styles from "./context-menu.module.sass";
 
 export function ContextMenu(props: {
+	isHiding?:boolean,
 	items: ({text: string, color?: string, icon?: IconDefinition | ReactElement, onClick: ()=>void} | ReactElement)[][]
 }){
 	const elements: ReactElement[] = [];
@@ -21,7 +22,7 @@ export function ContextMenu(props: {
 	}
 	// we don't need the last --
 	elements.pop();
-	return <div className={Styles.contextMenu}>
+	return <div className={Styles.contextMenu} data-is-hiding={props.isHiding ?? false}>
 		{elements}
 	</div>
 }

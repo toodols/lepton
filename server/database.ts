@@ -217,6 +217,17 @@ export const {
 		
 		// indexes
 
+		// after careful consideration, it is okay for both auths and users to have the same username index
+		await collections.auth.createIndex({username: 1}, {unique: true, collation: { // unique may be wrong here
+			locale: "en",
+			strength: 1,
+		}});
+
+		await collections.users.createIndex({username: 1}, {unique: true, collation: {
+			locale: "en",
+			strength: 1,
+		}});
+
 		// find groupusers by their group and user
 		await collections.groupUsers.createIndex(["group", "user"], {
 			unique: true,
