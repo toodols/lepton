@@ -1,5 +1,5 @@
 import { CommentPreview } from "./comment-preview";
-import { Post as PostObject } from "../../lib/client";
+import { Post as PostObject, User } from "../../lib/client";
 import Styles from "./posts.module.sass";
 import { useUpdatable } from "../../lib/useUpdatable";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -22,6 +22,7 @@ import { MarkupRendered } from "../../components/markup/rendered";
 import { PopupContext } from "../../components/layout";
 import { ContextMenu } from "../../components/context-menu";
 import { UserPreview } from "components/user-preview";
+import ReactDOM from "react-dom";
 
 function Roles({ flags }: { flags: Flags }) {
 	if (flags & Flags.Developer)
@@ -30,6 +31,22 @@ function Roles({ flags }: { flags: Flags }) {
 	if (flags & Flags.Moderator)
 		return <span className={Styles.role}>Moderator</span>;
 	return <></>;
+}
+
+function UserPreviewButton(props: { user: User }) {
+	// const [pos, setPos] = useState<{ x: number, y: number } | null>(null);
+	return <>{
+		// pos?<UserPreview pos={pos} user={props.user}/>:<></>
+	}<button onClick={(event)=>{
+		// dispaatch show user preview
+		// setPos({
+		// 	x: event.clientX,
+		// 	y: event.clientY,
+		// });
+	}}
+	className={Styles.userPreviewButton}>
+		{props.user.username}
+	</button></>
 }
 
 export function Post({
@@ -53,53 +70,58 @@ export function Post({
 	const [isExpanded, setIsExpanded] = useState(false);
 	const ctx = useContext(PostElementsContext);
 	const popupContext = useContext(PopupContext);
-
+	
 	return (
 		<div
 			onContextMenu={(event) => {
-				popupContext.open((isHiding) => (
-					<ContextMenu
-						isHiding={isHiding}
-						items={[
-							[
-								{
-									text: "Copy Id",
-									onClick: () => {
-										navigator.clipboard.writeText(post.id);
-									},
-								},
-								//@ts-ignore
-								...(event.clickOnProfile
-									? [
-											{
-												text: "Copy Author Id",
-												onClick: () => {
-													navigator.clipboard.writeText(
-														post.author.id
-													);
+				popupContext.open(
+					(isHiding) => (
+						<ContextMenu
+							isHiding={isHiding}
+							items={[
+								[
+									//@ts-ignore
+									...(event.clickOnProfile
+										? [
+												{
+													text: "Copy Author Id",
+													onClick: () => {
+														navigator.clipboard.writeText(
+															post.author.id
+														);
+													},
 												},
-											},
-									  ]
-									: []),
-								{
-									text: "Copy Content",
-									onClick: () => {
-										navigator.clipboard.writeText(
-											post.content
-										);
+										  ]
+										: []),
+									{
+										text: "Copy Id",
+										onClick: () => {
+											navigator.clipboard.writeText(
+												post.id
+											);
+										},
 									},
-								},
-								{
-									text: "Delete",
-									onClick: () => {
-										setIsBeingDeleted(true);
-										post.delete();
+									{
+										text: "Copy Content",
+										onClick: () => {
+											navigator.clipboard.writeText(
+												post.content
+											);
+										},
 									},
-								},
-							],
-						]}
-					/>
-				), 100);
+									{
+										text: "Delete",
+										onClick: () => {
+											setIsBeingDeleted(true);
+											post.delete();
+										},
+									},
+								],
+							]}
+						/>
+					),
+					100
+				);
 			}}
 			ref={(div) => {
 				if (div) {
@@ -114,7 +136,8 @@ export function Post({
 		>
 			<div className={Styles.postTopbar}>
 				<Avatar src={post.author.avatar} />
-				<Link href={`/users/${post.author.id}`}>
+				<UserPreviewButton user={post.author}/>
+				{/* <Link href={`/users/${post.author.id}`}>
 					<a
 						onContextMenu={(event) => {
 							console.log(event);
@@ -124,7 +147,7 @@ export function Post({
 					>
 						{post.author.username}
 					</a>
-				</Link>{" "}
+				</Link>{" "} */}
 				<Roles flags={post.author.flags} />
 				<div className={Styles.actionBar}>
 					<button

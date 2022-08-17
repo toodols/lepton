@@ -27,10 +27,12 @@
 @mixin dark
 	@include generator(#1a1a1a, #2a2a2a, #444, #fff, #666)
 	--color-accent: cyan
+	--color-command-select: #293a3a
 
 @mixin light
 	@include generator(#ffffff, #f5f5f5, #eee, #000, #ccc)
 	--color-accent: orange
+	--color-command-select: #aaffff
 
 @media (prefers-color-scheme: dark)
 	body[data-theme=default]
@@ -50,3 +52,4 @@ body[data-theme=light]
 body[data-theme=lol]
 	@include generator(#A1C084, #659157, #69A2B0, #fff, #FFCAB1)
 	--color-accent: red
+	--color-command-select: red

@@ -18,6 +18,7 @@ import {
 	SEARCH_GROUPS_URL,
 	GET_GROUP_URL,
 	LOOKUP_ITEM_URL,
+	GET_USER_BY_USERNAME_URL,
 } from "./constants";
 import { Settings } from "./types";
 import { ClientInfo, ClientInfoData } from "./clientinfo";
@@ -364,8 +365,24 @@ export class Client<Opts extends Options = DefaultOpts> extends EventEmitter {
 	/**
 	 * Looks up a full version of a user, and returns it.
 	 */
-	async findUser(userid: string): Promise<User<Opts>> {
+	async getUser(userid: string): Promise<User<Opts>> {
 		const response = await fetch(GET_USER_URL + userid, {
+			method: "GET",
+			headers: {
+				["Content-Type"]: "application/json",
+			},
+		}).then((e) => e.json());
+		if (response.error) {
+			throw new Error(response.error);
+		}
+		return User.from(this, response.user);
+	}
+
+	/**
+	 * Looks up a full version of user by case-insensitive username, and returns it.
+	 */
+	async getUserByUsername(username: string): Promise<User<Opts>> {
+		const response = await fetch(`${GET_USER_BY_USERNAME_URL}?username=${username}`, {
 			method: "GET",
 			headers: {
 				["Content-Type"]: "application/json",

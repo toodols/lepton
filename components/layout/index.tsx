@@ -2,12 +2,13 @@ import { Settings } from "../settings-modal";
 import { Sidebar } from "../sidebar";
 import { Signin } from "../sign-in-modal";
 import { Topbar } from "../topbar";
-import { RootState } from "../../lib/store";
+import { RootState, setCommandPaletteModalOpen } from "../../lib/store";
 import { Component, createContext, PropsWithChildren, ReactElement, useCallback, useContext, useEffect, useRef, useState } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import Head from "next/head";
 import { client } from "../../lib/client";
 import { useRouter } from "next/router";
+import { CommandPalette } from "components/command-palette";
 
 export const PopupContext = createContext<{
 	open: (el: ReactElement | ((hiding: boolean)=>ReactElement), hideTime?: number, at?: {x: number, y: number})=>void,
@@ -103,10 +104,17 @@ export function Layout({
 }>) {
 	const settings = useSelector((state: RootState) => state.settings.settings);
 	const title = useSelector((state: RootState) => state.main.title);
-
+	const dispatch = useDispatch();
+	
 	useEffect(() => {
 		if (typeof document !== "undefined") {
 			document.body.setAttribute("data-theme", settings.theme);
+			document.addEventListener("keydown", (event)=>{
+				const ctrl = event.ctrlKey || event.metaKey;
+				if (ctrl && event.shiftKey && event.key === "p") {
+					dispatch(setCommandPaletteModalOpen(true))
+				}
+			});
 		}
 	}, [settings]);
 
@@ -138,6 +146,7 @@ export function Layout({
 				</div>
 			</noscript>
 			<Topbar />
+			<CommandPalette/>
 			<PopupContext.Provider value={{open: ()=>{}, close: ()=>{}}}>
 			<PopupContextRenderer/>
 			{children}

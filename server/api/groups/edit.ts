@@ -7,7 +7,7 @@ interface Data {
 }
 
 const editGroupGuard = createGuard({
-	
+	name: Checkables.optional(Checkables.string),
 })
 
 export default async function handler(

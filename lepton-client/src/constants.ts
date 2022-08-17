@@ -16,6 +16,7 @@ export const GET_SELF_URL = FETCH_BASE_URL + "/api/users/lookup/@me";
 export const GET_USER_URL = FETCH_BASE_URL + "/api/users/lookup/";
 export const UNFOLLOW_USER_URL = FETCH_BASE_URL + "/api/users/unfollow";
 export const FOLLOW_USER_URL = FETCH_BASE_URL + "/api/users/follow";
+export const GET_USER_BY_USERNAME_URL = FETCH_BASE_URL + "/api/users/lookupbyusername";
 export const SEARCH_USERS_URL = FETCH_BASE_URL + "/api/searchusers";
 export const CREATE_GROUP_URL = FETCH_BASE_URL + "/api/groups/create";
 export const DELETE_GROUP_URL=  FETCH_BASE_URL +"/api/groups/delete";

@@ -30,8 +30,8 @@ export default async function handler(
 	}))
 
 	res.json({
-		user: (console.log("Loading user"), await Converter.toUserDataFull(user)),
-		info: (console.log("loading user info"), await Converter.toClientInfoData(user)),
+		user: await Converter.toUserDataFull(user),
+		info: await Converter.toClientInfoData(user),
 		items: await Promise.all(user.inventory.map(e=>e.item.toString()).filter((e,i,a)=>a.indexOf(e)===i).map(e=>{
 			return items.findOne({ _id: new ObjectId(e) });
 		})).then(items=>{

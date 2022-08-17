@@ -229,3 +229,13 @@ export async function withGroupUser(
 	}
 	return guser;
 }
+
+
+// Function is a bit niche and callbacks are not that favorable.
+// Just leaving this here but do not use.
+export async function waitUntil(cb: ()=>Promise<"1" | any>, timeout=60000) {
+	const start = Date.now();
+	while (await cb() !== "1" && Date.now() - start < timeout) {
+		await new Promise(resolve => setTimeout(resolve, 100));
+	}
+}

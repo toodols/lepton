@@ -7,6 +7,7 @@ import signInHandler from "./signin"
 import signUpHandler from "./signup"
 import lookupMeHandler from "./users/@me";
 import lookupUserHandler from "./users/lookup";
+import lookupByUsernameHandler from "./users/lookupbyusername"
 import createPostHandler from "./posts/create";
 import getPostsHandler from "./posts/get";
 import deletePostHandler from "./posts/delete";
@@ -54,6 +55,7 @@ export function apiRouter(app: Application) {
 
 	app.get("/api/users/lookup/@me", lookupMeHandler)
 	app.get("/api/users/lookup/:userid", lookupUserHandler)
+	app.get("/api/users/lookupbyusername", lookupByUsernameHandler)
 	app.get("/api/searchusers", searchUsersHandler)
 	app.post("/api/users/friend", friendUserHandler)
 	app.post("/api/users/unfriend", unfriendUserHandler)

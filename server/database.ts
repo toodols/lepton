@@ -48,6 +48,7 @@ export namespace DatabaseTypes {
 		Owner = 1,
 		Developer = 2,
 		Moderator = 4,
+		Admin = 8,
 	}
 	
 	export interface User extends DatedDocument {
@@ -227,6 +228,12 @@ export const {
 			locale: "en",
 			strength: 1,
 		}});
+		
+		// // search users
+		// await collections.users.createIndex({username: "text"}, {collation: {
+		// 	locale: "en",
+		// 	strength: 1,
+		// }});
 
 		// find groupusers by their group and user
 		await collections.groupUsers.createIndex(["group", "user"], {
