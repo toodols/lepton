@@ -2,15 +2,22 @@
 	transform: translate(-50%, 0%)
 	position: absolute
 	left: 50%
-	top: 100px
+	top: 50px
 	width: min(70%, 500px)
+	z-index: 99999
+	background-color: var(--color-background)
+	box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5)
 	input
-		width: 100%
+		width: calc(100% - 4px)
 		height: 30px
+		border: 1px solid
+		margin: 2px
 	.results
 		button
+			height: 20px
 			display: block
 			width: 100%
 			text-align: left
+			border-radius: 0px
 		button[data-selected=true]
 			background-color: var(--color-command-select)

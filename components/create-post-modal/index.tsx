@@ -1,6 +1,6 @@
 import { MarkupRendered } from "../markup/rendered";
 import { useRouter } from "next/router";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Modal from "react-modal";
 import { useDispatch, useSelector } from "react-redux";
 import { client } from "../../lib/client";
@@ -20,13 +20,15 @@ export function CreatePostModal() {
 			: undefined;
 	const [mode, setMode] = useState<"write" | "preview">("write");
 	const [currentValue, setCurrentValue] = useState<string>("I am sad.");
-
 	return (
 		<Modal
 			ariaHideApp={false}
 			className={Styles.createPostModal}
 			isOpen={isOpen}
 			closeTimeoutMS={300}
+			onAfterOpen={() => {
+				ref.current?.focus();
+			}}
 			onRequestClose={() => {
 				dispatch(setCreatePostModalOpen(false));
 			}}

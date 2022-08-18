@@ -18,7 +18,7 @@ export default function ProfileHandler() {
 	useEffect(()=>{
 		if (userid) {
 			let id = String(userid);
-		client.findUser(id).then((user)=>{
+		client.getUser(id).then((user)=>{
 				dispatch(setTitle(user.username));
 				setUser(user);
 			}).catch((e)=>{

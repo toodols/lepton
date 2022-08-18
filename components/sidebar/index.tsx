@@ -36,7 +36,7 @@ export function Sidebar() {
 					</Link>
 					{userid ? (
 						<>
-							<Link href={`/users/${userid}`}>
+							<Link href={`/users/${userid}`} passHref>
 								<button
 									onClick={() => {
 										dispatch(setSidebarOpen(false));

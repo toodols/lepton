@@ -1,5 +1,5 @@
 import { addAccount } from "lib/store/clientslice";
-import { createRef, useRef, useState } from "react";
+import { createRef, useEffect, useRef, useState } from "react";
 import Modal from "react-modal";
 import { useDispatch, useSelector } from "react-redux";
 import { client } from "../../lib/client";
@@ -23,8 +23,14 @@ export function Signin() {
 	const signupConfirmPasswordRef = useRef<HTMLInputElement>(null);
 
 	const [error, setError] = useState<string | null>(null);
-
-	return <Modal ariaHideApp={false} data={{
+	return <Modal onAfterOpen={()=>{
+		if (menuType === "signin") {
+			console.log(signInUsernameRef)
+			signInUsernameRef.current?.focus();
+		} else if (menuType === "signup") {
+			signUpUsernameRef.current?.focus();
+		}
+	}} ariaHideApp={false} data={{
 		error: !!error,
 		menutype: menuType,
 	}} className={Styles.signinModal} isOpen={isOpen} closeTimeoutMS={300} onRequestClose={()=>{

@@ -2,7 +2,7 @@ import { Settings } from "../settings-modal";
 import { Sidebar } from "../sidebar";
 import { Signin } from "../sign-in-modal";
 import { Topbar } from "../topbar";
-import { RootState, setCommandPaletteModalOpen } from "../../lib/store";
+import { RootState } from "../../lib/store";
 import { Component, createContext, PropsWithChildren, ReactElement, useCallback, useContext, useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import Head from "next/head";
@@ -109,12 +109,6 @@ export function Layout({
 	useEffect(() => {
 		if (typeof document !== "undefined") {
 			document.body.setAttribute("data-theme", settings.theme);
-			document.addEventListener("keydown", (event)=>{
-				const ctrl = event.ctrlKey || event.metaKey;
-				if (ctrl && event.shiftKey && event.key === "p") {
-					dispatch(setCommandPaletteModalOpen(true))
-				}
-			});
 		}
 	}, [settings]);
 

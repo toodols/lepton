@@ -1,11 +1,25 @@
-import { RootState, setCommandPaletteModalOpen, setCreateGroupModalOpen, setCreatePostModalOpen, setSettingsModalOpen, store } from "lib/store"
+import { client } from "../../lib/client";
+import { RootState, setCreateGroupModalOpen, setCreatePostModalOpen, setSettingsModalOpen, setSignInModalOpen, store } from "lib/store"
+import { removeAllAccounts } from "../../lib/store/clientslice";
 import { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import Styles from "./command-palette.module.sass";
+import Router from 'next/router'
 
-interface Command {
+interface CommandProps {
 	title: string;
-	action: () => void;	
+	condition?: (this: Command)=>boolean;
+	action: (this: Command) => void;	
+}
+
+class Command {
+	run(){
+		this.action.bind(this)();
+	}
+	
+	constructor(public registry: CommandsRegistry, public title: string, private action: (this: Command) => void, public condition: () => boolean = ()=>true) {
+
+	}
 }
 
 interface SearchResult<T> {
@@ -14,13 +28,14 @@ interface SearchResult<T> {
 
 class CommandsRegistry {
 	registeredCommands: Command[] = [];
-	register(command: Command) {
+	register(props: CommandProps) {
+		const command = new Command(this, props.title, props.action, props.condition);
 		this.registeredCommands.push(command);
 	}
 	search(text: string): SearchResult<Command>[] {
 		const results: SearchResult<Command>[] = [];
 		for (const command of this.registeredCommands) {
-			if (command.title.toLowerCase().startsWith(text.toLowerCase())) {
+			if (command.title.toLowerCase().includes(text.toLowerCase()) && command.condition.bind(command)()) {
 				results.push({
 					value: command
 				})
@@ -31,6 +46,13 @@ class CommandsRegistry {
 }
 
 export const commandsRegistry = new CommandsRegistry();
+commandsRegistry.register({
+	title: "Go Home",
+	condition: ()=>Router.pathname !== "/",
+	action: () => {
+		Router.push("/");
+	}
+})
 commandsRegistry.register({
 	title: "Create Post",
 	action: () => {
@@ -43,18 +65,55 @@ commandsRegistry.register({
 		store.dispatch(setSettingsModalOpen(true));
 	}
 })
+commandsRegistry.register({
+	title: "Create Group",
+	action: () => {
+		store.dispatch(setCreateGroupModalOpen({open: true, name: "New Group"}));
+	}
+});
+commandsRegistry.register({
+	title: "Sign Out",
+	condition: ()=>!!client.clientUser,
+	action: () => {
+		store.dispatch(removeAllAccounts());
+		client.signOut();
+	}
+})
+commandsRegistry.register({
+	title: "Add Account",
+	condition: ()=>!!client.clientUser,
+	action: () => {
+		store.dispatch(setSignInModalOpen(true));
+	}
+})
+
+commandsRegistry.register({
+	title: "Sign In",
+	condition: ()=>!client.clientUser,
+	action: () => {
+		store.dispatch(setSignInModalOpen(true));
+	}
+})
+commandsRegistry.register({
+	title: "Go To Profile",
+	condition: ()=>client.clientUser!=null&&Router.pathname!==`/users/${client.clientUser.id}`,
+	action: () => {
+		Router.push(`/users/${client.clientUser!.id}`);
+	}
+})
 
 export function CommandPalette(){
 	const inputRef = useRef<HTMLInputElement>(null);
 	const [selected, setSelected] = useState(0);
 	const [results, setResults] = useState<SearchResult<Command>[]>([]);
 	const dispatch = useDispatch();
-	const isOpen = useSelector((state: RootState) => state.main.commandPaletteModalOpen);
+	const [isOpen, setIsOpen] = useState(false);
+
 	function reset(){
 		inputRef.current!.value = "";
 		setSelected(0);
 		setResults([]);
-		dispatch(setCommandPaletteModalOpen(false));
+		setIsOpen(false);
 	}
 
 	useEffect(()=>{
@@ -64,9 +123,18 @@ export function CommandPalette(){
 		}
 	}, [isOpen]);
 
+	useEffect(()=>{
+		document.addEventListener("keydown", (event)=>{
+			const ctrl = event.ctrlKey || event.metaKey;
+			if (ctrl && event.shiftKey && event.key === "p") {
+				setIsOpen(true);
+			}
+		});
+	}, [])
+
 	if (isOpen) {
 	return <div className={Styles.commandPalette}>
-		<input onBlur={()=>{
+		<input placeholder="Type in command." onBlur={()=>{
 			reset()
 		}} ref={inputRef} onKeyDown={(event)=>{
 			if (event.key === "ArrowDown") {
@@ -76,7 +144,10 @@ export function CommandPalette(){
 				setSelected((selected+results.length-1)%results.length);
 				event.preventDefault();
 			} else if (event.key === "Enter") {
-				results[selected].value.action();
+				results[selected].value.run();
+				reset();
+				event.preventDefault();
+			} else if (event.key === "Escape") {
 				reset();
 				event.preventDefault();
 			}
@@ -88,9 +159,8 @@ export function CommandPalette(){
 		<div className={Styles.results}>
 			{results.map((result, index) => {
 				return <button data-selected={index===selected} key={index} onClick={() => {
-					result.value.action();
+					result.value.run();
 					reset();
-					dispatch(setCommandPaletteModalOpen(false));
 				}}>{result.value.title}</button>
 			})}
 		</div>

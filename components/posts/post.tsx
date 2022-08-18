@@ -37,14 +37,16 @@ function UserPreviewButton(props: { user: User }) {
 	// const [pos, setPos] = useState<{ x: number, y: number } | null>(null);
 	return <>{
 		// pos?<UserPreview pos={pos} user={props.user}/>:<></>
-	}<button onClick={(event)=>{
+	}<button className={Styles.userPreviewButton} onContextMenu={(event)=>{
+		//@ts-ignore
+		event.clickOnProfile = true;
+	}} onClick={(event)=>{
 		// dispaatch show user preview
 		// setPos({
 		// 	x: event.clientX,
 		// 	y: event.clientY,
 		// });
-	}}
-	className={Styles.userPreviewButton}>
+	}}>
 		{props.user.username}
 	</button></>
 }
