@@ -67,6 +67,7 @@ commandsRegistry.register({
 })
 commandsRegistry.register({
 	title: "Create Group",
+	condition: ()=>Router.pathname==="/",
 	action: () => {
 		store.dispatch(setCreateGroupModalOpen({open: true, name: "New Group"}));
 	}
@@ -96,7 +97,9 @@ commandsRegistry.register({
 })
 commandsRegistry.register({
 	title: "Go To Profile",
-	condition: ()=>client.clientUser!=null&&Router.pathname!==`/users/${client.clientUser.id}`,
+	condition: ()=>{
+		return client.clientUser!=null&&Router.pathname!==`/users/[userid]`
+	},
 	action: () => {
 		Router.push(`/users/${client.clientUser!.id}`);
 	}

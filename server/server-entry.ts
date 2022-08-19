@@ -48,11 +48,13 @@ export const redisClient = createClient({
 });
 
 const subscriber = redisClient.duplicate();
-
-await subscriber.connect()
-await redisClient.connect();
-io.adapter(createAdapter(redisClient, subscriber));
-
+try {
+	await subscriber.connect();
+	await redisClient.connect();
+	io.adapter(createAdapter(redisClient, subscriber));
+} catch (e) {
+	console.log("Hmm redis has some problems so we just not going to use it.")
+}
 apiRouter(app);
 
 io.on('connection', (socket: socketio.Socket) => {
