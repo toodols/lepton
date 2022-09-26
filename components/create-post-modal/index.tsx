@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Modal from "react-modal";
 import { useDispatch, useSelector } from "react-redux";
 import { client } from "../../lib/client";
-import { RootState, setCreatePostModalOpen } from "../../lib/store";
+import { RootState, setCreatePostModalOpen } from "../../store";
 import Styles from "./create-post-modal.module.sass";
 export function CreatePostModal() {
 	const dispatch = useDispatch();

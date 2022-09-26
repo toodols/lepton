@@ -2,7 +2,7 @@ import { faClose, faSignOut, faTrash } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Avatar } from "../../util/avatar";
 import { client } from "lib/client";
-import { removeAccount } from "lib/store/clientslice";
+import { removeAccount } from "store/clientslice";
 import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import Styles from "./account-selection.module.sass";

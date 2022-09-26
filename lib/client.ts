@@ -8,8 +8,8 @@ import {
 	Poll as _Poll,
 	InventoryItem as _InventoryItem,
 } from "lepton-client";
-import { store } from "./store";
-import { onClientUserChanged } from "./store/clientslice";
+import { store } from "../store";
+import { onClientUserChanged } from "../store/clientslice";
 
 export type Options = { partial: true };
 export type Comment = _Comment<Options>;

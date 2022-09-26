@@ -1,7 +1,7 @@
 import { Layout } from "../../components/layout";
 import { Posts } from "../../components/posts";
 import { client, User } from "lib/client";
-import { RootState, setTitle } from "lib/store";
+import { RootState, setTitle } from "store";
 import { useRouter } from "next/router"
 import { ReactNode, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";

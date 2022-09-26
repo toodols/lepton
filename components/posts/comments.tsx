@@ -7,7 +7,7 @@ import { useUpdatable } from "../../lib/useUpdatable";
 import { useEffect, useMemo, useRef, useState } from "react";
 import Styles from "./posts.module.sass";
 import { useSelector } from "react-redux";
-import { RootState } from "../../lib/store";
+import { RootState } from "../../store";
 import InfiniteScroll from "react-infinite-scroll-component";
 import Link from "next/link";
 

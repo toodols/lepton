@@ -58,8 +58,8 @@ export namespace DatabaseTypes {
 		inventory: InventoryItem[];
 		money: number;
 		flags: Flags;
-		followers: number;
-		following: number;
+		// followers: number;
+		// following: number;
 		friends: ObjectId[];
 		blocked: ObjectId[];
 	}

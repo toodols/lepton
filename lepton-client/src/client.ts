@@ -3,27 +3,15 @@ import { User, UserDataFull } from "./user";
 import { Comment, CommentData } from "./comment";
 import { Group, GroupDataFull } from "./group";
 import { EventEmitter } from "events";
-import { fetch } from "cross-fetch";
 import { io, Socket } from "socket.io-client";
-import {
-	CREATE_POST_URL,
-	GET_COMMENTS_URL,
-	GET_POSTS_URL,
-	GET_SELF_URL,
-	GET_USER_URL,
-	SIGN_IN_URL,
-	SIGN_UP_URL,
-	CREATE_GROUP_URL,
-	UPDATE_SETTINGS_URL,
-	SEARCH_GROUPS_URL,
-	GET_GROUP_URL,
-	LOOKUP_ITEM_URL,
-	GET_USER_BY_USERNAME_URL,
-} from "./constants";
 import { Settings } from "./types";
 import { ClientInfo, ClientInfoData } from "./clientinfo";
 import { Item, ItemData } from "./item";
 import { Poll } from "./poll";
+import { get } from "./methods/get";
+import { post } from "./methods/post";
+import { patch } from "./methods/patch";
+
 
 // const SOCKET_URL = process.env.NODE_ENV === "development" ? "/api/socket" : "wss://idk lmao";
 
@@ -35,6 +23,18 @@ export interface Options {
 	partial: boolean;
 }
 
+/**
+ * Marks a method as requiring the client to be signed in (or not, depending on the parameter) to run. Will ~~panic~~ error before the request is actually sent if not.
+ * @example
+ * ```ts
+ * class Object {
+ * 	\@signedIn(true)
+ * 	async method() {
+ * 		// this method requires the client to be signed in
+ * 	}
+ * }
+ * ```
+ * */
 export function signedIn(isSignedIn = true) {
 	return (
 		target: any,
@@ -96,33 +96,25 @@ export class Client<Opts extends Options = DefaultOpts> extends EventEmitter {
 	socketio: Socket;
 
 	async getPosts(props?: { before?: number; group?: string, user?: string }) {
-		const url = new URLSearchParams();
-		if (props) {
-			url.set("t", Date.now().toString())
-			if (props.before) {
-				url.set("before", props.before.toString());
-			}
-			if (props.group) {
-				url.set("group", props.group);
-			}
-			if (props.user) {
-				url.set("user", props.user);
-			}
-		}
-
 		const {
 			posts,
 			users,
 			comments,
 			hasMore,
-		}: {
-			hasMore: boolean;
-			posts: PostData[];
-			users: UserDataFull[];
-			comments: CommentData[];
-		} = await fetch(
-			GET_POSTS_URL + (url.toString() ? `?${url.toString()}` : "")
-		).then((e) => e.json());
+		} = await get(
+			"/api/posts",
+			{
+				t: Date.now().toString(),
+				...(props?.before && {before: props.before?.toString()}),
+				...(props?.group && {group: props.group}),
+				...(props?.user && {user: props.user}),
+			}
+		).then(res=>{
+			if ("error" in res) {
+				throw new Error(res.error);
+			}
+			return res;
+		});
 
 		for (const userid in users) {
 			User.from(this, users[userid]);
@@ -151,15 +143,9 @@ export class Client<Opts extends Options = DefaultOpts> extends EventEmitter {
 			comments,
 			users,
 			hasMore,
-		}: {
-			comments: CommentData[];
-			users: UserDataFull[];
-			hasMore: boolean;
-		} = await fetch(
-			GET_COMMENTS_URL +
-				`?post=${props.post}` +
-				(props.before ? `&before=${props.before}` : "")
-		).then((e) => e.json());
+		} = await get(`/api/posts/${props.post}/comments`, {
+			...(props.before && {before: props.before.toString()}),
+		})
 
 		for (const userid in users) {
 			User.from(this, users[userid]);
@@ -179,26 +165,24 @@ export class Client<Opts extends Options = DefaultOpts> extends EventEmitter {
 		if (!!this.getItemPromises[props.item]) {
 			return this.getItemPromises[props.item];
 		}
-		this.getItemPromises[props.item] = fetch(
-			LOOKUP_ITEM_URL + `${props.item}`
-		).then((e) => e.json()).then((e)=>{
-			if (e.error) {
-				throw new Error(e.error);
+		this.getItemPromises[props.item] = get(
+			`/api/items/${props.item}`
+		).then((res)=>{
+			if ("error" in res) {
+				throw new Error(res.error);
 			}
-			return Item.from(this, e.item);
+			return Item.from(this, res.item);
 		});
 		return this.getItemPromises[props.item];
 	}
 
 	@signedIn()
 	async createPost(props: { content: string; group?: string }) {
-		const post = await fetch(CREATE_POST_URL, {
-			method: "POST",
-			body: JSON.stringify(props),
-			headers: {
-				"content-type": "application/json",
-				Authorization: `Bearer ${this.token!}`,
-			},
+		const post_res = await post("/api/posts", props, {token: this.token!}).then(res=>{
+			if ("error" in res) {
+				throw new Error(res.error);
+			}
+			return res;
 		});
 	}
 
@@ -210,19 +194,17 @@ export class Client<Opts extends Options = DefaultOpts> extends EventEmitter {
 		groups: Record<string, GroupDataFull>;
 		items: Record<string, ItemData>
 	}> {
-		const result = await fetch(GET_SELF_URL, {
-			headers: {
-				Authorization: `Bearer ${token}`,
-			},
-		}).then((e) => e.json());
-		if (result.error) {
+		const result = await get("/api/users/@me", {}, {
+			token
+		});
+		if ("error" in result) {
 			throw new Error(result.error);
 		}
 		return result;
 	}
 
 	async getGroup(groupid: string): Promise<Group<Opts> | undefined> {
-		const result = await fetch(`${GET_GROUP_URL}${groupid}`, {
+		const result = await fetch(`/api/groups/${groupid}`, {
 			headers: {
 				Authorization: `Bearer ${this.token!}`,
 				"Content-Type": "application/json",
@@ -235,11 +217,11 @@ export class Client<Opts extends Options = DefaultOpts> extends EventEmitter {
 	}
 
 	async searchGroups(name: string): Promise<Group<Opts>[]> {
-		const result = await fetch(
-			`${SEARCH_GROUPS_URL}?name=${name}`,
-			{}
-		).then((e) => e.json());
-		if (result.error) {
+		const result = await get(
+			`/api/groups`,
+			{name}
+		);
+		if ("error" in result) {
 			throw new Error(result.error);
 		}
 		return result.groups.map((group: any) => Group.from(this, group));
@@ -267,18 +249,13 @@ export class Client<Opts extends Options = DefaultOpts> extends EventEmitter {
 		isPublic: boolean;
 		description: string;
 	}) {
-		const result = await fetch(CREATE_GROUP_URL, {
-			method: "POST",
-			body: JSON.stringify(props),
-			headers: {
-				"content-type": "application/json",
-				Authorization: `Bearer ${this.token!}`,
-			},
-		}).then((e) => e.json());
-		if (result.error) {
+		const result = await post("/api/groups", props, {
+			token: this.token!,
+		});
+		if ("error" in result) {
 			throw new Error(result.error);
 		}
-		return Group.from(this, result);
+		return Group.from(this, result.group);
 	}
 
 	async useToken(token: string) {
@@ -300,17 +277,11 @@ export class Client<Opts extends Options = DefaultOpts> extends EventEmitter {
 	 * Different then sign in because it is more uncommon so after calling this you need to use client.useToken(token)
 	 */
 	async signUp(username: string, password: string): Promise<string> {
-		const result = await fetch(SIGN_UP_URL, {
-			method: "POST",
-			headers: {
-				"content-type": "application/json",
-			},
-			body: JSON.stringify({
+		const result = await post("/api/sign-up", {
 				username,
 				password,
-			}),
-		}).then((e) => e.json());
-		if (result.error) {
+		});
+		if ("error" in result) {
 			throw new Error(result.error);
 		}
 		return result.token;
@@ -325,32 +296,21 @@ export class Client<Opts extends Options = DefaultOpts> extends EventEmitter {
 
 	@signedIn(true)
 	async updateSettings(settings: Settings) {
-		const result = await fetch(UPDATE_SETTINGS_URL, {
-			method: "POST",
-			headers: {
-				"content-type": "application/json",
-				Authorization: `Bearer ${this.token!}`,
-			},
-			body: JSON.stringify(settings),
-		}).then((e) => e.json());
-		if (result.error) {
+		const result = await patch("/api/settings", settings, {
+			token: this.token
+		});
+		if ("error" in result) {
 			throw new Error(result.error);
 		}
 		return result.settings;
 	}
 
 	async getToken(username: string, password: string) {
-		const result = await fetch(SIGN_IN_URL, {
-			method: "POST",
-			headers: {
-				"content-type": "application/json",
-			},
-			body: JSON.stringify({
+		const result = await post("/api/sign-in", {
 				username,
 				password,
-			}),
-		}).then((e) => e.json());
-		if (result.error) {
+		});
+		if ("error" in result) {
 			throw new Error(result.error);
 		}
 		return result.token;
@@ -366,32 +326,24 @@ export class Client<Opts extends Options = DefaultOpts> extends EventEmitter {
 	 * Looks up a full version of a user, and returns it.
 	 */
 	async getUser(userid: string): Promise<User<Opts>> {
-		const response = await fetch(GET_USER_URL + userid, {
-			method: "GET",
-			headers: {
-				["Content-Type"]: "application/json",
-			},
-		}).then((e) => e.json());
-		if (response.error) {
-			throw new Error(response.error);
+		const result = await get(`/api/users/${userid}`, {}, {token: this.token});
+		if ("error" in result) {
+			throw new Error(result.error);
 		}
-		return User.from(this, response.user);
+		return User.from(this, result.user);
 	}
 
 	/**
 	 * Looks up a full version of user by case-insensitive username, and returns it.
 	 */
 	async getUserByUsername(username: string): Promise<User<Opts>> {
-		const response = await fetch(`${GET_USER_BY_USERNAME_URL}?username=${username}`, {
-			method: "GET",
-			headers: {
-				["Content-Type"]: "application/json",
-			},
-		}).then((e) => e.json());
-		if (response.error) {
-			throw new Error(response.error);
+		const result = await get(`/api/get-user-by-username`, {
+			username
+		});
+		if ("error" in result) {
+			throw new Error(result.error);
 		}
-		return User.from(this, response.user);
+		return User.from(this, result.user);
 	}
 
 	constructor(options?: Opts) {

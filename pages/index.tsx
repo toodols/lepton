@@ -5,7 +5,7 @@ import { Posts } from "../components/posts";
 import { ReactNode, useEffect } from "react";
 import { Layout } from "../components/layout";
 import { useDispatch } from "react-redux";
-import { setTitle } from "lib/store";
+import { setTitle } from "store";
 import { CreateGroupModal } from "components/create-group-modal";
 
 export default function Home() {

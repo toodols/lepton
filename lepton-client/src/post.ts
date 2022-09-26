@@ -1,10 +1,10 @@
 import { EventEmitter } from "events";
 import { Client, DefaultOpts, Options, signedIn } from "./client";
 import { Comment } from "./comment";
-import { CREATE_COMMENT_URL, VOTE_POST_URL } from "./constants";
 import { Group } from "./group";
 import { User } from "./user";
-import { fetch } from "cross-fetch";
+import { post } from "./methods/post";
+import { delete_ } from "./methods/delete";
 
 export interface PostData {
 	id: string;
@@ -107,18 +107,13 @@ export class Post<Opts extends Options = DefaultOpts> extends EventEmitter {
 
 	@signedIn()
 	async vote(value: 1 | 0 | -1){
-		const result = await fetch(VOTE_POST_URL, {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json",
-				"Authorization": `Bearer ${this.client.token!}`,
-			},
-			body: JSON.stringify({
-				post: this.id,
-				value,
-			})
-		}).then(e=>e.json());
-		if (result.error) {
+		const result = await post(`/api/posts/${this.id}/vote`, {
+			value,
+		}, {
+			token: this.client.token!,
+		});
+		
+		if ("error" in result) {
 			throw new Error(result.error);
 		}
 	}
@@ -138,36 +133,27 @@ export class Post<Opts extends Options = DefaultOpts> extends EventEmitter {
 	 * @param replyTo The ID of the comment to reply to. Use comment.reply(content) instead.
 	 */
 	async comment(content: string, replyTo?: string){
-		const result = await fetch(CREATE_COMMENT_URL, {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json",
-				"Authorization": `Bearer ${this.client.token!}`,
-			},
-			body: JSON.stringify({
-				post: this.id,
-				content: content,
-				...(replyTo ? {replyTo} : {}),
-			}),
-		}).then(e=>e.json());
-		if (result.error) {
-			throw new Error(result.error);
-		}
-		return Comment.from(this.client, result);
+		const result = await post("/api/comments", {
+			post: this.id,
+			content,
+			replyTo,
+		}, {
+			token: this.client.token!,
+		}).then(res=>{
+			if ("error" in res){
+				throw new Error(res.error);
+			}
+			return res;
+		})
+
+		return Comment.from(this.client, result.comment);
 	}
 
 	@signedIn()
 	async delete(){
-		const result = await fetch(`/api/posts/delete`, {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json",
-				"Authorization": `Bearer ${this.client.token!}`,
-			},
-			body: JSON.stringify({
-				id: this.id,
-			})
-		}).then(e=>e.json());
+		const result = await delete_(`/api/posts/${this.id}`, {
+			token: this.client.token!,
+		});
 		if (result.error) { 
 			throw new Error(result.error);
 		}

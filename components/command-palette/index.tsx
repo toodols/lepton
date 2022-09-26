@@ -1,6 +1,6 @@
 import { client } from "../../lib/client";
-import { RootState, setCreateGroupModalOpen, setCreatePostModalOpen, setSettingsModalOpen, setSignInModalOpen, store } from "lib/store"
-import { removeAllAccounts } from "../../lib/store/clientslice";
+import { RootState, setCreateGroupModalOpen, setCreatePostModalOpen, setSettingsModalOpen, setSignInModalOpen, store } from "store"
+import { removeAllAccounts } from "../../store/clientslice";
 import { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import Styles from "./command-palette.module.sass";

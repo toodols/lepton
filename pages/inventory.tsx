@@ -5,7 +5,7 @@ import { Posts } from "../components/posts";
 import { ReactNode, useEffect } from "react";
 import { Layout } from "../components/layout";
 import { useDispatch, useSelector } from "react-redux";
-import { RootState, setTitle } from "lib/store";
+import { RootState, setTitle } from "store";
 import { CreateGroupModal } from "components/create-group-modal";
 import { client } from "lib/client";
 import { Inventory } from "components/inventory";

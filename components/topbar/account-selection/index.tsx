@@ -1,11 +1,11 @@
 import { useDispatch, useSelector } from "react-redux";
-import { RootState, setSignInModalOpen } from "../../../lib/store";
+import { RootState, setSignInModalOpen } from "../../../store";
 import Styles from "./account-selection.module.sass";
 import { Avatar } from "../../util/avatar";
 import { useState } from "react";
 import { client } from "lib/client";
 import { AccountSelectionItem } from "./accountselectionitem";
-import { removeAllAccounts } from "lib/store/clientslice";
+import { removeAllAccounts } from "store/clientslice";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSignOut, faUserPlus } from "@fortawesome/free-solid-svg-icons";
 

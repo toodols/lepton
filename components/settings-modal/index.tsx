@@ -3,12 +3,12 @@ import {
 	editSettings,
 	saveSettings,
 	Theme,
-} from "../../lib/store/settings";
-import { setSettingsModalOpen } from "../../lib/store";
+} from "../../store/settings";
+import { setSettingsModalOpen } from "../../store";
 import Select, { OptionProps, components } from "react-select";
 import Modal from "react-modal";
 import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "../../lib/store";
+import { RootState } from "../../store";
 import Styles from "./settings-modal.module.sass";
 import { createContext, useContext, useEffect, useRef } from "react";
 import { Appearance } from "./appearance";

@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { readFileSync } from "fs";
 import { ObjectId } from "mongodb";
-import { mergeInventory, mergeInventoryAsync } from "server/inventories";
+import { mergeInventory, mergeInventoryAsync } from "server-old/inventories";
 import { DatabaseTypes, posts, users } from "../../database";
 import { io, redisClient } from "../../server-entry";
 import { Checkables, createGuard, Error, getUserFromAuth } from "../util";

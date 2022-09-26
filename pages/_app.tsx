@@ -5,7 +5,7 @@ import type { AppProps } from "next/app";
 import { I18nextProvider } from "react-i18next";
 import i18n from "i18next";
 import { Provider } from "react-redux";
-import { store } from "../lib/store";
+import { store } from "../store";
 import { useEffect, useState, useCallback } from "react";
 
 

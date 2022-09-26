@@ -5,7 +5,7 @@ import {
 	RootState,
 	setSettingsModalOpen,
 	setSidebarOpen,
-} from "../../lib/store";
+} from "../../store";
 import Styles from "./sidebar.module.sass";
 
 export function Sidebar() {

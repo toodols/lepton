@@ -2,8 +2,7 @@ import { EventEmitter } from "events";
 import { Client, DefaultOpts, Options, signedIn } from "./client";
 import type { Post } from "./post";
 import type { User } from "./user";
-import { fetch } from "cross-fetch";
-import { string } from "yargs";
+import { delete_ } from "./methods/delete";
 
 export interface CommentData {
 	id: string;
@@ -51,17 +50,8 @@ export class Comment<Opts extends Options = DefaultOpts> extends EventEmitter {
 
 	@signedIn()
 	async delete(){
-		const result = await fetch(`/api/comments/delete`, {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json",
-				"Authorization": `Bearer ${this.client.token}`,
-			},
-			body: JSON.stringify({
-				id: this.id,
-			})
-		}).then(e=>e.json());
-		if (result.error) { 
+		const result = await delete_(`/api/comments/${this.id}`, {token: this.client.token!});
+		if ("error" in result) { 
 			throw new Error(result.error);
 		}
 	}

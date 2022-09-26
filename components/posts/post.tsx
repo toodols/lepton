@@ -11,7 +11,7 @@ import {
 	faTrash,
 } from "@fortawesome/free-solid-svg-icons";
 import { useSelector } from "react-redux";
-import { RootState } from "../../lib/store";
+import { RootState } from "../../store";
 import { useContext, useState } from "react";
 import { PostElementsContext } from ".";
 import { Avatar } from "../util/avatar";

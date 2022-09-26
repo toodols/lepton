@@ -1,6 +1,5 @@
 import { Client, DefaultOpts, Options, signedIn } from "./client";
-import { fetch } from "cross-fetch";
-import { DELETE_GROUP_URL } from "./constants";
+import { delete_ } from "./methods/delete";
 export interface GroupDataPartial {
 	id: string;
 	name: string;
@@ -24,15 +23,8 @@ export class Group<Opts extends Options = DefaultOpts> {
 
 	@signedIn()
 	async delete() {
-		fetch(DELETE_GROUP_URL, {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json",
-				Authorization: this.client.token?`Bearer ${this.client.token}`:"",
-			},
-			body: JSON.stringify({
-				id: this.id,
-			}),
+		delete_(`/api/groups/${this.id}`, {
+			token: this.client.token
 		});
 	}
 

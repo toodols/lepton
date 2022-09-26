@@ -2,7 +2,7 @@ import { Settings } from "../settings-modal";
 import { Sidebar } from "../sidebar";
 import { Signin } from "../sign-in-modal";
 import { Topbar } from "../topbar";
-import { RootState } from "../../lib/store";
+import { RootState } from "../../store";
 import { Component, createContext, PropsWithChildren, ReactElement, useCallback, useContext, useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import Head from "next/head";

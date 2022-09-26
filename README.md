@@ -27,3 +27,6 @@ Make issue if bug.
 Make fix if issue.
 Make pull request if fix.
 Will merge.
+
+# Structure
+During development mode, the client side is hosted on 3000 to leverage fast refresh while the api, written in rust, is hosted on 3001. In production, since the client is built to static files, they will be able to share the same port.

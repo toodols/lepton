@@ -1,6 +1,6 @@
 // react dev tools after adding 10 layers of nested elements with react router: 🗿
 
-import { setTitle } from "lib/store";
+import { setTitle } from "store";
 import { ReactNode } from "react";
 import { useDispatch } from "react-redux";
 import { Layout } from "../components/layout";

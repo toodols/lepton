@@ -1,9 +1,9 @@
-import { addAccount } from "lib/store/clientslice";
+import { addAccount } from "store/clientslice";
 import { createRef, useEffect, useRef, useState } from "react";
 import Modal from "react-modal";
 import { useDispatch, useSelector } from "react-redux";
 import { client } from "../../lib/client";
-import { setSignInModalOpen, RootState, setSigninMenuType } from "../../lib/store";
+import { setSignInModalOpen, RootState, setSigninMenuType } from "../../store";
 import { Input } from "../util/input";
 import Styles from "./sign-in-modal.module.sass";
 

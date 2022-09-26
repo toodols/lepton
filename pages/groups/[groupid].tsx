@@ -3,7 +3,7 @@ import { CreatePostModal } from "components/create-post-modal";
 import { Layout } from "components/layout";
 import { Posts } from "components/posts";
 import { client, Group } from "lib/client";
-import { setTitle } from "lib/store";
+import { setTitle } from "store";
 import { useRouter } from "next/router";
 import { ReactNode, useEffect, useState } from "react";
 import { useDispatch } from "react-redux";

@@ -1,11 +1,6 @@
 import { Client, DefaultOpts, Options, signedIn } from "./client";
-import {
-	FOLLOW_USER_URL,
-	FRIEND_USER_URL,
-	UNFOLLOW_USER_URL,
-	UNFRIEND_USER_URL,
-} from "./constants";
 import { InventoryItem, InventoryItemData, Item } from "./item";
+import { post } from "./methods/post";
 
 export enum Flags {
 	None = 0,
@@ -58,14 +53,8 @@ export class User<Opts extends Options = DefaultOpts> {
 
 	@signedIn()
 	async follow() {
-		const result = await fetch(FOLLOW_USER_URL, {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json",
-				Authorization: `Bearer ${this.client.token!}`,
-			},
-		}).then((e) => e.json());
-		if (result.error) {
+		const result = await post(`/api/users/${this.id}/follow`, null, {token: this.client.token!});
+		if ("error" in result) {
 			throw new Error(result.error);
 		}
 		return result.alreadyFollowed;
@@ -73,18 +62,19 @@ export class User<Opts extends Options = DefaultOpts> {
 
 
 	@signedIn()
+	async unfollow() {
+		const result = await post(`/api/users/${this.id}/unfollow`, null, {token: this.client.token!});
+		if ("error" in result) {
+			throw new Error(result.error);
+		}
+		return result.alreadyUnfollowed;
+	}
+
+
+	@signedIn()
 	async friend() {
-		const result = await fetch(FRIEND_USER_URL, {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json",
-				Authorization: `Bearer ${this.client.token!}`,
-			},
-			body: JSON.stringify({
-				user: this.id,
-			}),
-		}).then((e) => e.json());
-		if (result.error) {
+		const result = await post(`/api/users/${this.id}/friend`, null, {token: this.client.token!});
+		if ("error" in result) {
 			throw new Error(result.error);
 		}
 		if (result.accepted) {
@@ -100,39 +90,16 @@ export class User<Opts extends Options = DefaultOpts> {
 	 */
 	@signedIn()
 	async unfriend() {
-		const result = await fetch(UNFRIEND_USER_URL, {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json",
-				Authorization: `Bearer ${this.client.token!}`,
-			},
-			body: JSON.stringify({
-				user: this.id,
-			}),
-		}).then((e) => e.json());
-		if (result.error) {
+		const result = await post(`/api/users/${this.id}/unfriend`, null, {
+			token: this.client.token!,
+		});
+		if ("error" in result) {
 			throw new Error(result.error);
 		}
 		this.client.clientUser?.friendIds?.splice(
 			this.client.clientUser.friendIds.indexOf(this.id),
 			1
 		);
-		return result.alreadyUnfriended;
-	}
-
-	@signedIn()
-	async unfollow() {
-		const result = await fetch(UNFOLLOW_USER_URL, {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json",
-				Authorization: `Bearer ${this.client.token!}`,
-			},
-		}).then((e) => e.json());
-		if (result.error) {
-			throw new Error(result.error);
-		}
-		return result.alreadyUnfollowed;
 	}
 
 	update(data: UserData) {

@@ -16,7 +16,7 @@ import {
 	setSidebarOpen,
 	setCreatePostModalOpen,
 	setSettingsModalOpen,
-} from "../../lib/store";
+} from "../../store";
 import { AccountSelection } from "./account-selection";
 import { GroupSelection } from "./group-selection";
 import Styles from "./topbar.module.sass";

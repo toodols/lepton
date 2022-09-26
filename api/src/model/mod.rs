@@ -1,0 +1,12 @@
+mod comment;
+mod group;
+mod post;
+mod user;
+mod auth;
+mod friendship;
+pub use comment::*;
+pub use group::*;
+pub use post::*;
+pub use user::*;
+pub use auth::*;
+pub use friendship::*;

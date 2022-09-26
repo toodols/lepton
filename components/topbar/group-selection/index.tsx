@@ -1,5 +1,5 @@
 import { client } from "lib/client";
-import { RootState, setCreateGroupModalOpen } from "lib/store";
+import { RootState, setCreateGroupModalOpen } from "store";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";

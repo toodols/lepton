@@ -1,5 +1,5 @@
 import { createSlice, CreateSliceOptions, PayloadAction, SliceCaseReducers } from "@reduxjs/toolkit";
-import { client } from "../client";
+import { client } from "../lib/client";
 import jwt from "jsonwebtoken";
 export const clientSlice = createSlice({
 	name: "Client",

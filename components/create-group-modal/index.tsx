@@ -1,5 +1,5 @@
 import { client } from "lib/client";
-import { RootState, setCreateGroupModalOpen } from "lib/store";
+import { RootState, setCreateGroupModalOpen } from "store";
 import { useState, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import Styles from "./group-modal.module.sass"

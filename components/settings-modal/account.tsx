@@ -1,6 +1,6 @@
 import { ImageUpload } from "components/image-upload";
-import { RootState } from "lib/store";
-import { editSettings } from "lib/store/settings";
+import { RootState } from "store";
+import { editSettings } from "store/settings";
 import { useDispatch, useSelector } from "react-redux";
 import { Section, SettingsSelect } from ".";
 
