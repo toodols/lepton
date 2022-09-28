@@ -3,7 +3,7 @@ mod cors;
 mod model;
 mod routes;
 
-use model::{Post, User, Group, Auth};
+use model::{Auth, Group, Post, User};
 use mongodb::{
     options::{ClientOptions, ResolverConfig},
     Client, Collection,
@@ -11,11 +11,12 @@ use mongodb::{
 use std::{env, sync::Arc};
 
 pub struct DatabaseContext {
+	#[allow(unused)]
     client: Client,
     posts: Collection<Post>,
-	users: Collection<User>,
-	groups: Collection<Group>,
-	auth: Collection<Auth>,
+    users: Collection<User>,
+    groups: Collection<Group>,
+    auth: Collection<Auth>,
 }
 
 pub struct DevelopmentMode(bool);
@@ -38,9 +39,9 @@ async fn main() {
     let database_context = DatabaseContext {
         client: client.clone(),
         posts: client.database("database").collection("posts"),
-		users: client.database("database").collection("users"),
-		groups: client.database("database").collection("groups"),
-		auth: client.database("database").collection("auth"),
+        users: client.database("database").collection("users"),
+        groups: client.database("database").collection("groups"),
+        auth: client.database("database").collection("auth"),
     };
 
     let r = rocket::build()

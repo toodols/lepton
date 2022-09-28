@@ -11,13 +11,13 @@ use rocket::{
 
 use crate::{DatabaseContext, DevelopmentMode};
 
+mod authenticate;
 mod groups;
 mod posts;
-mod authenticate;
 
+use authenticate::{sign_in, sign_up};
 use groups::get_groups;
 use posts::{create_post, get_posts};
-use authenticate::sign_in;
 
 pub type DBState = State<DatabaseContext>;
 
@@ -66,14 +66,26 @@ pub fn cors(dev: &State<DevelopmentMode>, path: PathBuf) -> IAmSoFuckingFrustrat
 }
 
 pub fn routes() -> Vec<Route> {
-    rocket::routes![create_post, get_groups, get_posts, sign_in, test, cors, debug]
+    rocket::routes![
+        create_post,
+        get_groups,
+        get_posts,
+        sign_in,
+		sign_up,
+        test,
+        cors,
+        debug
+    ]
 }
 
 pub struct GenericRequestError(Status, String);
 impl GenericRequestError {
-	fn idc() -> Self {
-		Self(Status::InternalServerError, "Some stupid erorr I don't have time to deal iwth.".to_string())
-	}
+    fn idc() -> Self {
+        Self(
+            Status::InternalServerError,
+            "Some stupid erorr I don't have time to deal iwth.".to_string(),
+        )
+    }
 }
 impl<'r> Responder<'r, 'static> for GenericRequestError {
     fn respond_to(self, req: &'r Request<'_>) -> response::Result<'static> {

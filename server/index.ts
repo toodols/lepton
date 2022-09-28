@@ -18,7 +18,13 @@ if (dev) {
 		return handle(req,res)
 	});
 	const child = exec(`export ROCKET_ENV=development; cd api; cargo run`)
+	console.log(`API server started on port ${port} with pid ${child.pid}`);
 	child.stdout?.pipe(process.stdout);
+	child.stderr?.pipe(process.stderr);
+	// kill child process when parent process dies
+	process.on('exit', function() {
+		child.kill();
+	});
 
 	server.listen(port, () => {
 		console.log(`> Ready on http://localhost:${port}`);
