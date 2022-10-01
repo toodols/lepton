@@ -8,10 +8,11 @@ use mongodb::{
     options::{ClientOptions, ResolverConfig},
     Client, Collection,
 };
+use rocket::{catchers, catch, Request, Catcher};
 use std::{env, sync::Arc};
 
 pub struct DatabaseContext {
-	#[allow(unused)]
+    #[allow(unused)]
     client: Client,
     posts: Collection<Post>,
     users: Collection<User>,

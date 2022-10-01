@@ -24,13 +24,14 @@ pub enum Auth {
 bitflags! {
     #[derive(Serialize, Deserialize)]
     pub struct Permissions: u32 {
+		const ALL = 1 << 0;
         /// Allows the auth to see the user's basic info: username, password
-        const INFO = 1 << 0;
+        const INFO = 1 << 1;
         /// Allows the auth to create comments
-        const COMMENT = 1 << 1;
+        const COMMENT = 1 << 2;
         /// Allows the auth to create posts
-        const POST = 1 << 2;
+        const POST = 1 << 3;
         /// Allows the auth to see groups the user is in.
-        const VIEW_GROUPS = 1 << 3;
+        const VIEW_GROUPS = 1 << 4;
     }
 }

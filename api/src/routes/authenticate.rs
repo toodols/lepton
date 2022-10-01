@@ -1,17 +1,18 @@
-use std::{env};
+use std::env;
 
 use crate::model::{Auth, Permissions, User};
 use crypto::bcrypt::bcrypt;
 use mongodb::{
     bson::{doc, oid::ObjectId, DateTime},
-    options::FindOneAndUpdateOptions, results::InsertOneResult,
+    options::{FindOneAndUpdateOptions, ReturnDocument},
+    results::InsertOneResult,
 };
 use rand::Rng;
 use rocket::{http::Status, post, serde::json::Json};
 use serde::{Deserialize, Serialize};
 use tokio::task::spawn_blocking;
 
-use super::{DBState, GenericRequestError};
+use super::{DBState, GenericRequestError, AccessToken};
 
 #[derive(Deserialize)]
 pub struct SignInData {
@@ -24,12 +25,6 @@ pub struct SignInResponse {
     token: String,
 }
 
-#[derive(Serialize, Deserialize)]
-struct JWTClaims {
-    user: ObjectId,
-    permissions: Permissions,
-}
-
 #[post("/sign-in", data = "<data>")]
 pub async fn sign_in(
     db_client: &DBState,
@@ -37,9 +32,9 @@ pub async fn sign_in(
 ) -> Result<Json<SignInResponse>, GenericRequestError> {
     let SignInData { username, password } = data.into_inner();
 
-    let mut cursor = db_client
+    let auth: Auth = db_client
         .auth
-        .find(
+        .find_one(
             doc! {
                 "username": username,
                 "type": "password",
@@ -47,25 +42,25 @@ pub async fn sign_in(
             None,
         )
         .await
-        .unwrap();
-    if cursor.advance().await.unwrap() {
-        let auth = cursor.deserialize_current().unwrap();
+        .unwrap().ok_or_else(||GenericRequestError(Status::NotFound, "Can't find document with username".to_owned()))?;
         match auth {
             Auth::Password {
                 hashed_password,
                 salt,
                 user,
                 permissions,
-				..
+                ..
             } => {
                 let token = jsonwebtoken::encode(
                     &jsonwebtoken::Header::default(),
-                    &JWTClaims { user, permissions },
-                    &jsonwebtoken::EncodingKey::from_secret(env::var("JWT_SECRET").unwrap().as_bytes()),
+                    &AccessToken { user, permissions },
+                    &jsonwebtoken::EncodingKey::from_secret(
+                        env::var("JWT_SECRET").unwrap().as_bytes(),
+                    ),
                 )
                 .unwrap();
                 let output: &mut [u8; 24] = &mut [0; 24];
-                bcrypt(2, &hex::decode(salt).unwrap(), password.as_bytes(), output);
+                bcrypt(10, &hex::decode(salt).unwrap(), password.as_bytes(), output);
                 if *output == hex::decode(hashed_password).unwrap().as_ref() {
                     return Ok(Json(SignInResponse { token }));
                 } else {
@@ -78,12 +73,6 @@ pub async fn sign_in(
             }
             _ => panic!("Unexpected auth type"),
         }
-    } else {
-        Err(GenericRequestError(
-            Status::NotFound,
-            "Can't find document with username".to_owned(),
-        ))
-    }
 }
 
 #[derive(Deserialize)]
@@ -160,15 +149,15 @@ pub async fn sign_up(
     let mut output: [u8; 24] = [0; 24];
 
     // todo: stop using threadrng
-    let salt = spawn_blocking(|| {
-        let mut salt: [u8; 16] = [0; 16];
+    let salt: [u8; 16] = spawn_blocking(|| {
+        let mut salt = [0; 16];
         let mut thread = rand::thread_rng();
         thread.fill(&mut salt);
         salt
     })
     .await
     .unwrap();
-    bcrypt(2, &salt, password.as_bytes(), &mut output);
+    bcrypt(10, &salt, password.as_bytes(), &mut output);
     let hashed_password = hex::encode(output);
     let new_user = bson::to_bson(&User::new(username.clone())).unwrap();
     let result: Option<User> = db_client
@@ -180,11 +169,11 @@ pub async fn sign_up(
             doc! {
                 "$setOnInsert": new_user
             },
-            FindOneAndUpdateOptions::builder().upsert(true).build(),
+            FindOneAndUpdateOptions::builder().upsert(true).return_document(ReturnDocument::After).build(),
         )
         .await
         .unwrap();
-
+	println!("{:?}", result);
     let result = result.ok_or_else(|| {
         GenericRequestError(
             Status::InternalServerError,
@@ -192,24 +181,31 @@ pub async fn sign_up(
         )
     })?;
 
-	let res: InsertOneResult = db_client.auth.insert_one(Auth::Password {
-		id: None,
-		username,
-		hashed_password,
-		salt: hex::encode(salt),
-		user: result.id.unwrap(),
-		permissions: Permissions::all(),
-		created_at: DateTime::now(),
-	}, None).await.unwrap();
+    let res: InsertOneResult = db_client
+        .auth
+        .insert_one(
+            Auth::Password {
+                id: None,
+                username,
+                hashed_password,
+                salt: hex::encode(salt),
+                user: result.id,
+                permissions: Permissions::ALL,
+                created_at: DateTime::now(),
+            },
+            None,
+        )
+        .await
+        .unwrap();
 
-	let token = jsonwebtoken::encode(
-		&jsonwebtoken::Header::default(),
-		&JWTClaims {
-			user: result.id.unwrap(),
-			permissions: Permissions::all(),
-		},
-		&jsonwebtoken::EncodingKey::from_secret(env::var("JWT_SECRET").unwrap().as_ref()),
-	)
-	.unwrap();
-	Ok(Json(SignUpResponse { token }))
+    let token = jsonwebtoken::encode(
+        &jsonwebtoken::Header::default(),
+        &AccessToken {
+            user: result.id,
+            permissions: Permissions::ALL,
+        },
+        &jsonwebtoken::EncodingKey::from_secret(env::var("JWT_SECRET").unwrap().as_ref()),
+    )
+    .unwrap();
+    Ok(Json(SignUpResponse { token }))
 }

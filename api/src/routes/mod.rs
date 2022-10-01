@@ -1,23 +1,30 @@
 use std::{path::PathBuf, sync::Arc};
 
+use bson::oid::ObjectId;
 use rocket::{
     get,
     http::Status,
     options,
     response::{self, Responder},
-    serde::json::{serde_json::json, Json},
     Request, Response, Route, State,
 };
 
 use crate::{DatabaseContext, DevelopmentMode};
 
+use authenticate::{sign_in, sign_up};
+use groups::get_groups;
+use users::get_user;
+use posts::{create_post, get_posts};
+pub use error::GenericRequestError;
+pub use authorization::{AccessToken, AuthError};
+
 mod authenticate;
 mod groups;
 mod posts;
+mod users;
 
-use authenticate::{sign_in, sign_up};
-use groups::get_groups;
-use posts::{create_post, get_posts};
+mod error;
+mod authorization;
 
 pub type DBState = State<DatabaseContext>;
 
@@ -70,30 +77,11 @@ pub fn routes() -> Vec<Route> {
         create_post,
         get_groups,
         get_posts,
+		get_user,
         sign_in,
-		sign_up,
+        sign_up,
         test,
         cors,
         debug
     ]
-}
-
-pub struct GenericRequestError(Status, String);
-impl GenericRequestError {
-    fn idc() -> Self {
-        Self(
-            Status::InternalServerError,
-            "Some stupid erorr I don't have time to deal iwth.".to_string(),
-        )
-    }
-}
-impl<'r> Responder<'r, 'static> for GenericRequestError {
-    fn respond_to(self, req: &'r Request<'_>) -> response::Result<'static> {
-        let string = json!({
-            "error": self.1
-        });
-        Response::build_from(string.respond_to(req)?)
-            .status(self.0)
-            .ok()
-    }
 }

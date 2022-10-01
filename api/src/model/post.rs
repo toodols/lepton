@@ -5,6 +5,8 @@ use serde::{Deserialize, Serialize};
 #[derive(Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Post {
+	#[serde(rename = "_id")]
+	id: ObjectId,
     created_at: DateTime,
     author: ObjectId,
     content: String,

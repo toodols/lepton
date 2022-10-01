@@ -6,15 +6,13 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
     model::{Comment, Post, User},
-    DatabaseContext,
 };
 
-use super::{DBState, GenericRequestError};
+use super::{DBState, GenericRequestError, AccessToken, AuthError};
 
 #[derive(Deserialize)]
 pub struct NewPost {
     content: String,
-    group: ObjectId,
 }
 
 #[post("/posts", data = "<data>")]
@@ -39,7 +37,9 @@ pub async fn get_posts(
     group: Option<Json<ObjectId>>,
     before: Option<Json<ObjectId>>,
     user: Option<Json<ObjectId>>,
+	auth: Result<AccessToken, AuthError>,
 ) -> Result<Json<GetPostsResponse>, GenericRequestError> {
+	let auth = auth?;
     let mut query = doc! {};
     if group.is_some() {
         query.insert("group", group.unwrap().into_inner());
@@ -62,8 +62,7 @@ pub async fn get_posts(
         if cursor.advance().await.unwrap() {
             values.push(
                 cursor
-                    .deserialize_current()
-                    .map_err(|e| GenericRequestError::idc())?,
+                    .deserialize_current()?
             );
         } else {
             has_more = false;
