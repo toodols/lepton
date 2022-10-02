@@ -1,74 +1,112 @@
 use bitflags::bitflags;
-use mongodb::bson::{oid::ObjectId, Bson};
-use rocket::serde::json::serde_json::{self, json};
+use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize, Debug)]
+use super::{Id, Group, Friendship, CollectionItem};
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct Settings {
-    avatar: String,
-    description: String,
-    theme: String,
-    banner: String,
-    accent_color: String,
+	avatar: String,
+	description: String,
+	theme: String,
+	banner: String,
+	accent_color: String,
+}
+
+impl Default for Settings {
+	fn default() -> Self {
+		Self {
+			avatar: "/avatar.png".to_string(),
+			description: String::new(),
+			theme: "default".to_string(),
+			banner: "".to_string(),
+			accent_color: "#ff0000".to_string(),
+		}
+	}
 }
 
 bitflags! {
-    pub struct Flags: u32 {
-        const NONE = 0;
-        const OWNER = 1 << 0;
-        const DEVELOPER = 1 << 1;
-        const MODERATOR = 1 << 2;
-        const ADMIN = 1 << 3;
-    }
+	pub struct Flags: u32 {
+		const NONE = 0;
+		const OWNER = 1 << 0;
+		const DEVELOPER = 1 << 1;
+		const MODERATOR = 1 << 2;
+		const ADMIN = 1 << 3;
+	}
 }
 impl<'de> Deserialize<'de> for Flags {
-    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-    where
-        D: serde::Deserializer<'de>,
-    {
-        let value = u32::deserialize(deserializer)?;
-        Ok(Flags::from_bits_truncate(value))
-    }
+	fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+	where
+		D: serde::Deserializer<'de>,
+	{
+		let value = u32::deserialize(deserializer)?;
+		Ok(Flags::from_bits_truncate(value))
+	}
 }
 
 impl Serialize for Flags {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: serde::Serializer,
-    {
-        serializer.serialize_u32(self.bits())
-    }
+	fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+	where
+		S: serde::Serializer,
+	{
+		serializer.serialize_u32(self.bits())
+	}
 }
 
 #[test]
 fn de_bitflags() {
-    let s = "5";
-    let flags: Flags = serde_json::from_str(s).unwrap();
-    assert_eq!(flags, Flags::MODERATOR | Flags::OWNER);
+	let s = "5";
+	let flags: Flags = serde_json::from_str(s).unwrap();
+	assert_eq!(flags, Flags::MODERATOR | Flags::OWNER);
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Deserialize, Clone, PartialEq, Eq)]
+pub struct Item {
+	#[serde(rename = "_id")]
+	id: Id<Item>,
+	r#type: String,
+	name: String,
+	description: String,
+}
+
+impl CollectionItem for Item {
+	fn collection_name() -> &'static str {
+		"items"
+	}
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
 pub struct InventoryItem {
-    item: ObjectId,
-    count: u32,
+	pub item: Id<Item>,
+	pub count: u32,
 	#[serde(skip_serializing_if = "Option::is_none")]
-    name: Option<String>,
+	pub name: Option<String>,
 	#[serde(skip_serializing_if = "Option::is_none")]
-    description: Option<String>,
+	pub description: Option<String>,
 }
-
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
 pub struct User {
 	#[serde(rename = "_id")]
-    pub id: ObjectId,
-    pub username: String,
-    pub settings: Settings,
-    pub money: u32,
-    pub flags: Flags,
-    pub blocked: Vec<ObjectId>,
-    pub inventory: Vec<InventoryItem>,
+	pub id: Id<User>,
+	// #[serde(with = "chrono::serde::ts_milliseconds")]
+	// pub updated_at: DateTime<Utc>,
+	pub username: String,
+	pub settings: Settings,
+	pub money: u32,
+	pub flags: Flags,
+	pub blocked: Vec<Id<User>>,
+	pub inventory: Vec<InventoryItem>,
 }
+
+
+impl CollectionItem for User {
+	fn collection_name() -> &'static str {
+		"users"
+	}
+}
+
 
 // // This would have been really nice...
 // impl<T: Serialize> From<T> for Bson {
@@ -77,41 +115,53 @@ pub struct User {
 // 	}
 // }
 
+impl Default for User {
+	fn default() -> Self {
+		Self {
+			id: Id::new(),
+			username: String::new(),
+			settings: Settings::default(),
+			inventory: Vec::new(),
+			money: 0,
+			flags: Flags::NONE,
+			blocked: Vec::new(),
+		}
+	}
+}
+
 impl User {
-    pub fn new(username: String) -> Self {
-        Self {
-			id: ObjectId::new(),
-            username,
-            settings: Settings {
-                avatar: String::new(),
-                description: String::new(),
-                theme: String::new(),
-                banner: String::new(),
-                accent_color: String::new(),
-            },
-            inventory: Vec::new(),
-            money: 0,
-            flags: Flags::NONE,
-            blocked: Vec::new(),
-        }
-    }
+	pub fn new(username: String) -> Self {
+		Self {
+			username,
+			..Default::default()
+		}
+	}
 }
 
 #[derive(Serialize, Clone)]
+#[serde(rename_all = "camelCase")]
 pub struct SerializingUser {
-	pub id: ObjectId,
+	pub id: Id<User>,
 	pub username: String,
 	pub avatar: String,
 	pub description: String,
 	pub banner: String,
 	pub following_count: u64,
 	pub follower_count: u64,
-	pub friends: Vec<ObjectId>,
+	pub friends: Vec<Id<User>>,
 	pub flags: Flags,
+	// #[serde(with = "chrono::serde::ts_milliseconds")]
+	// pub updated_at: DateTime<Utc>,
+	pub inventory: Vec<InventoryItem>,
 }
 
 impl SerializingUser {
-	pub fn from_user(user: User, following_count: u64, follower_count: u64, friends: Vec<ObjectId>) -> Self {
+	pub fn from_user(
+		user: User,
+		following_count: u64,
+		follower_count: u64,
+		friends: Vec<Id<User>>,
+	) -> Self {
 		Self {
 			id: user.id,
 			username: user.username,
@@ -122,12 +172,25 @@ impl SerializingUser {
 			follower_count,
 			friends,
 			flags: user.flags,
+			inventory: user.inventory,
 		}
 	}
 }
 
+#[derive(Serialize, Clone)]
+#[serde(rename_all="camelCase")]
+pub struct ClientInfo {
+	pub groups: Vec<Id<Group>>,
+	pub settings: Settings,
+	pub blocked: Vec<Id<User>>,
+	pub outgoing_friend_requests: Vec<Id<Friendship>>,
+	pub incoming_friend_requests: Vec<Id<Friendship>>
+}
+
+#[derive(Serialize, Clone)]
+#[serde(rename_all = "camelCase")]
 pub struct SerializingPartialUser {
-	pub id: ObjectId,
+	pub id: Id<User>,
 	pub username: String,
 	pub avatar: String,
 	pub flags: Flags,
