@@ -1,9 +1,7 @@
 use async_trait::async_trait;
 use mongodb::Cursor;
 use rocket::serde::DeserializeOwned;
-use serde::{Deserialize, Serialize};
-
-use super::GenericRequestError;
+use serde::{Serialize};
 
 #[derive(Serialize)]
 pub struct CursorToVecResult<T> {
