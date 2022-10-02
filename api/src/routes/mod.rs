@@ -1,6 +1,4 @@
 use std::{path::PathBuf, sync::Arc};
-
-use bson::oid::ObjectId;
 use rocket::{
 	get,
 	http::Status,
@@ -23,6 +21,7 @@ mod groups;
 mod posts;
 mod users;
 
+mod cursor;
 mod authorization;
 mod error;
 

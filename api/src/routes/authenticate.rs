@@ -4,7 +4,7 @@ use crate::model::{Auth, Permissions, User, Id};
 use bson::SerializerOptions;
 use crypto::bcrypt::bcrypt;
 use mongodb::{
-	bson::{doc, oid::ObjectId, DateTime},
+	bson::{doc},
 	options::{FindOneAndUpdateOptions, ReturnDocument},
 	results::InsertOneResult,
 };
@@ -14,12 +14,6 @@ use serde::{Deserialize, Serialize};
 use tokio::task::spawn_blocking;
 
 use super::{AccessToken, DBState, GenericRequestError};
-
-#[test]
-fn test(){
-	let obj = ObjectId::new();
-	println!("{}", serde_json::to_string(&obj).unwrap());
-}
 
 #[derive(Deserialize)]
 pub struct SignInData {

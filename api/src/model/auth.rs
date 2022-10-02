@@ -1,5 +1,4 @@
 use bitflags::bitflags;
-use bson::DateTime;
 use serde::{Deserialize, Serialize};
 
 use super::{User, Id, CollectionItem};

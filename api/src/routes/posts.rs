@@ -1,12 +1,12 @@
 use std::collections::HashMap;
-
 use bson::DateTime;
 use mongodb::bson::{bson, doc, oid::ObjectId};
 use rocket::{get, http::Status, post, serde::json::Json, State};
 use serde::{Deserialize, Serialize};
 
-use crate::model::{Comment, Post, User};
+use crate::{model::{Comment, Post, User}, routes::cursor::CursorToVecResult};
 
+use super::cursor::CursorUtils;
 use super::{AccessToken, AuthError, DBState, GenericRequestError};
 
 #[derive(Deserialize)]
@@ -52,29 +52,14 @@ pub async fn get_posts(
 		query.insert("author", user.unwrap().into_inner());
 	}
 
-	let mut cursor = db_client.posts.find(query, None).await.unwrap();
+	let cursor = db_client.posts.find(query, None).await.unwrap();
 
 	const CAPACITY: usize = 30;
-	let mut values: Vec<Post> = Vec::with_capacity(CAPACITY);
-	let mut has_more = true;
-	for _ in 0..CAPACITY {
-		if cursor.advance().await.unwrap() {
-			values.push(cursor.deserialize_current()?);
-		} else {
-			has_more = false;
-			break;
-		}
-	}
-
-	if has_more {
-		if !cursor.advance().await.unwrap() {
-			has_more = false;
-		}
-	}
+	let CursorToVecResult::<Post> { data: posts, has_more } = cursor.to_vec(CAPACITY).await?;
 
 	Ok(Json(GetPostsResponse {
 		has_more,
-		posts: values,
+		posts,
 		comments: vec![],
 		users_map: HashMap::new(),
 	}))

@@ -17,6 +17,8 @@ impl GenericRequestError {
 		)
 	}
 }
+
+
 impl From<mongodb::error::Error> for GenericRequestError {
 	fn from(err: mongodb::error::Error) -> Self {
 		match err.kind {

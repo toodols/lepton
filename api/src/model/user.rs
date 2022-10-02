@@ -1,10 +1,9 @@
 use bitflags::bitflags;
-use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 
 use super::{Id, Group, Friendship, CollectionItem};
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
 pub struct Settings {
 	avatar: String,
@@ -85,7 +84,7 @@ pub struct InventoryItem {
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub description: Option<String>,
 }
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
 pub struct User {
 	#[serde(rename = "_id")]
