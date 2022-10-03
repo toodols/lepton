@@ -34,7 +34,7 @@ pub async fn sign_in(
 	let SignInData { username, password } = data.into_inner();
 
 	let auth: Auth = db_client
-		.auth
+		.auths
 		.find_one(
 			doc! {
 				"username": username,
@@ -137,7 +137,7 @@ pub async fn sign_up(
 	let SignUpData { username, password } = data.into_inner();
 	// verify that username is not taken
 	let mut cursor = db_client
-		.auth
+		.auths
 		.find(
 			doc! {
 				"username": &username,
@@ -193,7 +193,7 @@ pub async fn sign_up(
 	})?;
 
 	let res: InsertOneResult = db_client
-		.auth
+		.auths
 		.insert_one(
 			Auth::Password {
 				id: Id::new(),

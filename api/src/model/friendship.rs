@@ -1,3 +1,4 @@
+use mongodb::Collection;
 use serde::{Deserialize, Serialize};
 
 use super::{User, Id, CollectionItem};

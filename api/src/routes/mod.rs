@@ -13,13 +13,18 @@ use authenticate::{sign_in, sign_up};
 pub use authorization::{AccessToken, AuthError};
 pub use error::GenericRequestError;
 use groups::get_groups;
-use posts::{create_post, get_posts};
+use posts::{create_post, get_posts, delete_post};
 use users::get_user;
+use comments::{get_comments, get_comment_postid};
+use trade::{create_trade};
 
 mod authenticate;
 mod groups;
 mod posts;
 mod users;
+mod comments;
+mod polls;
+mod trade;
 
 mod cursor;
 mod authorization;
@@ -81,6 +86,9 @@ pub fn routes() -> Vec<Route> {
 		sign_up,
 		test,
 		cors,
-		debug
+		debug,
+		delete_post,
+		get_comments,
+		get_comment_postid
 	]
 }

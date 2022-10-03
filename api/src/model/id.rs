@@ -2,15 +2,42 @@ use std::any::type_name;
 use std::hash::{Hash,Hasher};
 use std::{str::FromStr, fmt::Formatter};
 use std::fmt::Debug;
+use bson::Document;
 use bson::oid::ObjectId;
+use rocket::http::Status;
+use rocket::request::FromParam;
 use serde::{Serialize, Deserialize};
+
+use crate::routes::GenericRequestError;
 
 pub trait CollectionItem {
 	fn collection_name() -> &'static str;
+	fn database_name() -> &'static str {
+		"database"
+	}
 }
+
 
 #[derive(PartialEq, Eq)]
 pub struct Id<T: CollectionItem>{inner: ObjectId, phantom: std::marker::PhantomData<T>}
+
+pub type IdResult<T> = Result<Id<T>, GenericRequestError>;
+
+impl<T: CollectionItem> Id<T> {
+	pub fn new() -> Self {
+		Id{inner: ObjectId::new(), phantom: std::marker::PhantomData}
+	}
+	pub fn into_query(self) -> bson::Document {
+		bson::doc!{"_id": self.inner}
+	}
+}
+impl<'a, T: CollectionItem> FromParam<'a> for Id<T> {
+	type Error = GenericRequestError;
+	fn from_param(param: &'a str) -> Result<Self, Self::Error> {
+		Id::from_str(param).map_err(|_|GenericRequestError(Status::BadRequest, format!("An invalid id was passed in for param '{param}'")))
+	}
+
+}
 impl<T: CollectionItem> Hash for Id<T> {
 	fn hash<H: Hasher>(&self, state: &mut H) {
 		self.inner.hash(state)
@@ -31,14 +58,6 @@ impl<T: CollectionItem> Copy for Id<T> {}
 impl<T: CollectionItem> Clone for Id<T> {
 	fn clone(&self) -> Self {
 		*self
-	}
-}
-impl<T: CollectionItem> Id<T> {
-	pub fn new() -> Self {
-		Id{inner: ObjectId::new(), phantom: std::marker::PhantomData}
-	}
-	pub fn into_query(self) -> bson::Document {
-		bson::doc!{"_id": self.inner}
 	}
 }
 impl<T: CollectionItem> ToString for Id<T> {

@@ -8,13 +8,13 @@ use super::{Id, User, Group, CollectionItem};
 #[serde(rename_all = "camelCase")]
 pub struct Post {
 	#[serde(rename = "_id")]
-	id: Id<Post>,
+	pub id: Id<Post>,
 	#[serde(with = "chrono::serde::ts_milliseconds")]
-	updated_at: DateTime<Utc>,
-	author: Id<User>,
-	content: String,
-	group: Option<Id<Group>>,
-	attachments: Vec<Attachment>,
+	pub updated_at: DateTime<Utc>,
+	pub author: Id<User>,
+	pub content: String,
+	pub group: Option<Id<Group>>,
+	pub attachments: Vec<Attachment>,
 }
 
 impl CollectionItem for Post {

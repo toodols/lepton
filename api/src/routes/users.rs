@@ -1,10 +1,10 @@
 use std::{str::FromStr, collections::HashMap};
 
 use bson::{doc, oid::ObjectId};
-use rocket::{get, http::Status, request::FromRequest, serde::json::Json};
+use rocket::{get, http::Status, request::FromRequest, serde::json::Json, post, put, delete};
 use serde::{Deserialize, Serialize};
 
-use crate::model::{SerializingUser, User, ClientInfo, Group, InventoryItem, Id, Item, Settings};
+use crate::model::{SerializingUser, User, ClientInfo, Group, InventoryItem, Id, Item, Settings, IdResult};
 
 use super::{AccessToken, AuthError, DBState, GenericRequestError};
 
@@ -16,25 +16,62 @@ pub struct GetUserByIdResponse {
 	user: SerializingUser,
 }
 
-#[get("/users/<id>")]
+#[derive(Serialize)]
+pub struct GetFriendsResponse {
+	friends: Id<User>,
+	users: HashMap<Id<User>, SerializingUser>
+}
+
+#[get("/users/@me/friends/<userid>")]
+pub async fn get_friends(userid: IdResult<User>) -> Result<Json<GetFriendsResponse>, GenericRequestError> {
+	let userid = userid?;
+	todo!();
+}
+
+#[put("/users/@me/friends/<userid>")]
+pub async fn befriend(userid: IdResult<User>) -> Result<(), GenericRequestError> {
+	let userid = userid?;
+	todo!();
+}
+
+#[delete("/users/@me/friends/<userid>")]
+pub async fn unfriend(userid: IdResult<User>) -> Result<(), GenericRequestError> {
+	let userid = userid?;
+	todo!();
+}
+
+#[get("/users/<userid>/followers")]
+pub async fn follow(userid: IdResult<User>) -> Result<(), GenericRequestError> {
+	let userid = userid?;
+	todo!();
+}
+
+#[get("/users/<userid>/followers")]
+pub async fn unfollow(userid: IdResult<User>) -> Result<(), GenericRequestError> {
+	let userid = userid?;
+	todo!();
+}
+
+
+#[get("/users/<userid>")]
 pub async fn get_user(
 	db_client: &DBState,
-	id: String,
+	userid: String,
 	auth: Result<AccessToken, AuthError>,
 ) -> Result<Json<GetUserByIdResponse>, GenericRequestError> {
-	let id = if id == "@me" {
+	let userid = if userid == "@me" {
 		auth?.user
 	} else {
-		Id::from_str(&id)?
+		Id::from_str(&userid)?
 	};
 	
 	let user: User = db_client
 		.users
-		.find_one(id.into_query(), None)
+		.find_one(userid.into_query(), None)
 		.await?
-		.ok_or(GenericRequestError(
+		.ok_or_else(||GenericRequestError(
 			Status::NotFound,
-			format!("Can't find user with id {:?}", id),
+			format!("Can't find user with id {:?}", userid),
 		))?;
 	let blocked = user.blocked.clone();
 	Ok(Json(GetUserByIdResponse {

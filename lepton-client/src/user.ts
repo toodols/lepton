@@ -51,6 +51,11 @@ export class User<Opts extends Options = DefaultOpts> {
 		return new User(client, post);
 	}
 
+	isClient(){
+		return this.client.clientUser === this;
+	}
+	
+
 	@signedIn()
 	async follow() {
 		const result = await post(`/api/users/${this.id}/follow`, null, {token: this.client.token!});

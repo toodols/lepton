@@ -3,13 +3,13 @@ mod cors;
 mod model;
 mod routes;
 
-use model::{Auth, Group, Post, User};
+use std::env;
+
+use model::{Auth, Group, Post, User, Item, Comment};
 use mongodb::{
 	options::{ClientOptions, ResolverConfig},
 	Client, Collection,
 };
-use rocket::{catch, catchers, Catcher, Request};
-use std::{env, sync::Arc};
 
 pub struct DatabaseContext {
 	#[allow(unused)]
@@ -17,7 +17,23 @@ pub struct DatabaseContext {
 	posts: Collection<Post>,
 	users: Collection<User>,
 	groups: Collection<Group>,
-	auth: Collection<Auth>,
+	auths: Collection<Auth>,
+	comments: Collection<Comment>,
+	items: Collection<Item>
+}
+
+impl DatabaseContext {
+	fn new(client: Client) -> DatabaseContext {
+		DatabaseContext {
+			client: client.clone(),
+			posts: client.database("database").collection("posts"),
+			users: client.database("database").collection("users"),
+			groups: client.database("database").collection("groups"),
+			auths: client.database("database").collection("auth"),
+			items: client.database("database").collection("items"),
+			comments: client.database("database").collection("comments")
+		}
+	}
 }
 
 pub struct DevelopmentMode(bool);
@@ -37,13 +53,7 @@ async fn main() {
 			.await
 			.unwrap();
 	let client = Client::with_options(options).unwrap();
-	let database_context = DatabaseContext {
-		client: client.clone(),
-		posts: client.database("database").collection("posts"),
-		users: client.database("database").collection("users"),
-		groups: client.database("database").collection("groups"),
-		auth: client.database("database").collection("auth"),
-	};
+	let database_context = DatabaseContext::new(client);
 
 	let r = rocket::build()
 		.manage(database_context)

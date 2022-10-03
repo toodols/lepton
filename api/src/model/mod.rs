@@ -10,6 +10,7 @@ pub use trade::*;
 pub use group_user::*;
 pub use poll::*;
 pub use notification::*;
+pub use item::*;
 
 mod auth;
 mod comment;
@@ -24,3 +25,4 @@ mod trade;
 mod group_user;
 mod poll;
 mod notification;
+mod item;

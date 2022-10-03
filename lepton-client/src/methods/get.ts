@@ -1,4 +1,4 @@
-import { ClientInfoData } from "../clientinfo";
+import { ClientInfoData } from "../client-info";
 import { CommentData } from "../comment";
 import { GroupDataFull } from "../group";
 import { ItemData } from "../item";

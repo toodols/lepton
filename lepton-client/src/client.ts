@@ -5,7 +5,7 @@ import { Group, GroupDataFull } from "./group";
 import { EventEmitter } from "events";
 import { io, Socket } from "socket.io-client";
 import { Settings } from "./types";
-import { ClientInfo, ClientInfoData } from "./clientinfo";
+import { ClientInfo, ClientInfoData } from "./client-info";
 import { Item, ItemData } from "./item";
 import { Poll } from "./poll";
 import { get } from "./methods/get";
@@ -91,7 +91,14 @@ export class Client<Opts extends Options = DefaultOpts> extends EventEmitter {
 
 	token?: string;
 	clientUser?: User<Opts>;
-	clientInfo?: ClientInfo<Opts>;
+	clientInfos: Record<string, ClientInfo<Opts>> = {};
+
+	get clientInfo(): ClientInfo<Opts> | undefined {
+		if (this.clientUser) {
+			return this.clientInfos[this.clientUser.id]
+		}
+	}
+
 	options: Opts;
 	socketio: Socket;
 
@@ -267,7 +274,7 @@ export class Client<Opts extends Options = DefaultOpts> extends EventEmitter {
 			Item.from(this, info.items[itemid]);
 		}
 		this.clientUser = User.from(this, info.user);
-		this.clientInfo = new ClientInfo(this, info.info, this.clientUser);
+		this.clientInfos[this.clientUser.id] = new ClientInfo(this, info.info, this.clientUser);
 		this.token = token;
 		this.emit("clientUserChanged");
 	}

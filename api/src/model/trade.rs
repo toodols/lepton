@@ -1,7 +1,7 @@
 use chrono::{DateTime, Utc};
 use serde::{Serialize, Deserialize};
 
-use super::{User, Id, InventoryItem};
+use super::{User, Id, InventoryItem, CollectionItem};
 
 #[derive(Serialize,Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -28,6 +28,12 @@ pub struct Trade {
 	items_requested: Vec<InventoryItem>,
 	status: TradeStatus,
 	expires: DateTime<Utc>
+}
+
+impl CollectionItem for Trade {
+    fn collection_name() -> &'static str {
+        "trades"
+    }
 }
 
 impl Default for Trade {

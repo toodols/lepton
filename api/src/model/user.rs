@@ -1,7 +1,7 @@
 use bitflags::bitflags;
 use serde::{Deserialize, Serialize};
 
-use super::{Id, Group, Friendship, CollectionItem};
+use super::{Id, Group, Friendship, CollectionItem, InventoryItem};
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
@@ -25,6 +25,7 @@ impl Default for Settings {
 	}
 }
 
+// lmfao straight from photop
 bitflags! {
 	pub struct Flags: u32 {
 		const NONE = 0;
@@ -32,6 +33,15 @@ bitflags! {
 		const DEVELOPER = 1 << 1;
 		const MODERATOR = 1 << 2;
 		const ADMIN = 1 << 3;
+		const TESTER = 1 << 4;
+		const CONTRIBUTOR = 1 << 5;
+		const VERIFIED = 1 << 6;
+	}
+}
+impl Flags {
+	pub fn can_delete_posts(self) -> bool {
+		let can_delete_posts = Flags::ADMIN & Flags::DEVELOPER & Flags::OWNER & Flags::MODERATOR;
+		self.intersects(can_delete_posts)
 	}
 }
 impl<'de> Deserialize<'de> for Flags {
@@ -60,30 +70,6 @@ fn de_bitflags() {
 	assert_eq!(flags, Flags::MODERATOR | Flags::OWNER);
 }
 
-#[derive(Deserialize, Clone, PartialEq, Eq)]
-pub struct Item {
-	#[serde(rename = "_id")]
-	id: Id<Item>,
-	r#type: String,
-	name: String,
-	description: String,
-}
-
-impl CollectionItem for Item {
-	fn collection_name() -> &'static str {
-		"items"
-	}
-}
-
-#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
-pub struct InventoryItem {
-	pub item: Id<Item>,
-	pub count: u32,
-	#[serde(skip_serializing_if = "Option::is_none")]
-	pub name: Option<String>,
-	#[serde(skip_serializing_if = "Option::is_none")]
-	pub description: Option<String>,
-}
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
 pub struct User {
