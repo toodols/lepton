@@ -1,4 +1,4 @@
-use std::{collections::HashMap};
+use std::collections::HashMap;
 
 use bson::{doc, oid::ObjectId};
 use mongodb::Collection;
@@ -19,7 +19,7 @@ Item {
 // they can be grouped into subcategories by the client
 // no need to be done on the server
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
-#[serde(tag = "type", content="attributes")]
+#[serde(tag = "type", content = "attributes")]
 #[serde(rename_all = "camelCase")]
 pub enum ItemAttribute {
 	None,
@@ -29,12 +29,12 @@ pub enum ItemAttribute {
 	Weapon {
 		damage: u32,
 	},
-	BackgroundDecoration(BackgroundDecoration)
+	BackgroundDecoration(BackgroundDecoration),
 }
 
 impl ItemAttribute {
 	pub fn is_none(&self) -> bool {
-		return &ItemAttribute::None == self
+		return &ItemAttribute::None == self;
 	}
 }
 
@@ -56,7 +56,7 @@ pub struct Item {
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub tag: Option<String>,
 	#[serde(flatten)]
-	pub attributes: ItemAttribute
+	pub attributes: ItemAttribute,
 }
 
 macro_rules! dumb_item {
@@ -67,27 +67,28 @@ macro_rules! dumb_item {
 			description: $desc.to_string(),
 			icon: $icon.to_string(),
 			tag: Some($tag.to_string()),
-			attributes: ItemAttribute::None
+			attributes: ItemAttribute::None,
 		}
 	};
 }
 
 impl Item {
 	pub fn generate_items() -> Vec<Item> {
-		vec![
-			dumb_item!({
-				name: "Hatsune Miku Figurine",
-				description: "Why do you even have this...",
-				icon: "ajoafjoiafewijofaewiojafijeo",
-				tag: "hatsune-miku-figurine"
-			}),
-		]
+		vec![dumb_item!({
+			name: "Hatsune Miku Figurine",
+			description: "Why do you even have this...",
+			icon: "ajoafjoiafewijofaewiojafijeo",
+			tag: "hatsune-miku-figurine"
+		})]
 	}
 }
 
 impl CollectionItem for Item {
-	fn collection_name() -> &'static str {
+	fn db() -> &'static str {
 		"items"
+	}
+	fn id(&self) -> Id<Self> {
+		self.id
 	}
 }
 
@@ -105,7 +106,7 @@ pub struct InventoryItem {
 	pub icon: Option<String>,
 	#[serde(skip_serializing_if = "Option::is_none")]
 	#[serde(flatten)]
-	pub attributes: Option<ItemAttribute>
+	pub attributes: Option<ItemAttribute>,
 }
 
 impl InventoryItem {
@@ -123,39 +124,54 @@ trait ItemProvider {
 }
 
 impl ItemProvider for HashMap<Id<Item>, Item> {
-    fn get_item<'a>(&'a self, id: Id<Item>) -> Result<&'a Item, ()>{
+	fn get_item<'a>(&'a self, id: Id<Item>) -> Result<&'a Item, ()> {
 		self.get(&id).ok_or(())
 	}
 }
 
 struct Inventory {
-	items: Vec<InventoryItem>
+	items: Vec<InventoryItem>,
 }
 impl Serialize for Inventory {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: serde::Serializer {
-        self.items.serialize(serializer)
-    }
+	fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+	where
+		S: serde::Serializer,
+	{
+		self.items.serialize(serializer)
+	}
 }
 impl<'de> Deserialize<'de> for Inventory {
-    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-    where
-        D: serde::Deserializer<'de> {
-        Vec::<InventoryItem>::deserialize(deserializer).map(|items|Inventory{items})
-    }
+	fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+	where
+		D: serde::Deserializer<'de>,
+	{
+		Vec::<InventoryItem>::deserialize(deserializer).map(|items| Inventory { items })
+	}
 }
 
 // reason i don't use std::ops is because it's just not right for the job
 impl Inventory {
-	pub async fn get_item_provider(&self, collection: Collection<Item>) -> Result<HashMap<Id<Item>, Item>, ()> {
-		let items = self.items.iter().map(|ii|ii.item.into()).collect::<Vec<ObjectId>>();
-		let mut cursor = collection.find(doc!{
-			"_id": {"$in": items}
-		}, None).await.map_err(|_|())?;
+	pub async fn get_item_provider(
+		&self,
+		collection: Collection<Item>,
+	) -> Result<HashMap<Id<Item>, Item>, ()> {
+		let items = self
+			.items
+			.iter()
+			.map(|ii| ii.item.into())
+			.collect::<Vec<ObjectId>>();
+		let mut cursor = collection
+			.find(
+				doc! {
+					"_id": {"$in": items}
+				},
+				None,
+			)
+			.await
+			.map_err(|_| ())?;
 		let mut map: HashMap<Id<Item>, Item> = HashMap::new();
-		while cursor.advance().await.map_err(|_|())? {
-			let v: Item = cursor.deserialize_current().map_err(|_|())?;
+		while cursor.advance().await.map_err(|_| ())? {
+			let v: Item = cursor.deserialize_current().map_err(|_| ())?;
 			map.insert(v.id, v);
 		}
 		Ok(map)
@@ -172,14 +188,14 @@ impl Inventory {
 	/// Immutably subtracts self from rhs, errors if underflows
 	/// O(#self * #rhs) -> O(n^2) 😢
 	/// tbf we're using rust so it will be blazingly fast so it's fine...
-    pub fn sub(&self, rhs: Inventory) -> Result<Inventory, ()> {
+	pub fn sub(&self, rhs: Inventory) -> Result<Inventory, ()> {
 		let mut new_items: Vec<InventoryItem> = Vec::with_capacity(self.items.len());
 		for item in self.items.iter() {
 			if let Some(index) = rhs.find_inventory_item(item) {
-				let InventoryItem{count,..} = rhs.items[index];
+				let InventoryItem { count, .. } = rhs.items[index];
 				if item.count < count {
 					// item doesn't have enough count
-					return Err(())
+					return Err(());
 				} else if item.count == count {
 					// ok, this is just skipped
 				} else if item.count > count {
@@ -188,6 +204,6 @@ impl Inventory {
 				}
 			}
 		}
-		Ok(Inventory{items:new_items})
-    }
+		Ok(Inventory { items: new_items })
+	}
 }

@@ -1,42 +1,68 @@
-use std::any::type_name;
-use std::hash::{Hash,Hasher};
-use std::{str::FromStr, fmt::Formatter};
-use std::fmt::Debug;
-use bson::Document;
 use bson::oid::ObjectId;
+use bson::{Bson, Document, SerializerOptions};
 use rocket::http::Status;
 use rocket::request::FromParam;
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
+use std::any::type_name;
+use std::fmt::Debug;
+use std::hash::{Hash, Hasher};
+use std::{fmt::Formatter, str::FromStr};
 
-use crate::routes::GenericRequestError;
+use crate::routes::RequestError;
 
-pub trait CollectionItem {
-	fn collection_name() -> &'static str;
-	fn database_name() -> &'static str {
+pub trait CollectionItem: for<'de> Deserialize<'de> + Serialize + Unpin + Send + Sync {
+	fn db() -> &'static str;
+	fn col() -> &'static str {
 		"database"
+	}
+	fn id(&self) -> Id<Self>;
+	fn to_bson(&self) -> Result<Bson, bson::ser::Error> {
+		bson::to_bson_with_options(
+			self,
+			SerializerOptions::builder().human_readable(false).build(),
+		)
 	}
 }
 
-
 #[derive(PartialEq, Eq)]
-pub struct Id<T: CollectionItem>{inner: ObjectId, phantom: std::marker::PhantomData<T>}
+pub struct Id<T: CollectionItem> {
+	inner: ObjectId,
+	phantom: std::marker::PhantomData<T>,
+}
 
-pub type IdResult<T> = Result<Id<T>, GenericRequestError>;
+pub type IdResult<T> = Result<Id<T>, RequestError>;
 
 impl<T: CollectionItem> Id<T> {
 	pub fn new() -> Self {
-		Id{inner: ObjectId::new(), phantom: std::marker::PhantomData}
+		Id {
+			inner: ObjectId::new(),
+			phantom: std::marker::PhantomData,
+		}
 	}
 	pub fn into_query(self) -> bson::Document {
-		bson::doc!{"_id": self.inner}
+		bson::doc! {"_id": self.inner}
 	}
 }
-impl<'a, T: CollectionItem> FromParam<'a> for Id<T> {
-	type Error = GenericRequestError;
-	fn from_param(param: &'a str) -> Result<Self, Self::Error> {
-		Id::from_str(param).map_err(|_|GenericRequestError(Status::BadRequest, format!("An invalid id was passed in for param '{param}'")))
-	}
 
+impl<T: CollectionItem> From<ObjectId> for Id<T> {
+	fn from(id: ObjectId) -> Self {
+		Id {
+			inner: id,
+			phantom: std::marker::PhantomData,
+		}
+	}
+}
+
+impl<'a, T: CollectionItem> FromParam<'a> for Id<T> {
+	type Error = RequestError;
+	fn from_param(param: &'a str) -> Result<Self, Self::Error> {
+		Id::from_str(param).map_err(|_| {
+			RequestError(
+				Status::BadRequest,
+				format!("An invalid id was passed in for param '{param}'"),
+			)
+		})
+	}
 }
 impl<T: CollectionItem> Hash for Id<T> {
 	fn hash<H: Hasher>(&self, state: &mut H) {
@@ -45,13 +71,16 @@ impl<T: CollectionItem> Hash for Id<T> {
 }
 impl<T: CollectionItem> Debug for Id<T> {
 	fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-		write!(f, "{}Id({})", type_name::<T>(),	self.inner.to_hex())
+		write!(f, "{}Id({})", type_name::<T>(), self.inner.to_hex())
 	}
 }
 impl<T: CollectionItem> FromStr for Id<T> {
 	type Err = <ObjectId as FromStr>::Err;
 	fn from_str(s: &str) -> Result<Self, Self::Err> {
-		Ok(Id{inner: ObjectId::from_str(s)?, phantom: std::marker::PhantomData})
+		Ok(Id {
+			inner: ObjectId::from_str(s)?,
+			phantom: std::marker::PhantomData,
+		})
 	}
 }
 impl<T: CollectionItem> Copy for Id<T> {}
@@ -82,11 +111,6 @@ impl<T: CollectionItem> From<Id<T>> for ObjectId {
 		id.inner
 	}
 }
-impl<T: CollectionItem> From<ObjectId> for Id<T> {
-	fn from(id: ObjectId) -> Self {
-		Id{inner: id, phantom: std::marker::PhantomData}
-	}
-}
 
 // ObjectId can deserialize both from "id" and {$oid: "id"}
 impl<'de, T: CollectionItem> Deserialize<'de> for Id<T> {
@@ -95,15 +119,19 @@ impl<'de, T: CollectionItem> Deserialize<'de> for Id<T> {
 		D: serde::Deserializer<'de>,
 	{
 		let value = ObjectId::deserialize(deserializer)?;
-		Ok(Id{inner: value, phantom: std::marker::PhantomData})
+		Ok(Id {
+			inner: value,
+			phantom: std::marker::PhantomData,
+		})
 	}
 }
 
 #[test]
-fn deser_oid_with_str(){
+fn deser_oid_with_str() {
 	let val: ObjectId = bson::from_bson(bson::bson!({
 		"$oid": "0123456789abcdef01234567"
-	})).unwrap();
+	}))
+	.unwrap();
 	println!("{:?}", val);
 	let val2: ObjectId = bson::from_bson(bson::bson!("0123456789abcdef01234567")).unwrap();
 	println!("{:?}", val2);

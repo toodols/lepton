@@ -1,8 +1,8 @@
 use chrono::{DateTime, Utc};
-use mongodb::bson::{oid::ObjectId};
+use mongodb::bson::oid::ObjectId;
 use serde::{Deserialize, Serialize};
 
-use super::{Id, User, Group, CollectionItem};
+use super::{CollectionItem, Group, Id, User};
 
 #[derive(Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -18,8 +18,11 @@ pub struct Post {
 }
 
 impl CollectionItem for Post {
-	fn collection_name() -> &'static str {
+	fn db() -> &'static str {
 		"posts"
+	}
+	fn id(&self) -> Id<Self> {
+		self.id
 	}
 }
 

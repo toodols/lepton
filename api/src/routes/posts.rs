@@ -1,13 +1,16 @@
-use std::{collections::HashMap, str::FromStr};
 use bson::DateTime;
 use mongodb::bson::{bson, doc, oid::ObjectId};
-use rocket::{get, http::Status, post, serde::json::Json, State, delete};
+use rocket::{delete, get, http::Status, post, serde::json::Json, State};
 use serde::{Deserialize, Serialize};
+use std::{collections::HashMap, str::FromStr};
 
-use crate::{model::{Comment, Post, User, Id, IdResult, Group}, routes::cursor::CursorToVecResult};
+use crate::{
+	model::{Comment, Group, Id, IdResult, Post, User},
+	routes::cursor::CursorToVecResult,
+};
 
-use super::cursor::CursorUtils;
-use super::{AccessToken, AuthError, DBState, GenericRequestError};
+use super::{authorization::AuthResult, cursor::CursorUtils};
+use super::{AccessToken, AuthError, DBState, RequestError};
 
 #[derive(Deserialize)]
 pub struct NewPost {
@@ -15,7 +18,11 @@ pub struct NewPost {
 }
 
 #[post("/posts?<group>", data = "<data>")]
-pub fn create_post(db_client: &DBState, data: Json<NewPost>, group: Option<Json<Id<Group>>>) -> Result<(), GenericRequestError> {
+pub fn create_post(
+	db_client: &DBState,
+	data: Json<NewPost>,
+	group: Option<Json<Id<Group>>>,
+) -> Result<(), RequestError> {
 	Ok(())
 }
 
@@ -30,22 +37,53 @@ pub struct GetPostsResponse {
 }
 
 #[delete("/posts/<postid>")]
-pub async fn delete_post(db_client: &DBState, postid: IdResult<Post>, auth: Result<AccessToken, AuthError>) -> Result<Json<()>, GenericRequestError> {
+pub async fn delete_post(
+	db_client: &DBState,
+	postid: IdResult<Post>,
+	auth: AuthResult,
+) -> Result<Json<()>, RequestError> {
 	let auth = auth?;
 	let postid = postid?;
-	let post: Post = db_client.posts.find_one(postid.into_query(), None).await?.ok_or_else(||GenericRequestError(Status::NotFound, format!("Can't find post with id {}", postid.to_string())))?;
+	let post: Post = db_client
+		.posts
+		.find_one(postid.into_query(), None)
+		.await?
+		.ok_or_else(|| {
+			RequestError(
+				Status::NotFound,
+				format!("Can't find post with id {}", postid.to_string()),
+			)
+		})?;
 	if auth.user != post.author {
-		let user: User = db_client.users.find_one(auth.user.into_query(), None).await?.ok_or_else(||GenericRequestError(Status::NotFound, format!("Can't find userid provided in token")))?;
+		let user: User = db_client
+			.users
+			.find_one(auth.user.into_query(), None)
+			.await?
+			.ok_or_else(|| {
+				RequestError(
+					Status::NotFound,
+					format!("Can't find userid provided in token"),
+				)
+			})?;
 		if !user.flags.can_delete_posts() {
-			return Err(GenericRequestError(Status::Unauthorized, format!("You aren't the author of this post." /* (and also not a moderator) */)))
+			return Err(RequestError(
+				Status::Unauthorized,
+				format!("You aren't the author of this post." /* (and also not a moderator) */),
+			));
 		}
 	}
 
-	let delete_res = db_client.posts.delete_one(postid.into_query(), None).await?;
+	let delete_res = db_client
+		.posts
+		.delete_one(postid.into_query(), None)
+		.await?;
 	if delete_res.deleted_count != 1 {
 		Ok(Json(()))
 	} else {
-		Err(GenericRequestError(Status::InternalServerError, format!("Something failed")))
+		Err(RequestError(
+			Status::InternalServerError,
+			format!("Something failed"),
+		))
 	}
 }
 
@@ -56,8 +94,8 @@ pub async fn get_posts(
 	group: Option<Json<Id<Group>>>,
 	before: Option<Json<DateTime>>,
 	user: Option<Json<Id<User>>>,
-	auth: Result<AccessToken, AuthError>,
-) -> Result<Json<GetPostsResponse>, GenericRequestError> {
+	auth: AuthResult,
+) -> Result<Json<GetPostsResponse>, RequestError> {
 	// let auth = auth?;
 	let mut query = doc! {};
 	if group.is_some() {
@@ -75,7 +113,10 @@ pub async fn get_posts(
 	let cursor = db_client.posts.find(query, None).await.unwrap();
 
 	const CAPACITY: usize = 30;
-	let CursorToVecResult::<Post> { data: posts, has_more } = cursor.to_vec(CAPACITY).await?;
+	let CursorToVecResult::<Post> {
+		data: posts,
+		has_more,
+	} = cursor.to_vec(CAPACITY).await?;
 
 	Ok(Json(GetPostsResponse {
 		has_more,

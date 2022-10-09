@@ -1,6 +1,5 @@
 // Why. https://github.com/SergioBenitez/Rocket/issues/1234
 
-use std::{env};
 use async_trait::async_trait;
 use jsonwebtoken::{errors::ErrorKind, DecodingKey, Validation};
 use rocket::{
@@ -8,8 +7,9 @@ use rocket::{
 	request::{FromRequest, Outcome},
 };
 use serde::{Deserialize, Serialize};
+use std::env;
 
-use crate::model::{Permissions, User, Id};
+use crate::model::{Id, Permissions, User};
 #[derive(Serialize, Deserialize)]
 pub struct AccessToken {
 	pub user: Id<User>,
@@ -24,6 +24,8 @@ pub enum AuthError {
 	InvalidTokenFormat,
 	DecodeError(ErrorKind),
 }
+
+pub type AuthResult = Result<AccessToken, AuthError>;
 
 #[async_trait]
 impl<'r> FromRequest<'r> for AccessToken {

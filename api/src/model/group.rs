@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use super::{Id, CollectionItem};
+use super::{CollectionItem, Id};
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
@@ -13,9 +13,11 @@ pub struct Group {
 	description: String,
 }
 
-
 impl CollectionItem for Group {
-	fn collection_name() -> &'static str {
+	fn db() -> &'static str {
 		"groups"
+	}
+	fn id(&self) -> Id<Self> {
+		self.id
 	}
 }

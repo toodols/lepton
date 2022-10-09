@@ -2,10 +2,11 @@
 mod cors;
 mod model;
 mod routes;
+mod transaction;
 
 use std::env;
 
-use model::{Auth, Group, Post, User, Item, Comment};
+use model::{Auth, Comment, Friendship, Group, Item, Post, User};
 use mongodb::{
 	options::{ClientOptions, ResolverConfig},
 	Client, Collection,
@@ -19,7 +20,8 @@ pub struct DatabaseContext {
 	groups: Collection<Group>,
 	auths: Collection<Auth>,
 	comments: Collection<Comment>,
-	items: Collection<Item>
+	items: Collection<Item>,
+	friendships: Collection<Friendship>,
 }
 
 impl DatabaseContext {
@@ -31,7 +33,8 @@ impl DatabaseContext {
 			groups: client.database("database").collection("groups"),
 			auths: client.database("database").collection("auth"),
 			items: client.database("database").collection("items"),
-			comments: client.database("database").collection("comments")
+			comments: client.database("database").collection("comments"),
+			friendships: client.database("database").collection("friendships"),
 		}
 	}
 }

@@ -1,6 +1,6 @@
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 
-use super::{Id, User, CollectionItem};
+use super::{CollectionItem, Id, User};
 
 #[derive(Serialize, Deserialize, Clone, Copy, PartialEq, Eq, Debug)]
 struct Follow {
@@ -11,7 +11,10 @@ struct Follow {
 }
 
 impl CollectionItem for Follow {
-	fn collection_name() -> &'static str {
+	fn db() -> &'static str {
 		"follows"
+	}
+	fn id(&self) -> Id<Self> {
+		self.id
 	}
 }

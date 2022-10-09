@@ -458,6 +458,7 @@ checksum = "7f21eda599937fba36daeb58a22e8f5cee2d14c4a17b5b7739c7c8e5e3b8230c"
 dependencies = [
  "futures-channel",
  "futures-core",
+ "futures-executor",
  "futures-io",
  "futures-sink",
  "futures-task",
@@ -856,6 +857,7 @@ dependencies = [
  "bson",
  "chrono",
  "dotenv",
+ "futures",
  "hex",
  "jsonwebtoken",
  "lazy_static",

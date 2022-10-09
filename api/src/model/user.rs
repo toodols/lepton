@@ -1,7 +1,7 @@
 use bitflags::bitflags;
 use serde::{Deserialize, Serialize};
 
-use super::{Id, Group, Friendship, CollectionItem, InventoryItem};
+use super::{CollectionItem, Friendship, Group, Id, InventoryItem};
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
@@ -83,15 +83,17 @@ pub struct User {
 	pub flags: Flags,
 	pub blocked: Vec<Id<User>>,
 	pub inventory: Vec<InventoryItem>,
+	pub disabled: bool,
 }
-
 
 impl CollectionItem for User {
-	fn collection_name() -> &'static str {
+	fn db() -> &'static str {
 		"users"
 	}
+	fn id(&self) -> Id<Self> {
+		self.id
+	}
 }
-
 
 // // This would have been really nice...
 // impl<T: Serialize> From<T> for Bson {
@@ -110,6 +112,7 @@ impl Default for User {
 			money: 0,
 			flags: Flags::NONE,
 			blocked: Vec::new(),
+			disabled: false,
 		}
 	}
 }
@@ -119,6 +122,14 @@ impl User {
 		Self {
 			username,
 			..Default::default()
+		}
+	}
+	/// makes sure it is not disabled
+	pub fn exists(self) -> Option<Self> {
+		if self.disabled {
+			Some(self)
+		} else {
+			None
 		}
 	}
 }
@@ -163,13 +174,13 @@ impl SerializingUser {
 }
 
 #[derive(Serialize, Clone)]
-#[serde(rename_all="camelCase")]
+#[serde(rename_all = "camelCase")]
 pub struct ClientInfo {
 	pub groups: Vec<Id<Group>>,
 	pub settings: Settings,
 	pub blocked: Vec<Id<User>>,
 	pub outgoing_friend_requests: Vec<Id<Friendship>>,
-	pub incoming_friend_requests: Vec<Id<Friendship>>
+	pub incoming_friend_requests: Vec<Id<Friendship>>,
 }
 
 #[derive(Serialize, Clone)]

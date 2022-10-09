@@ -1,7 +1,7 @@
 use bitflags::bitflags;
 use serde::{Deserialize, Serialize};
 
-use super::{User, Id, CollectionItem};
+use super::{CollectionItem, Id, User};
 
 #[derive(Serialize, Deserialize)]
 #[serde(tag = "type")]
@@ -22,8 +22,13 @@ pub enum Auth {
 }
 
 impl CollectionItem for Auth {
-	fn collection_name() -> &'static str {
+	fn db() -> &'static str {
 		"auths"
+	}
+	fn id(&self) -> Id<Self> {
+		match self {
+			Auth::Password { id, .. } => *id,
+		}
 	}
 }
 

@@ -1,8 +1,8 @@
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 
-use super::{User, Post, Id, CollectionItem};
+use super::{CollectionItem, Id, Post, User};
 
-#[derive(Serialize)]
+#[derive(Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Comment {
 	#[serde(rename = "_id")]
@@ -14,9 +14,11 @@ pub struct Comment {
 	reply_to: Option<Id<Comment>>,
 }
 
-
 impl CollectionItem for Comment {
-	fn collection_name() -> &'static str {
+	fn db() -> &'static str {
 		"comments"
+	}
+	fn id(&self) -> Id<Self> {
+		self.id
 	}
 }

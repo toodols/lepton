@@ -1,6 +1,6 @@
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 
-use super::{Post, User, Id, CollectionItem};
+use super::{CollectionItem, Id, Post, User};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Vote {
@@ -10,7 +10,10 @@ pub struct Vote {
 	value: i32,
 }
 impl CollectionItem for Vote {
-	fn collection_name() -> &'static str {
+	fn db() -> &'static str {
 		"votes"
+	}
+	fn id(&self) -> Id<Self> {
+		self.id
 	}
 }

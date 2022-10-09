@@ -1,20 +1,33 @@
 use mongodb::Collection;
 use serde::{Deserialize, Serialize};
 
-use super::{User, Id, CollectionItem};
+use super::{CollectionItem, Id, User};
 
 #[derive(Deserialize, Serialize, Clone)]
 pub struct Friendship {
 	#[serde(rename = "_id")]
-	id: Id<Friendship>,
-	to: Id<User>,
-	from: Id<User>,
-	accepted: bool,
+	pub id: Id<Friendship>,
+	pub to: Id<User>,
+	pub from: Id<User>,
+	pub accepted: bool,
 }
 
+impl Friendship {
+	pub fn new(to: Id<User>, from: Id<User>) -> Self {
+		Self {
+			id: Id::new(),
+			to,
+			from,
+			accepted: false,
+		}
+	}
+}
 
 impl CollectionItem for Friendship {
-	fn collection_name() -> &'static str {
+	fn db() -> &'static str {
 		"friendships"
+	}
+	fn id(&self) -> Id<Self> {
+		self.id
 	}
 }

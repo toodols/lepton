@@ -1,10 +1,10 @@
 use std::env;
 
-use crate::model::{Auth, Permissions, User, Id};
+use crate::model::{Auth, Id, Permissions, User};
 use bson::SerializerOptions;
 use crypto::bcrypt::bcrypt;
 use mongodb::{
-	bson::{doc},
+	bson::doc,
 	options::{FindOneAndUpdateOptions, ReturnDocument},
 	results::InsertOneResult,
 };
@@ -13,7 +13,7 @@ use rocket::{http::Status, post, serde::json::Json};
 use serde::{Deserialize, Serialize};
 use tokio::task::spawn_blocking;
 
-use super::{AccessToken, DBState, GenericRequestError};
+use super::{AccessToken, DBState, RequestError};
 
 #[derive(Deserialize)]
 pub struct SignInData {
@@ -30,7 +30,7 @@ pub struct SignInResponse {
 pub async fn sign_in(
 	db_client: &DBState,
 	data: Json<SignInData>,
-) -> Result<Json<SignInResponse>, GenericRequestError> {
+) -> Result<Json<SignInResponse>, RequestError> {
 	let SignInData { username, password } = data.into_inner();
 
 	let auth: Auth = db_client
@@ -45,7 +45,7 @@ pub async fn sign_in(
 		.await
 		.unwrap()
 		.ok_or_else(|| {
-			GenericRequestError(
+			RequestError(
 				Status::NotFound,
 				"Can't find document with username".to_owned(),
 			)
@@ -74,7 +74,7 @@ pub async fn sign_in(
 				return Ok(Json(SignInResponse { token }));
 			} else {
 				// unauthorized
-				return Err(GenericRequestError(
+				return Err(RequestError(
 					Status::Unauthorized,
 					"Invalid username or password".to_owned(),
 				));
@@ -133,7 +133,7 @@ pub fn verify_password(password: impl AsRef<str>) -> Result<(), &'static str> {
 pub async fn sign_up(
 	db_client: &DBState,
 	data: Json<SignUpData>,
-) -> Result<Json<SignUpResponse>, GenericRequestError> {
+) -> Result<Json<SignUpResponse>, RequestError> {
 	let SignUpData { username, password } = data.into_inner();
 	// verify that username is not taken
 	let mut cursor = db_client
@@ -147,14 +147,13 @@ pub async fn sign_up(
 		.await
 		.unwrap();
 	if cursor.advance().await.unwrap() {
-		return Err(GenericRequestError(
+		return Err(RequestError(
 			Status::BadRequest,
 			"Username is already taken".to_owned(),
 		));
 	}
 	// verify that password is secure
-	verify_password(&password)
-		.map_err(|e| GenericRequestError(Status::BadRequest, e.to_owned()))?;
+	verify_password(&password).map_err(|e| RequestError(Status::BadRequest, e.to_owned()))?;
 	let mut output: [u8; 24] = [0; 24];
 
 	// todo: stop using threadrng
@@ -168,7 +167,11 @@ pub async fn sign_up(
 	.unwrap();
 	bcrypt(10, &salt, password.as_bytes(), &mut output);
 	let hashed_password = hex::encode(output);
-	let new_user = bson::to_bson_with_options(&User::new(username.clone()), SerializerOptions::builder().human_readable(false).build()).unwrap();
+	let new_user = bson::to_bson_with_options(
+		&User::new(username.clone()),
+		SerializerOptions::builder().human_readable(false).build(),
+	)
+	.unwrap();
 	let result: Option<User> = db_client
 		.users
 		.find_one_and_update(
@@ -186,7 +189,7 @@ pub async fn sign_up(
 		.await
 		.unwrap();
 	let result = result.ok_or_else(|| {
-		GenericRequestError(
+		RequestError(
 			Status::InternalServerError,
 			"Failed to create user".to_owned(),
 		)

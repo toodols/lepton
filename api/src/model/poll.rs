@@ -1,8 +1,8 @@
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 
-use super::{Id, User, CollectionItem};
+use super::{CollectionItem, Id, User};
 
-#[derive(Serialize,Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Poll {
 	id: Id<Poll>,
 	question: String,
@@ -10,12 +10,15 @@ pub struct Poll {
 }
 
 impl CollectionItem for Poll {
-	fn collection_name() -> &'static str {
+	fn db() -> &'static str {
 		"polls"
+	}
+	fn id(&self) -> Id<Self> {
+		self.id
 	}
 }
 
-#[derive(Serialize,Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct PollResponse {
 	id: Id<PollResponse>,
 	poll: Id<Poll>,
@@ -24,8 +27,10 @@ pub struct PollResponse {
 }
 
 impl CollectionItem for PollResponse {
-	fn collection_name() -> &'static str {
+	fn db() -> &'static str {
 		"pollResponses"
 	}
+	fn id(&self) -> Id<Self> {
+		self.id
+	}
 }
-

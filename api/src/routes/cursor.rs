@@ -1,7 +1,7 @@
 use async_trait::async_trait;
 use mongodb::Cursor;
 use rocket::serde::DeserializeOwned;
-use serde::{Serialize};
+use serde::Serialize;
 
 #[derive(Serialize)]
 pub struct CursorToVecResult<T> {
@@ -16,7 +16,7 @@ pub trait CursorUtils<T> {
 
 #[async_trait]
 impl<'de, T: DeserializeOwned + Send + 'de> CursorUtils<T> for Cursor<T> {
-	async fn to_vec(mut self, limit: usize) -> Result<CursorToVecResult<T>,mongodb::error::Error> {
+	async fn to_vec(mut self, limit: usize) -> Result<CursorToVecResult<T>, mongodb::error::Error> {
 		let mut values: Vec<T> = Vec::with_capacity(limit);
 		let mut has_more = true;
 		for _ in 0..limit {
@@ -27,7 +27,7 @@ impl<'de, T: DeserializeOwned + Send + 'de> CursorUtils<T> for Cursor<T> {
 				break;
 			}
 		}
-	
+
 		if has_more {
 			if !self.advance().await? {
 				has_more = false;
