@@ -1,12 +1,14 @@
 use rocket::{get, post, serde::json::Json};
 use serde::Deserialize;
 
-use crate::model::{IdResult, Trade};
+use crate::model::{IdResult, Trade, InventoryItem};
 
 use super::RequestError;
 
 #[derive(Deserialize)]
-pub struct CreateTradeData {}
+pub struct CreateTradeData {
+	requesting: InventoryItem
+}
 
 #[post("/trades", data = "<data>")]
 pub fn create_trade(data: Json<CreateTradeData>) -> Result<Json<()>, RequestError> {

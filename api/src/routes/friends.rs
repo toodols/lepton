@@ -32,34 +32,33 @@ pub async fn befriend(
 
 	create_transaction::<(), RequestError, _>(db_client.client.clone(), |transaction| {
 		async move {
-			let user = transaction
-				.get(auth.user)
-				.await?.ok_or(RequestError(
-					Status::NotFound,
-					format!("Can't find user with id {:?}", auth.user),
-				))?;
-			let target = transaction
-				.get(userid)
-				.await?.ok_or(RequestError(
-					Status::NotFound,
-					format!("Can't find user with id {:?}", auth.user),
-				))?;
-			
+			let user = transaction.get(auth.user).await?.ok_or(RequestError(
+				Status::NotFound,
+				format!("Can't find user with id {:?}", auth.user),
+			))?;
+			let target = transaction.get(userid).await?.ok_or(RequestError(
+				Status::NotFound,
+				format!("Can't find user with id {:?}", auth.user),
+			))?;
+
 			let friendship: Option<Friendship> = transaction
-				.find_one(doc! {
-					"$or": [
-						{
-							"from": ObjectId::from(user.id),
-							"to": ObjectId::from(target.id)
-						},
-						{
-							"to": ObjectId::from(user.id),
-							"from": ObjectId::from(target.id)
-						},
-					]
-				}, None)
+				.find_one(
+					doc! {
+						"$or": [
+							{
+								"from": ObjectId::from(user.id),
+								"to": ObjectId::from(target.id)
+							},
+							{
+								"to": ObjectId::from(user.id),
+								"from": ObjectId::from(target.id)
+							},
+						]
+					},
+					None,
+				)
 				.await?;
-			
+
 			match friendship {
 				Some(mut friendship) => {
 					if friendship.accepted {

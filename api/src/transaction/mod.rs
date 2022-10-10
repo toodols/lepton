@@ -6,7 +6,7 @@ use std::any::Any;
 
 use bson::Document;
 use futures::{future::BoxFuture, FutureExt};
-use mongodb::options::{Collation, UpdateModifications, FindOneAndUpdateOptions, FindOneOptions};
+use mongodb::options::{Collation, FindOneAndUpdateOptions, FindOneOptions, UpdateModifications};
 use mongodb::{Client, Collection};
 use rocket::http::Status;
 
@@ -59,7 +59,8 @@ impl Transaction {
 			.await
 			.map_err(|e| TransactionError {
 				message: e.to_string(),
-			}).map(|r|r.inserted_id.as_object_id().unwrap().into())
+			})
+			.map(|r| r.inserted_id.as_object_id().unwrap().into())
 	}
 	pub async fn update<T: CollectionItem>(&mut self, item: T) -> Result<(), TransactionError> {
 		self.collection::<T>()
@@ -72,7 +73,8 @@ impl Transaction {
 			.await
 			.map_err(|e| TransactionError {
 				message: e.to_string(),
-			}).map(|_|())
+			})
+			.map(|_| ())
 	}
 	pub async fn find_one<T: CollectionItem>(
 		&mut self,
@@ -93,12 +95,7 @@ impl Transaction {
 		options: impl Into<Option<FindOneAndUpdateOptions>>,
 	) -> Result<Option<T>, TransactionError> {
 		self.collection::<T>()
-			.find_one_and_update_with_session(
-				query,
-				update,
-				None,
-				&mut self.session,
-			)
+			.find_one_and_update_with_session(query, update, None, &mut self.session)
 			.await
 			.map_err(|e| TransactionError {
 				message: e.to_string(),

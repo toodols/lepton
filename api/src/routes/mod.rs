@@ -11,8 +11,10 @@ use crate::{DatabaseContext, DevelopmentMode};
 
 use authenticate::{sign_in, sign_up};
 pub use authorization::{AccessToken, AuthError};
-use comments::{get_comment_postid, get_comments};
+use comments::{get_comment, get_comments};
 pub use error::RequestError;
+use followers::{follow, get_followers, unfollow};
+use friends::{befriend, get_friends, unfriend};
 use groups::get_groups;
 use posts::{create_post, delete_post, get_posts};
 use trade::create_trade;
@@ -91,6 +93,13 @@ pub fn routes() -> Vec<Route> {
 		debug,
 		delete_post,
 		get_comments,
-		get_comment_postid
+		get_friends,
+		befriend,
+		unfriend,
+		get_followers,
+		follow,
+		unfollow,
+		get_comment,
+		create_trade
 	]
 }

@@ -17,6 +17,19 @@ pub struct Post {
 	pub attachments: Vec<Attachment>,
 }
 
+impl Post {
+	pub fn new(content: String, author: Id<User>, group: Option<Id<Group>>) -> Self {
+		Self {
+			id: Id::new(),
+			updated_at: Utc::now(),
+			author,
+			content,
+			group,
+			attachments: Vec::new(),
+		}
+	}
+}
+
 impl CollectionItem for Post {
 	fn db() -> &'static str {
 		"posts"

@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 use super::{CollectionItem, Id, User};
 
 #[derive(Serialize, Deserialize, Clone, Copy, PartialEq, Eq, Debug)]
-struct Follow {
+pub struct Follow {
 	#[serde(rename = "_id")]
 	id: Id<Follow>,
 	from: Id<User>,

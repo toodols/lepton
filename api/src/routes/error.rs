@@ -5,8 +5,6 @@ use rocket::{
 	Request, Response,
 };
 
-use crate::model::CollectionItem;
-
 use super::AuthError;
 
 #[derive(Debug)]
@@ -24,13 +22,14 @@ impl RequestError {
 	pub fn not_found(msg: impl ToString) -> Self {
 		Self(Status::NotFound, msg.to_string())
 	}
-}
-
-impl<T: CollectionItem> From<Option<T>> for RequestError {
-	fn from(option: Option<T>) -> Self {
-		Self(Status::NotFound, "Not found".to_string())
+	pub fn unauthorized(msg: impl ToString) -> Self {
+		Self(Status::Unauthorized, msg.to_string())
+	}
+	pub fn forbidden(msg: impl ToString) -> Self {
+		Self(Status::Forbidden, msg.to_string())
 	}
 }
+
 impl From<mongodb::error::Error> for RequestError {
 	fn from(err: mongodb::error::Error) -> Self {
 		match err.kind {
@@ -39,7 +38,7 @@ impl From<mongodb::error::Error> for RequestError {
 	}
 }
 impl From<bson::oid::Error> for RequestError {
-	fn from(err: bson::oid::Error) -> Self {
+	fn from(_: bson::oid::Error) -> Self {
 		Self(Status::BadRequest, "Invalid objectID".to_string())
 	}
 }

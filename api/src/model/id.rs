@@ -1,5 +1,6 @@
 use bson::oid::ObjectId;
 use bson::{Bson, Document, SerializerOptions};
+use rocket::form::FromFormField;
 use rocket::http::Status;
 use rocket::request::FromParam;
 use serde::{Deserialize, Serialize};
@@ -64,6 +65,13 @@ impl<'a, T: CollectionItem> FromParam<'a> for Id<T> {
 		})
 	}
 }
+
+impl<'a, T: CollectionItem> FromFormField<'a> for Id<T> {
+	fn from_value(value: rocket::form::ValueField<'a>) -> rocket::form::Result<Self> {
+		Ok(Id::<T>::from_str(value.value).map_err(|_| value.unexpected())?)
+	}
+}
+
 impl<T: CollectionItem> Hash for Id<T> {
 	fn hash<H: Hasher>(&self, state: &mut H) {
 		self.inner.hash(state)
@@ -111,7 +119,11 @@ impl<T: CollectionItem> From<Id<T>> for ObjectId {
 		id.inner
 	}
 }
-
+impl<T: CollectionItem> From<Id<T>> for Bson {
+	fn from(id: Id<T>) -> Self {
+		Bson::ObjectId(id.inner)
+	}
+}
 // ObjectId can deserialize both from "id" and {$oid: "id"}
 impl<'de, T: CollectionItem> Deserialize<'de> for Id<T> {
 	fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>

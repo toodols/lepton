@@ -6,7 +6,7 @@ mod transaction;
 
 use std::env;
 
-use model::{Auth, Comment, Friendship, Group, Item, Post, User};
+use model::{Auth, Comment, Follow, Friendship, Group, GroupUser, Item, Post, User};
 use mongodb::{
 	options::{ClientOptions, ResolverConfig},
 	Client, Collection,
@@ -22,6 +22,8 @@ pub struct DatabaseContext {
 	comments: Collection<Comment>,
 	items: Collection<Item>,
 	friendships: Collection<Friendship>,
+	group_users: Collection<GroupUser>,
+	follows: Collection<Follow>,
 }
 
 impl DatabaseContext {
@@ -35,6 +37,8 @@ impl DatabaseContext {
 			items: client.database("database").collection("items"),
 			comments: client.database("database").collection("comments"),
 			friendships: client.database("database").collection("friendships"),
+			group_users: client.database("database").collection("group_users"),
+			follows: client.database("database").collection("follows"),
 		}
 	}
 }
