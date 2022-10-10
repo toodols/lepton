@@ -29,6 +29,7 @@ mod polls;
 mod posts;
 mod trade;
 mod users;
+mod account;
 
 mod authorization;
 mod cursor;

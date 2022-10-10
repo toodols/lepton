@@ -118,14 +118,21 @@ where
 		.map_err(|_| E::from(TransactionError::new("error")))
 		.map_err(|_| E::from(TransactionError::new("error")))?;
 	let mut transaction = Transaction { client, session };
-	let e = cb(&mut transaction).await?;
-	transaction
-		.session
-		.commit_transaction()
-		.await
-		.map_err(|_| E::from(TransactionError::new("error")))
-		.map_err(|_| E::from(TransactionError::new("error")))?;
-	return Ok(e);
+	let res = cb(&mut transaction).await;
+	match res {
+		Ok(_) => {
+			transaction
+			.session
+			.commit_transaction()
+			.await
+			.map_err(|_| E::from(TransactionError::new("error")))
+			.map_err(|_| E::from(TransactionError::new("error")))?;
+		}
+		Err(_)=>{
+			transaction.session.abort_transaction().await.map_err(|_| E::from(TransactionError::new("error aborting")))?;
+		}
+	}
+	return res;
 }
 
 #[tokio::test]

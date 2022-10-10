@@ -6,16 +6,6 @@ use serde::{Deserialize, Serialize};
 
 use super::{CollectionItem, Id};
 
-/*
-
-Item {
-	id: ..,
-	type: "",
-	name: ""
-}
-
-*/
-
 // they can be grouped into subcategories by the client
 // no need to be done on the server
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]

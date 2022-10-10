@@ -23,12 +23,6 @@ pub struct GetUserByIdResponse {
 	user: SerializingUser,
 }
 
-#[derive(Serialize)]
-pub struct GetFriendsResponse {
-	friends: Id<User>,
-	users: HashMap<Id<User>, SerializingUser>,
-}
-
 #[get("/users/<userid>")]
 pub async fn get_user(
 	db_client: &DBState,

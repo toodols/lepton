@@ -1,7 +1,4 @@
-use mongodb::Client;
 use serde::{Deserialize, Serialize};
-
-use crate::DatabaseContext;
 
 use super::{CollectionItem, Id};
 

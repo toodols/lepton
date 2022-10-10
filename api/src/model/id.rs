@@ -1,5 +1,5 @@
 use bson::oid::ObjectId;
-use bson::{Bson, Document, SerializerOptions};
+use bson::{Bson, SerializerOptions};
 use rocket::form::FromFormField;
 use rocket::http::Status;
 use rocket::request::FromParam;

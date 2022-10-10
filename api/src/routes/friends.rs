@@ -1,24 +1,83 @@
+use std::collections::HashMap;
+
 use bson::oid::ObjectId;
 use mongodb::{
-	bson::{doc, SerializerOptions},
-	options::{FindOneAndUpdateOptions, ReturnDocument},
+	bson::{doc},
 };
 use rocket::{delete, futures::FutureExt, get, http::Status, put, serde::json::Json};
+use serde::Serialize;
 
 use crate::{
-	model::{Friendship, Id, IdResult, User},
+	model::{Friendship, IdResult, User, Id, SerializingPartialUser},
 	transaction::create_transaction,
 };
 
 use super::{
-	authorization::AuthResult, users::GetFriendsResponse, AccessToken, AuthError, DBState,
+	authorization::AuthResult, DBState,
 	RequestError,
 };
 
-#[get("/users/@me/friends/<userid>")]
-pub async fn get_friends(userid: IdResult<User>) -> Result<Json<GetFriendsResponse>, RequestError> {
-	let userid = userid?;
-	todo!();
+#[derive(Serialize)]
+pub struct GetFriendsResponse {
+	friends: Vec<Id<User>>,
+	users: HashMap<Id<User>, SerializingPartialUser>,
+}
+
+// gets list of friendships that are accepted
+#[get("/users/@me/friends")]
+pub async fn get_friends(db_client: &DBState, auth: AuthResult) -> Result<Json<GetFriendsResponse>, RequestError> {
+	let auth = auth?;
+	
+	let mut userids = Vec::new();
+	let mut cursor = db_client
+		.friendships
+		.find(
+			doc! {
+				"$or": [
+					{
+						"from": auth.user,
+						"status": "accepted"
+					},
+					{
+						"to": auth.user,
+						"status": "accepted"
+					}
+				]
+			},
+			None,
+		)
+		.await?;
+
+	while cursor.advance().await? {
+		let friendship: Friendship = cursor.deserialize_current()?;
+		if friendship.from == auth.user {
+			userids.push(friendship.to);
+		} else {
+			userids.push(friendship.from);
+		}
+	}
+
+	let mut users = HashMap::with_capacity(userids.len());
+	let mut cursor = db_client
+		.users
+		.find(
+			doc! {
+				"_id": {
+					"$in": &userids
+				}
+			},
+			None,
+		)
+		.await?;
+	while cursor.advance().await? {
+		let user = cursor.deserialize_current()?;
+		users.insert(user.id, user.into());
+	}
+	Ok(Json(GetFriendsResponse {
+		friends: userids,
+		users,
+	}))
+
 }
 
 #[put("/users/@me/friends/<userid>")]
@@ -89,7 +148,20 @@ pub async fn befriend(
 }
 
 #[delete("/users/@me/friends/<userid>")]
-pub async fn unfriend(userid: IdResult<User>) -> Result<(), RequestError> {
+pub async fn unfriend(db_client: &DBState, userid: IdResult<User>, auth: AuthResult) -> Result<(), RequestError> {
+	let auth = auth?;
 	let userid = userid?;
-	todo!();
+	db_client.friendships.delete_one(doc!{
+		"$or": [
+			{
+				"from": ObjectId::from(auth.user),
+				"to": ObjectId::from(userid),
+			},
+			{
+				"to": ObjectId::from(auth.user),
+				"from": ObjectId::from(userid),
+			},
+		]
+	}, None).await?;
+	Ok(())
 }

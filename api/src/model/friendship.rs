@@ -1,4 +1,3 @@
-use mongodb::Collection;
 use serde::{Deserialize, Serialize};
 
 use super::{CollectionItem, Id, User};
@@ -27,7 +26,7 @@ impl CollectionItem for Friendship {
 	fn db() -> &'static str {
 		"friendships"
 	}
-	fn id(&self) -> Id<Self> {
+		fn id(&self) -> Id<Self> {
 		self.id
 	}
 }
