@@ -5,6 +5,7 @@ mod routes;
 mod transaction;
 mod unbson;
 use std::env;
+mod indexes;
 
 use model::{Auth, Comment, Follow, Friendship, Group, GroupUser, Item, Post, User};
 use mongodb::{
