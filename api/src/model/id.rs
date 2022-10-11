@@ -1,5 +1,5 @@
 use bson::oid::ObjectId;
-use bson::{Bson, SerializerOptions};
+use bson::{Bson};
 use rocket::form::FromFormField;
 use rocket::http::Status;
 use rocket::request::FromParam;
@@ -18,10 +18,7 @@ pub trait CollectionItem: for<'de> Deserialize<'de> + Serialize + Unpin + Send +
 	}
 	fn id(&self) -> Id<Self>;
 	fn to_bson(&self) -> Result<Bson, bson::ser::Error> {
-		bson::to_bson_with_options(
-			self,
-			SerializerOptions::builder().human_readable(false).build(),
-		)
+		bson::to_bson(self)
 	}
 }
 
@@ -107,11 +104,7 @@ impl<T: CollectionItem> Serialize for Id<T> {
 	where
 		S: serde::Serializer,
 	{
-		if serializer.is_human_readable() {
-			serializer.serialize_str(&self.inner.to_hex())
-		} else {
-			self.inner.serialize(serializer)
-		}
+		self.inner.serialize(serializer)
 	}
 }
 impl<T: CollectionItem> From<Id<T>> for ObjectId {

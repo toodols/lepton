@@ -11,12 +11,12 @@ pub struct CreateTradeData {
 }
 
 #[post("/trades", data = "<data>")]
-pub fn create_trade(data: Json<CreateTradeData>) -> Result<Json<()>, RequestError> {
+pub fn create_trade(data: Json<CreateTradeData>) -> Result<(), RequestError> {
 	todo!()
 }
 
 #[get("/trades/<tradeid>")]
-pub fn get_trade(tradeid: IdResult<Trade>) -> Result<Json<()>, RequestError> {
+pub fn get_trade(tradeid: IdResult<Trade>) -> Result<(), RequestError> {
 	let tradeid = tradeid?;
 	todo!();
 }

@@ -1,19 +1,16 @@
 use std::{collections::HashMap, str::FromStr};
 
-use bson::{doc, oid::ObjectId};
-use mongodb::{
-	bson::SerializerOptions,
-	options::{FindOneAndUpdateOptions, ReturnDocument},
-};
-use rocket::{delete, get, http::Status, post, put, request::FromRequest, serde::json::Json};
-use serde::{Deserialize, Serialize};
+use bson::{doc};
 
-use crate::model::{
-	ClientInfo, Friendship, Group, Id, IdResult, InventoryItem, Item, SerializingUser, Settings,
+use rocket::{get, http::Status, serde::json::Json};
+use serde::{Serialize};
+
+use crate::{model::{
+	ClientInfo, Group, Id, InventoryItem, Item, SerializingUser, Settings,
 	User,
-};
+}, unbson::Unbson};
 
-use super::{authorization::AuthResult, AccessToken, AuthError, DBState, RequestError};
+use super::{authorization::AuthResult, DBState, RequestError};
 
 #[derive(Serialize)]
 pub struct GetUserByIdResponse {
@@ -28,7 +25,7 @@ pub async fn get_user(
 	db_client: &DBState,
 	userid: String,
 	auth: AuthResult,
-) -> Result<Json<GetUserByIdResponse>, RequestError> {
+) -> Result<Json<Unbson<GetUserByIdResponse>>, RequestError> {
 	let userid = if userid == "@me" {
 		auth?.user
 	} else {
@@ -46,7 +43,7 @@ pub async fn get_user(
 			)
 		})?;
 	let blocked = user.blocked.clone();
-	Ok(Json(GetUserByIdResponse {
+	Ok(Json(Unbson(GetUserByIdResponse {
 		user: SerializingUser::from_user(user, 0, 0, vec![]),
 		info: Some(ClientInfo {
 			groups: Vec::new(),
@@ -57,5 +54,5 @@ pub async fn get_user(
 		}),
 		groups: Some(HashMap::new()),
 		items: Some(HashMap::new()),
-	}))
+	})))
 }

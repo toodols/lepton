@@ -1,12 +1,13 @@
 use std::collections::{HashMap, HashSet};
 
+use bson::DateTime;
 use mongodb::bson::doc;
 use rocket::{get, serde::json::Json};
 use serde::Serialize;
 
 use crate::{
 	model::{Comment, Group, GroupPrivacy, IdResult, Post, SerializingPartialUser, Id, User},
-	routes::cursor::{CursorToVecResult, CursorUtils},
+	routes::cursor::{CursorToVecResult, CursorUtils}, unbson::Unbson,
 };
 
 use super::{authorization::AuthResult, DBState, RequestError};
@@ -29,7 +30,8 @@ pub async fn get_comments(
 	limit: Option<usize>,
 	before: Option<i64>,
 	auth: AuthResult,
-) -> Result<Json<GetCommentResult>, RequestError> {
+) -> Result<Json<Unbson<GetCommentResult>>, RequestError> {
+	let before = before.map(|before| DateTime::from_millis(before));
 	let postid = postid?;
 	let post: Post = db_client
 		.posts
@@ -89,7 +91,7 @@ pub async fn get_comments(
 		let user = cursor.deserialize_current()?;
 		users.insert(user.id, user.into());
 	}
-	Ok(Json(GetCommentResult { users, comments, has_more }))
+	Ok(Json(Unbson(GetCommentResult { users, comments, has_more })))
 	
 }
 

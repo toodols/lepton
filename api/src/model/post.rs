@@ -1,4 +1,4 @@
-use chrono::{DateTime, Utc};
+use bson::DateTime;
 use mongodb::bson::oid::ObjectId;
 use serde::{Deserialize, Serialize};
 
@@ -9,8 +9,7 @@ use super::{CollectionItem, Group, Id, User};
 pub struct Post {
 	#[serde(rename = "_id")]
 	pub id: Id<Post>,
-	#[serde(with = "chrono::serde::ts_milliseconds")]
-	pub updated_at: DateTime<Utc>,
+	pub updated_at: DateTime,
 	pub author: Id<User>,
 	pub content: String,
 	pub group: Option<Id<Group>>,
@@ -21,7 +20,7 @@ impl Post {
 	pub fn new(content: String, author: Id<User>, group: Option<Id<Group>>) -> Self {
 		Self {
 			id: Id::new(),
-			updated_at: Utc::now(),
+			updated_at: DateTime::now(),
 			author,
 			content,
 			group,

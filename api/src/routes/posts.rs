@@ -1,5 +1,5 @@
 use futures::FutureExt;
-use mongodb::bson::{doc, oid::ObjectId};
+use mongodb::bson::{doc, oid::ObjectId, DateTime};
 use rocket::{delete, get, http::Status, post, serde::json::Json};
 use serde::{Deserialize, Serialize};
 use std::{collections::HashMap};
@@ -7,7 +7,7 @@ use std::{collections::HashMap};
 use crate::{
 	model::{Comment, Group, GroupPrivacy, GroupUser, Id, IdResult, Post, User},
 	routes::cursor::CursorToVecResult,
-	transaction::create_transaction,
+	transaction::create_transaction, unbson::Unbson,
 };
 
 use super::{authorization::AuthResult, cursor::CursorUtils};
@@ -83,7 +83,7 @@ pub async fn delete_post(
 	db_client: &DBState,
 	postid: IdResult<Post>,
 	auth: AuthResult,
-) -> Result<Json<()>, RequestError> {
+) -> Result<(), RequestError> {
 	let auth = auth?;
 	let postid = postid?;
 	let post: Post = db_client
@@ -113,7 +113,7 @@ pub async fn delete_post(
 		.delete_one(postid.into_query(), None)
 		.await?;
 	if delete_res.deleted_count != 1 {
-		Ok(Json(()))
+		Ok(())
 	} else {
 		Err(RequestError(
 			Status::InternalServerError,
@@ -136,11 +136,12 @@ pub struct GetPostsResponse {
 #[get("/posts?<group>&<before>&<user>")]
 pub async fn get_posts(
 	db_client: &DBState,
-	group: Option<Json<Id<Group>>>,
+	group: Option<Id<Group>>,
 	before: Option<i64>,
-	user: Option<Json<Id<User>>>,
+	user: Option<Id<User>>,
 	auth: AuthResult,
-) -> Result<Json<GetPostsResponse>, RequestError> {
+) -> Result<Json<Unbson<GetPostsResponse>>, RequestError> {
+	let before = before.map(|before| DateTime::from_millis(before));
 	// let auth = auth?;
 	let mut query = doc! {};
 	if group.is_some() {
@@ -168,10 +169,10 @@ pub async fn get_posts(
 		query.insert("group", doc! {"$exists": false});
 	}
 	if before.is_some() {
-		query.insert("createdAt", doc! {"$lt": before.unwrap()});
+		query.insert("updatedAt", doc! {"$lt": before.unwrap()});
 	}
 	if user.is_some() {
-		query.insert("author", user.unwrap().into_inner());
+		query.insert("author", user.unwrap());
 	}
 
 	let cursor = db_client.posts.find(query, None).await.unwrap();
@@ -182,10 +183,10 @@ pub async fn get_posts(
 		has_more,
 	} = cursor.to_vec(CAPACITY).await?;
 
-	Ok(Json(GetPostsResponse {
+	Ok(Json(Unbson(GetPostsResponse {
 		has_more,
 		posts,
 		comments: vec![],
 		users_map: HashMap::new(),
-	}))
+	})))
 }

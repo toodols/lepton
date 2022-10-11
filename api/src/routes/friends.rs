@@ -9,7 +9,7 @@ use serde::Serialize;
 
 use crate::{
 	model::{Friendship, IdResult, User, Id, SerializingPartialUser},
-	transaction::create_transaction,
+	transaction::create_transaction, unbson::Unbson,
 };
 
 use super::{
@@ -25,7 +25,7 @@ pub struct GetFriendsResponse {
 
 // gets list of friendships that are accepted
 #[get("/users/@me/friends")]
-pub async fn get_friends(db_client: &DBState, auth: AuthResult) -> Result<Json<GetFriendsResponse>, RequestError> {
+pub async fn get_friends(db_client: &DBState, auth: AuthResult) -> Result<Json<Unbson<GetFriendsResponse>>, RequestError> {
 	let auth = auth?;
 	
 	let mut userids = Vec::new();
@@ -73,10 +73,10 @@ pub async fn get_friends(db_client: &DBState, auth: AuthResult) -> Result<Json<G
 		let user = cursor.deserialize_current()?;
 		users.insert(user.id, user.into());
 	}
-	Ok(Json(GetFriendsResponse {
+	Ok(Json(Unbson(GetFriendsResponse {
 		friends: userids,
 		users,
-	}))
+	})))
 
 }
 

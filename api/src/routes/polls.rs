@@ -1,7 +1,7 @@
 use rocket::{get, serde::json::Json};
 use serde::Serialize;
 
-use crate::model::{IdResult, Poll};
+use crate::{model::{IdResult, Poll}, unbson::Unbson};
 
 use super::RequestError;
 
@@ -9,7 +9,7 @@ use super::RequestError;
 pub struct GetPollResponse {}
 
 #[get("/polls/<pollid>")]
-pub async fn get_poll(pollid: IdResult<Poll>) -> Result<Json<GetPollResponse>, RequestError> {
+pub async fn get_poll(pollid: IdResult<Poll>) -> Result<Json<Unbson<GetPollResponse>>, RequestError> {
 	let pollid = pollid?;
 	todo!();
 }

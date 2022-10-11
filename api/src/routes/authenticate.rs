@@ -1,6 +1,6 @@
 use std::env;
 
-use crate::model::{Auth, Id, Permissions, User};
+use crate::{model::{Auth, Id, Permissions, User, CollectionItem}, unbson::Unbson};
 use bson::SerializerOptions;
 use crypto::bcrypt::bcrypt;
 use mongodb::{
@@ -30,7 +30,7 @@ pub struct SignInResponse {
 pub async fn sign_in(
 	db_client: &DBState,
 	data: Json<SignInData>,
-) -> Result<Json<SignInResponse>, RequestError> {
+) -> Result<Json<Unbson<SignInResponse>>, RequestError> {
 	let SignInData { username, password } = data.into_inner();
 
 	let auth: Auth = db_client
@@ -71,7 +71,7 @@ pub async fn sign_in(
 			let output: &mut [u8; 24] = &mut [0; 24];
 			bcrypt(10, &hex::decode(salt).unwrap(), password.as_bytes(), output);
 			if *output == hex::decode(hashed_password).unwrap().as_ref() {
-				return Ok(Json(SignInResponse { token }));
+				return Ok(Json(Unbson(SignInResponse { token })));
 			} else {
 				// unauthorized
 				return Err(RequestError(
@@ -133,7 +133,7 @@ pub fn verify_password(password: impl AsRef<str>) -> Result<(), &'static str> {
 pub async fn sign_up(
 	db_client: &DBState,
 	data: Json<SignUpData>,
-) -> Result<Json<SignUpResponse>, RequestError> {
+) -> Result<Json<Unbson<SignUpResponse>>, RequestError> {
 	let SignUpData { username, password } = data.into_inner();
 	// verify that username is not taken
 	let mut cursor = db_client
@@ -167,11 +167,7 @@ pub async fn sign_up(
 	.unwrap();
 	bcrypt(10, &salt, password.as_bytes(), &mut output);
 	let hashed_password = hex::encode(output);
-	let new_user = bson::to_bson_with_options(
-		&User::new(username.clone()),
-		SerializerOptions::builder().human_readable(false).build(),
-	)
-	.unwrap();
+	let new_user = User::new(username.clone()).to_bson().unwrap();
 	let result: Option<User> = db_client
 		.users
 		.find_one_and_update(
@@ -221,5 +217,5 @@ pub async fn sign_up(
 		&jsonwebtoken::EncodingKey::from_secret(env::var("JWT_SECRET").unwrap().as_ref()),
 	)
 	.unwrap();
-	Ok(Json(SignUpResponse { token }))
+	Ok(Json(Unbson(SignUpResponse { token })))
 }
